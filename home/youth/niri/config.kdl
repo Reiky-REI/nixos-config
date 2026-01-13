@@ -185,7 +185,7 @@ binds {
     Mod+Shift+W hotkey-overlay-title="切换壁纸: swww" { spawn "~/.config/wallpaper/script/swww-rofi.sh"; }
     Mod+G hotkey-overlay-title="截图与录屏" { spawn "~/.config/hypr/scripts/capture.sh"; }
     Mod+E hotkey-overlay-title="yazi文件管理器" { spawn "alacritty" "-e" "yazi"; }
-    Mod+B hotkey-overlay-title="打开谷歌浏览器" { spawn "chromium-browser"; }
+    Mod+B hotkey-overlay-title="打开谷歌浏览器" { spawn "google-chrome-stable"; }
     Mod+Shift+B hotkey-overlay-title="打开火狐浏览器" { spawn "firefox"; }
     Mod+N hotkey-overlay-title="打开编辑器: neovim" { spawn "alacritty" "-e" "nvim"; }
     Super+L hotkey-overlay-title="锁屏: noctalia-shell-lock" { spawn "alacritty" "-e" "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
