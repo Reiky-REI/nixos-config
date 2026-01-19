@@ -9,6 +9,7 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    google-chrome
     pulseaudio
     pciutils # lspci
     ffmpeg
