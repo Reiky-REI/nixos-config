@@ -21,8 +21,10 @@
     curl
     wget
     bluez
+    cachix
   ];
 
+  nix.settings.trusted-users = ["root" "youth"];
   # docker
   virtualisation.docker.enable = true;
 
