@@ -1,6 +1,5 @@
-{ config, pkgs, inputs, ...}:
-{
-  programs.lazygit = { 
+_: {
+  programs.lazygit = {
     enable = true;
     settings = {};
   };

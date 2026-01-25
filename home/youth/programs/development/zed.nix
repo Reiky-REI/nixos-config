@@ -1,4 +1,3 @@
-{  config, pkgs, ... }:
-{
+_: {
   programs.zed-editor.enable = true;
 }

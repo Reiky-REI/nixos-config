@@ -1,5 +1,4 @@
-{ config, pkgs, ... }:
-{
+_: {
   programs.alacritty = {
     enable = true;
   };
@@ -7,7 +6,7 @@
   programs.alacritty.settings = {
     font = {
       normal.family = "FiraCode Nerd Font";
-      normal.style  = "Regular";
+      normal.style = "Regular";
       size = 14.0;
     };
   };
@@ -16,5 +15,4 @@
     enable = true;
     flavor = "mocha";
   };
-
 }

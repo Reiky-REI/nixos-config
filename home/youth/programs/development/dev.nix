@@ -1,10 +1,12 @@
-{ config, pkgs, ... }:
-{
+{pkgs, ...}: {
   home.packages = with pkgs; [
     nodejs_24
     pnpm_9
 
-    rustup
+    # rustup
+    rustc
+    cargo
+    rustfmt
 
     go
 
@@ -15,5 +17,6 @@
     gdb
     pkg-config
     cmake
+    ninja
   ];
 }

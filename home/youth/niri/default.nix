@@ -1,5 +1,4 @@
-{ config, pkgs, ... }:
-{
+_: {
   programs.fuzzel.enable = true;
   catppuccin.fuzzel = {
     enable = true;
@@ -8,5 +7,4 @@
   };
 
   home.file.".config/niri/config.kdl".source = ./config.kdl;
-
 }
