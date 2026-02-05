@@ -11,6 +11,7 @@
     fcitx5-configtool
     fcitx5-chinese-addons # 拼音、五笔等
   ];
+  i18n.inputMethod.fcitx5.waylandFrontend = true;
 
   /*
   *i18n.inputMethod.fcitx5.settings.inputMethod与catppuccin.fcitx5.apply相冲突
@@ -31,8 +32,11 @@
     "Groups/0/Items/1".Name = "rime";
   };
 
-  i18n.inputMethod.fcitx5.settings.addons = {
-    classicui.globalSection.Theme = "catppuccin-mocha-mauve";
+  i18n.inputMethod.fcitx5.settings = {
+    globalOptions = {
+      "Hotkey/TriggerKeys" = {"0" = "Super+space";};
+    };
+    addons.classicui.globalSection.Theme = "catppuccin-mocha-mauve";
   };
 
   # catppuccin的flake,option

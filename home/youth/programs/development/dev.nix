@@ -1,5 +1,7 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
+    typst
+
     nodejs_24
     pnpm_9
 

@@ -20,6 +20,7 @@
     shellAliases = {
       ll = "ls -l";
       la = "ls -la";
+      lta = "ls --tree --long --icons";
       nv = "nvim";
       snv = "sudo nvim";
       ff = "fastfetch";
@@ -30,9 +31,9 @@
     initContent = ''
       # source ${pkgs.zsh-powerlevel10k}/share/zsh-powerlevel10k/powerlevel10k.zsh-theme
       # [[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
-      for file in /run/agenix/ai_api_key.zsh; do
-        [ -f "$file" ] && source "$file"
-      done
+      # for file in /run/agenix/ai_api_key.zsh; do
+      #   [ -f "$file" ] && source "$file"
+      # done
     '';
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
