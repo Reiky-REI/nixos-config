@@ -69,9 +69,11 @@ layout {
     default-column-width { proportion 0.5; }
     focus-ring {
         // off
-        width 5
-        active-color "#7fc8ff"
-        inactive-color "#505050"
+        width 4
+        active-color "#a6da95"
+        inactive-color "#363a4f"
+        // active-color "#7fc8ff"
+        // inactive-color "#505050"
     }
 
     border {
@@ -95,6 +97,7 @@ layout {
         // top 64
         // bottom 64
     }
+
 }
 
 hotkey-overlay {
@@ -167,13 +170,14 @@ window-rule {
 /-window-rule {
     match app-id=r#"^org\.keepassxc\.KeePassXC$"#
     match app-id=r#"^org\.gnome\.World\.Secrets$"#
-
     block-out-from "screen-capture"
-
 }
-/-window-rule {
+
+window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
+    opacity 0.92
+    // draw-border-with-background true
 }
 
 binds {
@@ -188,10 +192,9 @@ binds {
     Mod+B hotkey-overlay-title="打开谷歌浏览器" { spawn "google-chrome-stable"; }
     Mod+Shift+B hotkey-overlay-title="打开火狐浏览器" { spawn "firefox"; }
     Mod+N hotkey-overlay-title="打开编辑器: neovim" { spawn "alacritty" "-e" "nvim"; }
-    Super+L hotkey-overlay-title="锁屏: noctalia-shell-lock" { spawn "alacritty" "-e" "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
-    Super+Shift+C hotkey-overlay-title="计算机: noctalia-shell-calculator" { spawn "alacritty" "-e" "noctalia-shell" "ipc" "call" "launcher" "calculator"; }
-    Super+Shift+V hotkey-overlay-title="剪切板: noctalia-shell-clipboard" { spawn "alacritty" "-e" "noctalia-shell" "ipc" "call" "launcher" "clipboard"; }
-    Super+S hotkey-overlay-title="多功能启动器: noctalia-shell-launcher" { spawn "alacritty" "-e" "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
+    Super+L hotkey-overlay-title="锁屏: noctalia-shell-lock" { spawn "noctalia-shell" "ipc" "call" "lockScreen" "lock"; }
+    Super+Shift+V hotkey-overlay-title="剪切板: noctalia-shell-clipboard" { spawn "noctalia-shell" "ipc" "call" "launcher" "clipboard"; }
+    Super+S hotkey-overlay-title="多功能启动器: noctalia-shell-launcher" { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
 
     XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }

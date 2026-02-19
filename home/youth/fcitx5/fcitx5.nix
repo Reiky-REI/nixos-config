@@ -8,8 +8,8 @@
   # 添加常用中文模块
   i18n.inputMethod.fcitx5.addons = with pkgs; [
     fcitx5-rime
-    fcitx5-configtool
-    fcitx5-chinese-addons # 拼音、五笔等
+    qt6Packages.fcitx5-configtool
+    qt6Packages.fcitx5-chinese-addons # 拼音、五笔等
   ];
   i18n.inputMethod.fcitx5.waylandFrontend = true;
 
@@ -36,7 +36,7 @@
     globalOptions = {
       "Hotkey/TriggerKeys" = {"0" = "Super+space";};
     };
-    addons.classicui.globalSection.Theme = "catppuccin-mocha-mauve";
+    # addons.classicui.globalSection.Theme = "catppuccin-mocha-mauve";
   };
 
   # catppuccin的flake,option

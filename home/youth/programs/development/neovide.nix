@@ -4,7 +4,6 @@
   programs.neovide.settings = {
     idle = true;
     vsync = true;
-
     font = {
       normal = [];
       size = 16.0;

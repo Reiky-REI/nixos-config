@@ -11,22 +11,26 @@
     ];
   };
   inputs = {
-    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.05";
+    nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-25.11";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+
     agenix.url = "github:ryantm/agenix";
+
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs-unstable"; # 只给 Noctalia 用
+      inputs.nixpkgs.follows = "nixpkgs-unstable";
     };
-    # nxivim配置完整版
+
+    # CookNxivim 配置完整版
     CookNixvim = {
       url = "github:Youthdreamer/CookNixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    catppuccin.url = "github:catppuccin/nix/release-25.05";
+    catppuccin.url = "github:catppuccin/nix/release-25.11";
+
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

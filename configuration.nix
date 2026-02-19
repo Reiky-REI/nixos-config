@@ -32,8 +32,6 @@
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     TERMINAL = "kitty";
-    # GTK_IM_MODULE = "fcitx";
-    # QT_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
   };
 
@@ -54,7 +52,7 @@
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     hashedPassword = "$6$d89dDb.7HKl8dx2J$NP00uF4ukMaVYoWzInQxoeokT7927qybXJGzrGwe7WYd7aRNMrNVfLbgnotRDPysU0lqTrZ1L0uTu7EjXsYwg/";
-    extraGroups = ["wheel" "networkmanager" "audio" "video" "docker" "kvm" "libvirtd"];
+    extraGroups = ["wheel" "networkmanager" "audio" "input" "video" "docker" "kvm" "libvirtd"];
   };
   security.sudo.wheelNeedsPassword = false; # sudo组是否需要密码
 
@@ -129,7 +127,7 @@
   fonts.packages = with pkgs; [
     noto-fonts
     noto-fonts-cjk-sans
-    noto-fonts-emoji
+    noto-fonts-color-emoji
 
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
@@ -156,8 +154,8 @@
     withUWSM = true;
     xwayland.enable = true;
   };
-  services.xserver.displayManager.gdm.enable = true;
-  services.xserver.displayManager.gdm.wayland = true;
+  services.displayManager.gdm.enable = true;
+  services.displayManager.gdm.wayland = true;
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.gdm.enableGnomeKeyring = true;
 

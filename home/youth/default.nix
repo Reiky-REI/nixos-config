@@ -49,7 +49,9 @@
     "image/png" = ["imv.desktop"];
     "image/jpeg" = ["imv.desktop"];
     "image/gif" = ["imv.desktop"];
-    "text/html" = ["chromium-browser.desktop"];
+    "text/html" = "google-chrome.desktop";
+    "x-scheme-handler/http" = "google-chrome.desktop";
+    "x-scheme-handler/https" = "google-chrome.desktop";
     "x-scheme-handler/clash" = "clash-verge.desktop";
   };
 
@@ -70,6 +72,6 @@
     LC_MESSAGES = "en_US.UTF-8"; # 程序输出信息保持英文
   };
 
-  home.stateVersion = "25.05";
-  home.enableNixpkgsReleaseCheck = false;
+  home.stateVersion = "25.11";
+  # home.enableNixpkgsReleaseCheck = false;
 }
