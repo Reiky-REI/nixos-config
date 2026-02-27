@@ -1,5 +1,7 @@
 {pkgs, ...}: {
   home.packages = with pkgs; [
+    basedpyright
+    rust-analyzer
     typst
 
     nodejs_24

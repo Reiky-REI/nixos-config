@@ -34,6 +34,10 @@
 
   i18n.inputMethod.fcitx5.settings = {
     globalOptions = {
+      "Behavior" = {
+        # 关键设置：关闭程序内预编辑，强制使用 Fcitx5 浮窗(能解决 neovide 中无法预编辑的问题)
+        "PreeditEnabledByDefault" = "False";
+      };
       "Hotkey/TriggerKeys" = {"0" = "Super+space";};
     };
     # addons.classicui.globalSection.Theme = "catppuccin-mocha-mauve";

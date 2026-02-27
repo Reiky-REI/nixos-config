@@ -5,6 +5,7 @@
 }: {
   home.packages = with pkgs; [
     wechat
+    qq
     vlc
     discord
     obsidian

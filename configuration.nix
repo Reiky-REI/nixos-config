@@ -32,6 +32,9 @@
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     TERMINAL = "kitty";
+    # GTK_IM_MODULE = "fcitx";
+    QT_IM_MODULE = "fcitx";
+    QT5_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
   };
 
@@ -225,7 +228,7 @@
   #### systemd user env loader ####
   systemd.user.services.env-loader = {
     description = "Load API keys from agenix into graphical session";
-    wantedBy = ["graphical-session.target"];
+    wantedBy = ["graphical-session-pre.target"];
     before = ["graphical-session.target"];
 
     serviceConfig = {

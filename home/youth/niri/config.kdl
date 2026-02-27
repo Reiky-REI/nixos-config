@@ -180,11 +180,23 @@ window-rule {
     // draw-border-with-background true
 }
 
+window-rule {
+    // 匹配 app-id 为 "floating_terminal" 的窗口
+    match app-id="floating_terminal"
+    
+    // 初始状态设为浮动
+    open-floating true
+    
+    default-column-width { proportion 0.6; }
+    default-window-height { proportion 0.6; }
+}
+
 binds {
     // Mod-Shift-/, which is usually the same as Mod-?,
     // shows a list of important hotkeys.
     Mod+Shift+Slash { show-hotkey-overlay; }
     Mod+Return hotkey-overlay-title="打开终端: alacritty" { spawn "alacritty"; }
+    Mod+Shift+Return hotkey-overlay-title="打开终端(浮动): alacritty" { spawn "alacritty" "--class" "floating_terminal"; }
     Mod+D hotkey-overlay-title="打开应用启动器: fuzzel" { spawn "fuzzel"; }
     Mod+Shift+W hotkey-overlay-title="切换壁纸: swww" { spawn "~/.config/wallpaper/script/swww-rofi.sh"; }
     Mod+G hotkey-overlay-title="截图与录屏" { spawn "~/.config/hypr/scripts/capture.sh"; }
