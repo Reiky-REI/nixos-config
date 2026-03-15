@@ -1,5 +1,6 @@
 {
   imports = [
+    ./direnv.nix
     ./vscode.nix
     ./zed.nix
     ./neovide.nix

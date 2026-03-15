@@ -6,6 +6,8 @@ _: {
       size = 14;
     };
     extraConfig = ''
+      # kitty的光标动画（默认不开启）
+      # cursor_trail 3
       bold_font        auto
       italic_font      auto
       bold_italic_font auto
