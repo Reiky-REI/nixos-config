@@ -10,6 +10,8 @@
   ];
 
   environment.systemPackages = with pkgs; [
+    wineWow64Packages.stable
+    winetricks
     google-chrome
     pulseaudio
     pciutils # lspci
