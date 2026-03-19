@@ -1,8 +1,4 @@
-{
-  pkgs,
-  pkgs-unstable,
-  ...
-}: {
+{pkgs, ...}: {
   home.packages = with pkgs; [
     wechat
     qq
@@ -12,7 +8,6 @@
     youtube-music
     spotify
     kdePackages.dolphin
-    pkgs-unstable.clash-verge-rev
   ];
 
   # 谷歌浏览器设置 主题
