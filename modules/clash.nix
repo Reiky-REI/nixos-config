@@ -4,5 +4,6 @@
     package = pkgs-unstable.clash-verge-rev;
     autoStart = true;
     tunMode = true;
+    serviceMode = true;
   };
 }
