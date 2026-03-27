@@ -9,6 +9,10 @@
     ./modules
   ];
 
+  nix.settings.trusted-users = ["root" "youth"];
+  nixpkgs.config.allowUnfree = true;
+  nix.settings.experimental-features = ["nix-command" "flakes"];
+
   environment.systemPackages = with pkgs; [
     wineWow64Packages.stable
     winetricks
@@ -26,10 +30,6 @@
     bluez
     cachix
   ];
-
-  nix.settings.trusted-users = ["root" "youth"];
-  # docker
-  virtualisation.docker.enable = true;
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
@@ -49,6 +49,8 @@
     owner = "youth";
   };
 
+  programs.steam.enable = true;
+  programs.steam.fontPackages = with pkgs; [source-han-sans];
   programs.zsh.enable = true;
   users.users.youth = {
     description = "Youth";
@@ -60,9 +62,6 @@
     extraGroups = ["wheel" "networkmanager" "audio" "input" "video" "docker" "kvm" "libvirtd"];
   };
   security.sudo.wheelNeedsPassword = false; # sudo组是否需要密码
-
-  nixpkgs.config.allowUnfree = true;
-  nix.settings.experimental-features = ["nix-command" "flakes"];
 
   # Use the systemd-boot EFI boot loader.
   boot.loader.systemd-boot.enable = true;
@@ -94,12 +93,6 @@
     noProxy = "localhost,127.0.0.1,::1,*.local";
   };
 
-  # networking.proxy = {
-  #   default = "http://192.168.3.90:7897";
-  #   httpProxy = "http://192.168.3.90:7897";
-  #   httpsProxy = "http://192.168.3.90:7897";
-  #   noProxy = "localhost,127.0.0.1,::1,*.local";
-  # };
   # 禁用所有形式的睡眠和休眠
   systemd.sleep.extraConfig = ''
     AllowSuspend=yes         # 如果只想禁用休眠，可以保持 Suspend 启用
@@ -125,9 +118,6 @@
     keyMap = lib.mkDefault "us";
     useXkbConfig = true; # use xkb.options in tty.
   };
-
-  programs.steam.enable = true;
-  programs.steam.fontPackages = with pkgs; [source-han-sans];
 
   fonts.packages = with pkgs; [
     noto-fonts
