@@ -1,7 +1,7 @@
-{pkgs-unstable, ...}: {
+_: {
   programs.clash-verge = {
     enable = true;
-    package = pkgs-unstable.clash-verge-rev;
+    # package = pkgs-unstable.clash-verge-rev;
     autoStart = true;
     tunMode = true;
     serviceMode = true;

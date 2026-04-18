@@ -124,6 +124,8 @@
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
 
+    dejavu_fonts
+
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
   ];
@@ -139,6 +141,8 @@
       };
     };
   };
+
+  programs.xwayland.enable = true;
 
   # Niri
   programs.niri.enable = true;

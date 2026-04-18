@@ -174,19 +174,24 @@ window-rule {
 }
 
 window-rule {
+    match app-id="Alacritty"
+    match app-id="neovide"
+    opacity 0.92
+}
+
+window-rule {
     geometry-corner-radius 12
     clip-to-geometry true
-    opacity 0.92
+    // opacity 0.92
     // draw-border-with-background true
 }
 
 window-rule {
     // 匹配 app-id 为 "floating_terminal" 的窗口
     match app-id="floating_terminal"
-    
+    opacity 0.92
     // 初始状态设为浮动
     open-floating true
-    
     default-column-width { proportion 0.6; }
     default-window-height { proportion 0.6; }
 }

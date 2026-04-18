@@ -19,6 +19,7 @@
     gdb
     pkg-config
     cmake
+    gnumake
     ninja
   ];
 }

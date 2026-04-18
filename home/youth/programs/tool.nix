@@ -1,4 +1,8 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  pkgs-unstable,
+  ...
+}: {
   home.packages = with pkgs; [
     tty-clock
     tree
@@ -26,6 +30,11 @@
     # 蓝牙
     blueman
   ];
+
+  programs.claude-code = {
+    enable = true;
+    package = pkgs-unstable.claude-code;
+  };
 
   # fzf 模糊搜索 主题
   programs.fzf = {
