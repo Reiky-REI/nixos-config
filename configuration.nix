@@ -9,7 +9,7 @@
     ./modules
   ];
 
-  nix.settings.trusted-users = ["root" "reiky"];
+  nix.settings.trusted-users = ["root" "Reiky-REI"];
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
@@ -43,10 +43,10 @@
   programs.steam.enable = true;
   programs.steam.fontPackages = with pkgs; [source-han-sans];
   programs.zsh.enable = true;
-  users.users.reiky = {
-    description = "__reiky__";
+  users.users.Reiky-REI = {
+    description = "__Reiky__";
     isNormalUser = true;
-    home = "/home/reiky";
+    home = "/home/Reiky-REI";
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     hashedPassword = "$y$j9T$RQ9/Mj/mI5O8AhOnB.3gJ/$mRmKCYV3q7zKoFF1asu5oZNfBNRE4uHDloKQM7Eq5G3";
@@ -59,7 +59,7 @@
   boot.loader.efi.canTouchEfiVariables = true;
   # Low-power CPUs use the kernel parameters below to avoid crashes
   boot.kernelParams = ["ahci.mobile_lpm_policy=1"];
-  
+
   # Use the latestist kernal
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
