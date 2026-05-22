@@ -9,7 +9,7 @@
     ./modules
   ];
 
-  nix.settings.trusted-users = ["root" "youth"];
+  nix.settings.trusted-users = ["root" "reiky"];
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
@@ -40,25 +40,16 @@
     XMODIFIERS = "@im=fcitx";
   };
 
-  # NOTE: 敏感环境变量加载 (ai_api_key等)
-  age.identityPaths = [
-    "/home/youth/.ssh/id_ed25519"
-  ];
-  age.secrets."ai_api_key" = {
-    file = ./secrets/ai_api_key.age;
-    owner = "youth";
-  };
-
   programs.steam.enable = true;
   programs.steam.fontPackages = with pkgs; [source-han-sans];
   programs.zsh.enable = true;
-  users.users.youth = {
-    description = "Youth";
+  users.users.reiky = {
+    description = "__reiky__";
     isNormalUser = true;
-    home = "/home/youth";
+    home = "/home/reiky";
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
-    hashedPassword = "$6$d89dDb.7HKl8dx2J$NP00uF4ukMaVYoWzInQxoeokT7927qybXJGzrGwe7WYd7aRNMrNVfLbgnotRDPysU0lqTrZ1L0uTu7EjXsYwg/";
+    hashedPassword = "$y$j9T$RQ9/Mj/mI5O8AhOnB.3gJ/$mRmKCYV3q7zKoFF1asu5oZNfBNRE4uHDloKQM7Eq5G3";
     extraGroups = ["wheel" "networkmanager" "audio" "input" "video" "docker" "kvm" "libvirtd"];
   };
   security.sudo.wheelNeedsPassword = false; # sudo组是否需要密码

@@ -4,7 +4,7 @@
   ];
   services.mpd.enable = true;
   services.mpd = {
-    musicDirectory = "/home/youth/music";
+    musicDirectory = "/home/reiky/music";
     extraConfig = ''
       audio_output {
         type "pipewire"
@@ -17,9 +17,9 @@
   };
   programs.ncmpcpp = {
     enable = true;
-    mpdMusicDir = "/home/youth/music";
+    mpdMusicDir = "/home/reiky/music";
     settings = {
-      lyrics_directory = "/home/youth/music";
+      lyrics_directory = "/home/reiky/music";
       store_lyrics_in_song_dir = "yes";
     };
   };
