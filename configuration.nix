@@ -59,6 +59,9 @@
   boot.loader.efi.canTouchEfiVariables = true;
   # Low-power CPUs use the kernel parameters below to avoid crashes
   boot.kernelParams = ["ahci.mobile_lpm_policy=1"];
+  
+  # Use the latestist kernal
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
   # Enable the OpenSSH daemon.
   services.openssh.enable = true;
@@ -199,10 +202,10 @@
   system.stateVersion = "25.05";
 
   # Enable CUPS to print documents.
-  # services.printing.enable = true;
+  services.printing.enable = true;
 
   # Enable touchpad support (enabled default in most desktopManager).
-  # services.libinput.enable = true;
+  services.libinput.enable = true;
 
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
