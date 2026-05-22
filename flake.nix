@@ -66,6 +66,33 @@
           ./configuration.nix
           agenix.nixosModules.default
           catppuccin.nixosModules.catppuccin
+
+          ({
+            pkgs,
+            lib,
+            config,
+            ...
+          }: {
+            nixpkgs.overlays = [
+              #  (self: super: {
+              #    # 方法1：使用 override 强制 qt6（如果支持）
+              #    fcitx5-qt = super.fcitx5-qt.override {
+              #      useQt6 = true;
+              #      qt6 = super.qt6;
+              #    };
+              #  })
+              (final: prev: {
+                fcitx5 = prev.fcitx5.overrideAttrs (old: {
+                  cmakeFlags = (old.cmakeFlags or []) ++ ["-DUSE_QT6=ON"];
+                  buildInputs = (old.buildInputs or []) ++ [final.qt6.qtbase];
+                  dontWrapQtApps = true;
+                });
+                fcitx5-rime = prev.fcitx5-rime.override {fcitx5 = final.fcitx5;};
+                fcitx5-gtk = prev.fcitx5-gtk.override {fcitx5 = final.fcitx5;};
+              })
+            ];
+          })
+
           home-manager.nixosModules.home-manager
           {
             environment.systemPackages = [agenix.packages.${system}.default];
