@@ -34,10 +34,6 @@
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     TERMINAL = "kitty";
-    # GTK_IM_MODULE = "fcitx";
-    QT_IM_MODULE = "fcitx";
-    QT5_IM_MODULE = "fcitx";
-    XMODIFIERS = "@im=fcitx";
   };
 
   programs.steam.enable = true;
@@ -105,6 +101,10 @@
     LC_NUMERIC = "zh_CN.UTF-8";
     LC_PAPER = "zh_CN.UTF-8";
     LC_CTYPE = "zh_CN.UTF-8";
+  };
+  i18n.inputMethod = {
+    type = "fcitx5";
+    enable = true;
   };
 
   console = {
