@@ -73,12 +73,12 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {inherit inputs pkgs-unstable;};
-            home-manager.users.youth = {
+            home-manager.users.reiky = {
               imports = [
                 catppuccin.homeModules.catppuccin
                 agenix.homeManagerModules.default
                 noctalia.homeModules.default
-                ./home/youth
+                ./home/reiky
               ];
               home.packages = [
                 CookNixvim.packages.${system}.default
