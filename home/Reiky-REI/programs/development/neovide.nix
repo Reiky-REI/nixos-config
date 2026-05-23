@@ -6,7 +6,7 @@
     vsync = true;
     font = {
       normal = [];
-      size = 16.0;
+      size = 12.0;
     };
   };
 }

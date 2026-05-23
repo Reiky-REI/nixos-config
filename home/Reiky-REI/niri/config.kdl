@@ -168,6 +168,7 @@ window-rule {
     opacity 0.85
     background-effect {
       blur true
+      xray false
     } 
 }
 
@@ -183,9 +184,11 @@ window-rule {
     match app-id="Logseq"
     match app-id="DolPhine"
     match app-id="Bottles"
+    match app-id="kitty"
     opacity 0.6
     background-effect {
       blur true
+      xray false
     }
 }
 
@@ -199,11 +202,15 @@ window-rule {
 window-rule {
     // 匹配 app-id 为 "floating_terminal" 的窗口
     match app-id="floating_terminal"
-    opacity 0.92
+    opacity 0.65
     // 初始状态设为浮动
     open-floating true
     default-column-width { proportion 0.6; }
     default-window-height { proportion 0.6; }
+    background-effect{
+      blur true
+      xray false
+    }
 }
 
 binds {
