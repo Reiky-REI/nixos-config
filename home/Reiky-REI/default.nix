@@ -8,12 +8,6 @@
     ./shell
     ./programs
     ./terminal
-    ./niri
-    ./hyprland
-    ./noctalia
-    ./fcitx5
-    ./rofi
-    ./wallpaper
     ./music
   ];
 
@@ -52,7 +46,6 @@
     "text/html" = "google-chrome.desktop";
     "x-scheme-handler/http" = "google-chrome.desktop";
     "x-scheme-handler/https" = "google-chrome.desktop";
-    "x-scheme-handler/clash" = "clash-verge.desktop";
   };
 
   # 光标配置
