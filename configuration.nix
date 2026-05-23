@@ -152,7 +152,10 @@
   #services.gnome.gnome-keyring.enable = true;
   #security.pam.services.gdm.enableGnomeKeyring = true;
 
-  services.displayManager.sddm.enable = true;
+  # services.displayManager.sddm.enable = true;
+
+  services.displayManager.ly.enable = true;
+
   # Enable the X11 windowing system.
   services.xserver.enable = true;
   # Configure keymap in X11

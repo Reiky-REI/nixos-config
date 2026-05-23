@@ -3,11 +3,14 @@
     wechat
     qq
     vlc
-    discord
     obsidian
     youtube-music
     spotify
     kdePackages.dolphin
+    notion-app-enhanced
+    netease-cloud-music-gtk
+    cider
+    logseq
   ];
 
   # 谷歌浏览器设置 主题
