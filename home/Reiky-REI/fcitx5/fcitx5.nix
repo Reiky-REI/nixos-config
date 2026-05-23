@@ -5,16 +5,10 @@ in {
     type = "fcitx5";
     enable = true;
     fcitx5.addons = with pkgs; [
-      fcitx5-rime
       qt6pkgs.fcitx5-chinese-addons # 修正包名
       fcitx5-gtk
     ];
   };
-
-  home.packages = with pkgs; [
-    # qt6pkgs.fcitx5-configtool # 图形配置工具（Qt6 版本）
-    rime-data
-  ];
 
   i18n.inputMethod.fcitx5.settings = {
     inputMethod = {
@@ -25,7 +19,7 @@ in {
         DefaultIM = "keyboard-us";
       };
       "Groups/0/Items/0".Name = "keyboard-us";
-      "Groups/0/Items/1".Name = "rime";
+      "Groups/0/Items/1".Name = "pinyin";
     };
     globalOptions = {
       "Hotkey/TriggerKeys" = {"0" = "Super+space";};
@@ -37,6 +31,6 @@ in {
     flavor = "mocha";
     accent = "mauve";
     enableRounded = true;
-    apply = false;
+    apply = true;
   };
 }
