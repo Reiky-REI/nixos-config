@@ -1,5 +1,5 @@
 {
-  description = "Cook configuration";
+  description = "MEOW configuration";
   nixConfig = {
     substituters = [
       "https://cache.nixos.org"
@@ -22,9 +22,9 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    # CookNxivim 配置完整版
+    # CookNxivim 配置完整版, 原作者：github.com:Youthdreamer
     CookNixvim = {
-      url = "github:Youthdreamer/CookNixvim";
+      url = "git@github.com:Reiky-REI/CookNixvim.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -69,7 +69,7 @@
         };
 
         modules = [
-          ./configuration.nix
+          ./hosts/MEOW/default.nix
           agenix.nixosModules.default
           catppuccin.nixosModules.catppuccin
 
