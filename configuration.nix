@@ -35,6 +35,10 @@
     NIXOS_OZONE_WL = "1";
     TERMINAL = "kitty";
   };
+  environment.sessionVariables.XDG_DATA_DIRS = lib.mkAfter [
+    "/var/lib/flatpak/exports/share"
+    "$HOME/.local/share/flatpak/exports/share"
+  ];
 
   programs.steam.enable = true;
   programs.steam.fontPackages = with pkgs; [source-han-sans];
@@ -184,6 +188,9 @@
   services.power-profiles-daemon.enable = true;
   services.upower.enable = true;
 
+  # flatpak
+  services.flatpak.enable = true;
+
   hardware = {
     enableAllFirmware = true; # 自动安装所有固件
     cpu.intel.updateMicrocode = true; # Intel CPU
@@ -210,6 +217,8 @@
   # Enable touchpad support (enabled default in most desktopManager).
   services.libinput.enable = true;
 
+  # allow none nix packages
+  programs.nix-ld.enable = true;
   # Some programs need SUID wrappers, can be configured further or are
   # started in user sessions.
   # programs.mtr.enable = true;

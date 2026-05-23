@@ -34,6 +34,12 @@
       url = "github:nix-community/home-manager/release-25.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # niri
+    niri = {
+      url = "github:YaLTeR/niri";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -82,6 +88,9 @@
                 });
                 fcitx5-rime = prev.fcitx5-rime.override {fcitx5 = final.fcitx5;};
                 fcitx5-gtk = prev.fcitx5-gtk.override {fcitx5 = final.fcitx5;};
+              })
+              (final: prev: {
+                niri = pkgs-unstable.niri;
               })
             ];
           })

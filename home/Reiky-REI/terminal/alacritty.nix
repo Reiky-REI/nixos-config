@@ -7,7 +7,7 @@ _: {
     font = {
       normal.family = "FiraCode Nerd Font";
       normal.style = "Regular";
-      size = 14.0;
+      size = 12.0;
     };
   };
 

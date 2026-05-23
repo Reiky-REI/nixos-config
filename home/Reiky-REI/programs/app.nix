@@ -9,7 +9,6 @@
     kdePackages.dolphin
     notion-app-enhanced
     netease-cloud-music-gtk
-    cider
     logseq
   ];
 
