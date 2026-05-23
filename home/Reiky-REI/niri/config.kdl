@@ -165,6 +165,10 @@ window-rule {
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
     open-floating true
+    opacity 0.85
+    background-effect {
+      blur true
+    } 
 }
 
 /-window-rule {
@@ -176,7 +180,13 @@ window-rule {
 window-rule {
     match app-id="Alacritty"
     match app-id="neovide"
-    opacity 0.92
+    match app-id="Logseq"
+    match app-id="DolPhine"
+    match app-id="Bottles"
+    opacity 0.6
+    background-effect {
+      blur true
+    }
 }
 
 window-rule {
