@@ -147,10 +147,10 @@
     withUWSM = true;
     xwayland.enable = true;
   };
-  services.displayManager.gdm.enable = true;
-  services.displayManager.gdm.wayland = true;
-  services.gnome.gnome-keyring.enable = true;
-  security.pam.services.gdm.enableGnomeKeyring = true;
+  #services.displayManager.gdm.enable = true;
+  #services.displayManager.gdm.wayland = true;
+  #services.gnome.gnome-keyring.enable = true;
+  #security.pam.services.gdm.enableGnomeKeyring = true;
 
   services.displayManager.sddm.enable = true;
   # Enable the X11 windowing system.
