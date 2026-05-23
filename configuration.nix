@@ -34,6 +34,10 @@
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     TERMINAL = "kitty";
+    # GTK_IM_MODULE = "fcitx";
+    QT_IM_MODULE = "fcitx";
+    QT5_IM_MODULE = "fcitx";
+    XMODIFIERS = "@im=fcitx";
   };
   environment.sessionVariables.XDG_DATA_DIRS = lib.mkAfter [
     "/var/lib/flatpak/exports/share"
