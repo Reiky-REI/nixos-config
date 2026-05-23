@@ -4,9 +4,9 @@ _: {
     settings = {};
   };
 
-  catppuccin.lazygit = {
-    enable = true;
-    accent = "mauve";
-    flavor = "mocha";
-  };
+  # catppuccin.lazygit = {
+  #   enable = true;
+  #   accent = "mauve";
+  #   flavor = "mocha";
+  # };
 }

@@ -2,9 +2,10 @@
   description = "MEOW configuration";
   nixConfig = {
     substituters = [
+      "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+      "https://mirrors.ustc.edu.cn/nix-channels/store"
       "https://cache.nixos.org"
       "https://nix-community.cachix.org"
-      "https://mirrors.ustc.edu.cn/nix-channels/store"
     ];
     trusted-public-keys = [
       "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
@@ -24,7 +25,7 @@
 
     # CookNxivim 配置完整版, 原作者：github.com:Youthdreamer
     CookNixvim = {
-      url = "git@github.com:Reiky-REI/CookNixvim.git";
+      url = "github:Reiky-REI/CookNixvim";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
@@ -61,7 +62,7 @@
     };
   in {
     nixosConfigurations = {
-      cook = nixpkgs.lib.nixosSystem {
+      NixMEOW = nixpkgs.lib.nixosSystem {
         inherit system;
 
         specialArgs = {
@@ -80,15 +81,6 @@
             ...
           }: {
             nixpkgs.overlays = [
-              (final: prev: {
-                fcitx5 = prev.fcitx5.overrideAttrs (old: {
-                  cmakeFlags = (old.cmakeFlags or []) ++ ["-DUSE_QT6=ON"];
-                  buildInputs = (old.buildInputs or []) ++ [final.qt6.qtbase];
-                  dontWrapQtApps = true;
-                });
-                fcitx5-rime = prev.fcitx5-rime.override {fcitx5 = final.fcitx5;};
-                fcitx5-gtk = prev.fcitx5-gtk.override {fcitx5 = final.fcitx5;};
-              })
               (final: prev: {
                 niri = pkgs-unstable.niri;
               })

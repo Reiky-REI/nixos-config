@@ -19,11 +19,6 @@
     LC_PAPER = "zh_CN.UTF-8";
     LC_CTYPE = "zh_CN.UTF-8";
   };
-  i18n.inputMethod = {
-    type = "fcitx5";
-    enable = true;
-  };
-
   console = {
     font = "Lat2-Terminus16";
     keyMap = lib.mkDefault "us";
@@ -62,4 +57,16 @@
 
   # allow none nix packages
   programs.nix-ld.enable = true;
+
+  programs.zsh.enable = true;
+
+  security.sudo.wheelNeedsPassword = false;
+
+  environment.systemPackages = with pkgs; [
+    vim
+    git
+    curl
+    wget
+    cachix
+  ];
 }
