@@ -87,8 +87,8 @@
   systemd.sleep.extraConfig = ''
     AllowSuspend=yes         # 如果只想禁用休眠，可以保持 Suspend 启用
     AllowHibernation=no      # 禁用休眠 (Hibernate)
-    AllowHybridSleep=no      # 禁用混合睡眠 (Hybrid Sleep)
-    AllowSuspendThenHibernate=no # 禁用先睡眠后休眠
+    AllowHybridSleep=yes# 禁用混合睡眠 (Hybrid Sleep)
+    AllowSuspendThenHibernate=yes# 禁用先睡眠后休眠
   '';
 
   # timezone and local
@@ -152,7 +152,7 @@
   services.gnome.gnome-keyring.enable = true;
   security.pam.services.gdm.enableGnomeKeyring = true;
 
-  # services.displayManager.sddm.enable = true;
+  services.displayManager.sddm.enable = true;
   # Enable the X11 windowing system.
   services.xserver.enable = true;
   # Configure keymap in X11

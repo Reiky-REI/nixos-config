@@ -18,8 +18,8 @@
     agenix.url = "github:ryantm/agenix";
 
     noctalia = {
-      url = "github:noctalia-dev/noctalia-shell";
-      inputs.nixpkgs.follows = "nixpkgs-unstable";
+      url = "github:noctalia-dev/noctalia-shell/main";
+      inputs.nixpkgs.follows = "nixpkgs";
     };
 
     # CookNxivim 配置完整版
@@ -74,13 +74,6 @@
             ...
           }: {
             nixpkgs.overlays = [
-              #  (self: super: {
-              #    # 方法1：使用 override 强制 qt6（如果支持）
-              #    fcitx5-qt = super.fcitx5-qt.override {
-              #      useQt6 = true;
-              #      qt6 = super.qt6;
-              #    };
-              #  })
               (final: prev: {
                 fcitx5 = prev.fcitx5.overrideAttrs (old: {
                   cmakeFlags = (old.cmakeFlags or []) ++ ["-DUSE_QT6=ON"];
