@@ -56,11 +56,11 @@
       "--no-preview"
     ];
   };
-  catppuccin.fzf = {
-    enable = true;
-    flavor = "mocha";
-    accent = "mauve";
-  };
+  # catppuccin.fzf = {
+  #   enable = true;
+  #   flavor = "mocha";
+  #   accent = "mauve";
+  # };
 
   # fd查找
   programs.fd = {
@@ -90,20 +90,20 @@
       paging = "always";
     };
   };
-  catppuccin.bat = {
-    enable = true;
-    flavor = "mocha";
-  };
+  # catppuccin.bat = {
+  #   enable = true;
+  #   flavor = "mocha";
+  # };
 
   # jq json查看
   programs.jq.enable = true;
 
   # imv图片查看 主题
   programs.imv.enable = true;
-  catppuccin.imv = {
-    enable = true;
-    flavor = "mocha";
-  };
+  # catppuccin.imv = {
+  #   enable = true;
+  #   flavor = "mocha";
+  # };
 
   # yazi终端文件管理 主题
   programs.yazi = {
@@ -119,16 +119,16 @@
 
   # btop系统监控 主题
   programs.btop.enable = true;
-  catppuccin.btop = {
-    enable = true;
-    flavor = "mocha";
-  };
+  # catppuccin.btop = {
+  #   enable = true;
+  #   flavor = "mocha";
+  # };
 
   # cava频谱 主题
   programs.cava.enable = true;
-  catppuccin.cava = {
-    enable = true;
-    flavor = "mocha";
-    transparent = true;
-  };
+  # catppuccin.cava = {
+  #   enable = true;
+  #   flavor = "mocha";
+  #   transparent = true;
+  # };
 }

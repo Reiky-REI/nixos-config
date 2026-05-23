@@ -11,8 +11,8 @@ _: {
     };
   };
 
-  catppuccin.alacritty = {
-    enable = true;
-    flavor = "mocha";
-  };
+  # catppuccin.alacritty = {
+  #   enable = true;
+  #   flavor = "mocha";
+  # };
 }

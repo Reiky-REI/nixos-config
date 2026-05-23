@@ -24,8 +24,8 @@
   };
 
   # 主题
-  catppuccin.tmux = {
-    enable = true;
-    flavor = "mocha";
-  };
+  # catppuccin.tmux = {
+  #   enable = true;
+  #   flavor = "mocha";
+  # };
 }

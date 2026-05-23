@@ -1,4 +1,20 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  lib,
+  config,
+  ...
+}: {
+  nixpkgs.overlays = [
+    (final: prev: {
+      fcitx5 = prev.fcitx5.overrideAttrs (old: {
+        cmakeFlags = (old.cmakeFlags or []) ++ ["-DUSE_QT6=ON"];
+        buildInputs = (old.buildInputs or []) ++ [final.qt6.qtbase];
+        dontWrapQtApps = true;
+      });
+      fcitx5-rime = prev.fcitx5-rime.override {fcitx5 = final.fcitx5;};
+      fcitx5-gtk = prev.fcitx5-gtk.override {fcitx5 = final.fcitx5;};
+    })
+  ];
   # 选择输入法类型为 fcitx5
   i18n.inputMethod = {
     type = "fcitx5";
@@ -45,9 +61,13 @@
   # catppuccin的flake,option
   catppuccin.fcitx5 = {
     enable = true;
-    flavor = "mocha"; # 主题变体
-    accent = "mauve"; # 强调色
-    enableRounded = true; # 启用圆角
-    apply = false; # 自动配置
+    flavor = "mocha";
+    accent = "mauve";
+  };
+
+  environment.sessionVariables = {
+    QT_IM_MODULE = "fcitx";
+    QT5_IM_MODULE = "fcitx";
+    XMODIFIERS = "@im=fcitx";
   };
 }

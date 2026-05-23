@@ -29,10 +29,10 @@
     #     "kjoehdlockiihccmfnoamenhobkkddng" # CSDN自动展开+一键复制代码
     #   ];
   };
-  catppuccin.chromium = {
-    enable = true;
-    flavor = "mocha";
-  };
+  # catppuccin.chromium = {
+  #   enable = true;
+  #   flavor = "mocha";
+  # };
 
   # firefox
   programs.firefox = {
@@ -49,11 +49,11 @@
 
   # 视频软件
   programs.mpv.enable = true;
-  catppuccin.mpv = {
-    enable = true;
-    accent = "mauve";
-    flavor = "mocha";
-  };
+  # catppuccin.mpv = {
+  #   enable = true;
+  #   accent = "mauve";
+  #   flavor = "mocha";
+  # };
 
   # 录制软件
   programs.obs-studio.enable = true;

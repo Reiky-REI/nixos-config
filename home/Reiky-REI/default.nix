@@ -9,6 +9,11 @@
     ./programs
     ./terminal
     ./music
+    ./hyprland
+    ./niri
+    ./rofi
+    ./wallpaper
+    ./noctalia
   ];
 
   home.packages = with pkgs; [
@@ -26,10 +31,10 @@
   # 消息通知
   services.swaync.enable = true;
   services.swayidle.enable = true;
-  catppuccin.swaync = {
-    enable = true;
-    flavor = "mocha";
-  };
+  # catppuccin.swaync = {
+  #   enable = true;
+  #   flavor = "mocha";
+  # };
 
   # services.mako.enable = true;
   # catppuccin.mako = {
@@ -59,10 +64,11 @@
   home.sessionVariables = {
     EDITOR = "nvim";
     VISUAL = "nvim";
+    TERMINAL = "kitty";
     PATH = "$HOME/.local/bin:$PATH";
-    LANG = "en_US.UTF-8"; # 系统主语言英文
-    LC_CTYPE = "zh_CN.UTF-8"; # 字符显示支持中文
-    LC_MESSAGES = "en_US.UTF-8"; # 程序输出信息保持英文
+    LANG = "en_US.UTF-8";
+    LC_CTYPE = "zh_CN.UTF-8";
+    LC_MESSAGES = "en_US.UTF-8";
   };
 
   home.stateVersion = "25.11";
