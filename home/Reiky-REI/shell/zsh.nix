@@ -42,7 +42,7 @@
       # 按用户名自动加载对应的密钥文件:
       #   ai_api_key_<USERNAME>.age → /run/agenix/ai_api_key_<USERNAME>
       # 这样系统上的每个用户可以有自己的密钥文件。
-      for file in /run/agenix/ai_api_key_${USER}; do
+      for file in /run/agenix/ai_api_key_''${USER}; do
         [ -f "$file" ] && source "$file"
       done
 
