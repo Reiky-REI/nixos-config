@@ -7,7 +7,7 @@ if [ -f /run/agenix/ai_api_key_REIKY_REI ]; then
   source /run/agenix/ai_api_key_REIKY_REI
 fi
 
-# 回退到 token 文件（首次或 agenix 不可用时）
+# 回退到 token 文件（首次部署或 agenix 不可用时）
 TOKEN_FILE="$(dirname "$0")/token"
 if [ -z "${NIX_ACCESS_TOKEN:-}" ] && [ -f "$TOKEN_FILE" ]; then
   NIX_ACCESS_TOKEN="$(cat "$TOKEN_FILE")"
