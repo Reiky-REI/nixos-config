@@ -1,6 +1,6 @@
 {pkgs, ...}: {
   environment.systemPackages = with pkgs; [
     cudatoolkit
-    cudaPackages.cudaa_nvcc
+    cudaPackages.cuda_nvcc
   ];
 }

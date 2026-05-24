@@ -1,1 +1,5 @@
 .agent/config/token
+.agent/plans/20*/
+.agent/sessions/20*/
+secrets/*.age
+secrets/secrets.nix
