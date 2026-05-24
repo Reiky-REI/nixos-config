@@ -34,7 +34,7 @@
 10. [经验积累管道](#10-经验积累管道)
 11. [哨兵系统](#11-哨兵系统)
 12. [社区监控矩阵](#12-社区监控矩阵)
-13. [文件整理与软链接策略](#13-文件整理与软链接策略)
+13. [文件整理与每目录 AI 配置](#13-文件整理与每目录-ai-配置)
 14. [备份路由](#14-备份路由)
 15. [systemd 定时器总表](#15-systemd-定时器总表)
 16. [完整工具清单](#16-完整工具清单)
@@ -53,7 +53,7 @@
 | 维度 | 目标 |
 |------|------|
 | **系统维护** | AI 管理 NixOS 配置、监控安全漏洞、清理磁盘 |
-| **文件管理** | AI 按内容智能分类、去重、软链接保留、路由备份 |
+| **文件管理** | AI 按内容智能分类、去重、路由备份 |
 | **学习陪伴** | AI 跟踪学习进度、生成笔记摘要、构建知识图谱 |
 | **安全哨兵** | AI 追踪 CVE 和社区 breaking changes，监控自身行为 |
 | **自进化** | AI 从经验中学习、生成技能、发布知识 |
@@ -395,7 +395,7 @@ Reiky-REI (人类)
 
 | Skill | 触发方式 | 权限边界 | 核心工具 |
 |-------|---------|---------|---------|
-| file-organizer | watchexec + timer (hourly) | ai-shared 可写目录 | organize-tool, trash-cli, ai-relocate |
+| file-organizer | watchexec + timer (hourly) | ai-shared 可写目录 | organize-tool, .ai-rules.toml |
 | file-classifier | timer (weekly) | ai-shared 可读目录 | ollama, fd, jq, gno |
 | learn-companion | inotify ~/ai-agent/learn/ | agent home + ai-shared | gno, ollama |
 | work-assistant | git hook + 项目目录检测 | ai-shared 内项目 | git, td |
@@ -618,7 +618,7 @@ ai.sentinel = {
 
 ---
 
-## 13. 文件整理与软链接策略
+## 13. 文件整理与每目录 AI 配置
 
 ### 三级权限模型
 
@@ -628,44 +628,77 @@ confirm: ~/documents/** ~/WorkSpace/**   ~/Desktop/*
 deny:    ~/.ssh/**      ~/.gnupg/**      ~/Documents/private/**
 ```
 
-### 软链接保留方案（自建——无现有工具支持）
+### 每目录 AI 配置（`.ai-rules.toml`）
 
-**调研结论**: organize-tool 的 symlink 方向是错的（在目标目录建软链接，不是原位置）。需自建。
+每个目录可以有自己的 `.ai-rules.toml`，告诉 AI 这个目录的特性。  
+AI 在目录中工作时，先读这个配置；也可以在目录中积累经验后更新它。
 
-**ai-relocate 工具**:
-```python
-# 移动文件 → 在原位置留软链接 → 记录到 registry
-# {ts, src, dst, symlink_path, expires_at}
-```
-
-**symlink-cleaner skill** (定期清理过期软链接):
-```bash
-# 读取 ~/ai-agent/.symlink-registry.jsonl
-# 找到 expires_at < now 的条目 → 删除软链接
-```
-
-**每目录配置文件** (organize-tool 不原生支持):
+相当于每个目录里有一个小的 `.agent/`。
 
 ```toml
-# ~/Downloads/.organize-rules.toml
-[symlink]
-enabled = true
-keep_days = 30
+# ~/Downloads/.ai-rules.toml
+# 这个目录的特性：临时文件集散地
 
 [auto]
 enabled = true
-categories = ["documents", "images", "archives"]
+# AI 可以自动整理: 按规则分类到对应子目录
+rules.pdf = "~/documents/papers/"
+rules.image = "~/screenshot/archive/"
+rules.archive = "~/Downloads/archives/"
+max_items = 200       # 超 200 个文件才触发整理，避免频繁打扰
+
+[ai.experience]
+# AI 在此目录积累的经验，每次操作后更新
+last_organized = "2026-05-24"
+avg_files_per_day = 15
+common_patterns = ["论文 pdf", "截图 png"]
 ```
 
 ```toml
-# ~/documents/.organize-rules.toml
-[symlink]
-enabled = false
+# ~/documents/.ai-rules.toml
+# 这个目录的特性：重要文档，需要确认
+
+[auto]
+enabled = false         # 不自动整理
+[confirm]
+enabled = true          # AI 操作前需用户确认
+
+[ai.experience]
+last_organized = ""
+# 没有经验记录——AI 每一次都要小心
+```
+
+```toml
+# ~/WorkSpace/project-x/.ai-rules.toml
+# 这个目录的特性：活跃项目
+
 [auto]
 enabled = false
 [confirm]
 enabled = true
+safe_dirs = ["src/", "tests/"]   # AI 可以读的目录
+deny_dirs = [".env", "secrets/"] # AI 绝对不能读的
+
+[ai.experience]
+rule_found = "AI 发现这个项目 90% 的变更在 src/ 和 tests/ 下"
+updated_at = "2026-05-25"
 ```
+
+### AI 的工作方式
+
+```
+AI 进入目录 → 读 .ai-rules.toml →
+  如果 [auto].enabled = true:
+    按 rules.* 自动分类整理
+    整理后更新 [ai.experience]
+  如果 [confirm].enabled = true:
+    提议整理方案 → 等待确认 → 执行 → 更新经验
+  如果目录没有任何 .ai-rules.toml:
+    AI 创建一份初始配置，标记 [auto].enabled = true
+    操作一段时间后写入经验
+```
+
+AI 迁移文件后，原始位置不留痕迹。用户通过 `.ai-rules.toml` 决定目录行为，不需要全局系统。
 
 ---
 
@@ -742,8 +775,7 @@ MCP / 感知:
   agenix (密钥管理, 已有)               CONSTITUTION.md (代理宪法)
 
 文件整理:
-  🐍 organize-tool (<30行 derivation)   🔧 ai-relocate (自建)
-  🔧 .organize-rules.toml parser        🔧 symlink-cleaner
+  🐍 organize-tool (<30行 derivation)   🔧 .ai-rules.toml parser
 
 角色间通信:
   🔧 文件通信 (~/ai-agent/tasks/*.jsonl) — Phase 1
@@ -792,7 +824,7 @@ MCP / 感知:
 改动:
   home/Reiky-REI/ai/skills/  11 个 skill .nix → SKILL.md 生成
   organize-tool derivation
-  ai-relocate + symlink-cleaner 脚本
+  .ai-rules.toml 配置生成
 
 验证:
   ~/.config/opencode/skills/ 包含 11+3 个 SKILL.md
@@ -969,7 +1001,7 @@ github.com/numbergroup/AgentGuard           — 纯规则 injection 防护
 | 代理宪法 | 无 | 无 | 无 | 无 | 无 | **CONSTITUTION.md** |
 | 哨兵 | JSON 审计 | 无 | 无 | 无 | 部分 | **独立 uid + HMAC + 9 维检测** |
 | 自进化 | 无 | 无 | curator | curator | 无 | **四层边界 + 经验管道** |
-| 文件软链接 | 无 | 无 | 无 | 无 | 无 | **自建 ai-relocate** |
+| 文件策略 | 无 | 无 | 无 | 无 | 无 | **每目录 `.ai-rules`** |
 | 经验积累 | 无 | 无 | session search | session search | 无 | **4 级管道 (原始→复盘→知识→技能)** |
 | 社区监控 | 无 | 无 | 无 | skills hub | 无 | **8 源 RSS + API 矩阵** |
 | 网络审计 | 无 | 无 | firewall off | 无 | 无 | **cli-proxy-api + iptables uid** |

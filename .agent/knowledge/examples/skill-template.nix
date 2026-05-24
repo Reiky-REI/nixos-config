@@ -24,17 +24,16 @@ let
     ## 安全约束
     - 绝对不访问: ~/.ssh/, ~/.gnupg/, ~/Documents/private/
     - 操作前先 dry-run
-    - 软链接保留 30 天
+    - 操作后更新目录的 .ai-rules.toml 中的 experience 字段
 
     ## 步骤
-    1. 识别需要处理的文件: `ls -lt ~/Downloads/ | head -20`
-    2. 按规则分类:
-       - *.pdf, *.docx → ~/documents/
-       - *.jpg, *.png → ~/screenshot/archive/
+    1. 读当前目录的 .ai-rules.toml
+    2. 按配置规则分类文件
     3. dry-run 验证: `organize sim`
-    4. 执行: `organize run` + `ai-relocate`
-    5. 记录: 追加到 activity.jsonl
-    6. 通知: `notify-send "整理了 N 个文件"`
+    4. 执行: `organize run`
+    5. 更新 .ai-rules.toml 的 [ai.experience]
+    6. 记录: 追加到 activity.jsonl
+    7. 通知: `notify-send "整理了 N 个文件"`
   '';
 in {
   # ============================================================

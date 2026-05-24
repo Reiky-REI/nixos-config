@@ -92,7 +92,7 @@
 
 ### Phase 6: 学习陪伴 + 发布
 - ⚪ Step 17: learn-companion 框架
-- ⚪ Step 18: symlink-cleaner
+- ⚪ Step 18: 经验沉淀到 .ai-rules.toml
 
 ---
 

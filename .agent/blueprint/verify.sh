@@ -125,8 +125,8 @@ case "$PHASE" in
     verify P3.4 phase3 "vulnix returns valid JSON" \
       'sudo vulnix --system --json 2>/dev/null | jq -e ". == [] or type == \"array\"" >/dev/null 2>&1' || true
     
-    verify P3.5 phase3 "ai-relocate prototype exists" \
-      'test -x /home/ai-agent/.local/bin/ai-relocate 2>/dev/null || test -f /home/ai-agent/bin/ai-relocate 2>/dev/null || echo "SKIP"' || true
+    verify P3.5 phase3 ".ai-rules.toml parser exists" \
+      'test -f /home/ai-agent/.local/bin/ai-rules-parse 2>/dev/null || echo "SKIP"' || true
     ;;
 
   phase4|all)

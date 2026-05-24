@@ -76,7 +76,7 @@
 
 ## 🟢 可复用经验
 - ollama 的 `loadModels` 首次需要手动 `ollama pull`
-- organize-tool 的 symlink action 方向是反的，用 shell action 调用 ai-relocate
+- organize-tool 不在 nixpkgs 中，需要写 derivation
 
 ## ⚠️ 未解决问题
 - <留给下个 AI 的问题>
@@ -364,7 +364,7 @@ sudo -u ai-agent sudo -n true 2>&1 | grep "not allowed"
 ### 步骤 4: 手动验证文件整理管道可行性
 
 ```
-目标: 手工跑通 "下载文件 → 分类 → 留软链接" 全流程
+目标: 手工跑通 "下载文件 → 分类 → 读每目录配置" 的全流程
 前提: 步骤 3 完成
 风险: 零 — 在 ~/Downloads/test-ai-org/ 中进行，不影响真实文件
 ```
@@ -387,32 +387,25 @@ rules:
 EOF
 ```
 
-**测试 ai-relocate 原型** [伪]:
+**测试每目录 AI 配置** [伪]:
 ```bash
-cat > /tmp/ai-relocate.sh <<'SCRIPT'
-#!/usr/bin/env bash
-src="$1"; dst_dir="$2"; keep_days="${3:-30}"
-fname=$(basename "$src")
-mv "$src" "$dst_dir/"
-ln -s "$dst_dir/$fname" "$src"
-echo "{\"ts\":\"$(date -Iseconds)\",\"src\":\"$src\",\"dst\":\"$dst_dir/$fname\",\"symlink\":\"$src\",\"expires\":\"$(date -Iseconds -d "+$keep_days days")\"}" >> /tmp/symlink-registry.jsonl
-SCRIPT
-chmod +x /tmp/ai-relocate.sh
+cat > ~/Downloads/.ai-rules.toml <<'TOMLEOF'
+[auto]
+enabled = true
+rules.pdf = "~/documents/papers/"
+rules.image = "~/screenshot/archive/"
+rules.archive = "~/Downloads/archives/"
+
+[ai.experience]
+last_organized = ""
+TOMLEOF
 ```
 
-**验证方式**:
+**验证 AI 读配置**:
 ```bash
-touch ~/Downloads/test-ai-org/test-file.txt
-/tmp/ai-relocate.sh ~/Downloads/test-ai-org/test-file.txt ~/documents/
-ls -la ~/Downloads/test-ai-org/test-file.txt  # 应是软链接
-readlink ~/Downloads/test-ai-org/test-file.txt  # 指向实际文件
-rm -rf ~/Downloads/test-ai-org ~/documents/test-file.txt 2>/dev/null
+opencode --skill file-organizer \
+  --prompt "读 ~/Downloads/.ai-rules.toml，按配置整理测试文件。"
 ```
-
-**此步骤完成后必须写复盘到 `.agent/knowledge/session-logs/`**。记录：
-- organize-tool 的 symlink action 方向是反的 (不能直接用)
-- organize-tool 的 `shell` action 可调用 ai-relocate 脚本
-- organize-tool 不在 nixpkgs 中，需要写 derivation
 
 ---
 
@@ -470,14 +463,14 @@ pkgs.python3Packages.buildPythonPackage rec {
 
 ```
 目标: 生成完整可用的 file-organizer skill
-范围: 仅 ~/Downloads 目录、PDF/图片/压缩包分类、软链接保留
+范围: 仅 ~/Downloads 目录、PDF/图片/压缩包分类、按 .ai-rules.toml 执行
 前提: 步骤 5 完成
 ```
 
 **设计意图** [伪]:
 通过 Nix 生成 `~/.config/opencode/skills/file-organizer/SKILL.md`。Skill 内容描述:
-- 识别新文件 → 规则分类 → organize sim → organize run → 记录 activity.jsonl → 通知
-- 安全约束: 不访问 ~/.ssh/ 等、移动前 dry-run、操作后留软链接 30 天
+- 识别新文件 → 读 .ai-rules.toml → 规则分类 → organize sim → organize run → 记录 activity.jsonl → 更新 experience → 通知
+- 安全约束: 不访问 ~/.ssh/ 等、移动前 dry-run、操作后更新 .ai-rules.toml
 
 **验证方式**: `test -f ~/.config/opencode/skills/file-organizer/SKILL.md`
 
@@ -657,7 +650,7 @@ bash /etc/nixos/.agent/blueprint/verify.sh phase4
 
 ---
 
-## 第六阶段: 学习陪伴 + 软链接清理
+## 第六阶段: 学习陪伴 + 经验沉淀
 
 ### 依赖关系
 
@@ -671,9 +664,9 @@ bash /etc/nixos/.agent/blueprint/verify.sh phase4
 
 ---
 
-### 步骤 18: symlink-cleaner
+### 步骤 18: 经验沉淀到 .ai-rules.toml
 
-测试过期软链接清理管道。
+AI 在目录中工作一段时间后，更新 `.ai-rules.toml` 中的 `[ai.experience]` 字段，为后续 AI 积累该目录的使用模式。
 
 ---
 
@@ -767,7 +760,7 @@ openclaw 占用资源过多
         security-monitor skill (依赖 vulnix)
 
   依赖 file-organizer:
-        symlink-cleaner        (依赖 ai-relocate 原型)
+        experience 更新到 .ai-rules  (依赖 organize-tool + AI 操作)
 
   依赖 openclaw flake input:
         openclaw service       (依赖 Phase 1 基础设施)
