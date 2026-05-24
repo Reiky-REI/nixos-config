@@ -74,6 +74,10 @@
           agenix.nixosModules.default
           catppuccin.nixosModules.catppuccin
 
+          {
+            age.secrets.ai_api_key.file = ./secrets/ai_api_key.age;
+          }
+
           ({
             pkgs,
             lib,
