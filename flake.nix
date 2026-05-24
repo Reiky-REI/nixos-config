@@ -75,8 +75,8 @@
           catppuccin.nixosModules.catppuccin
 
           {
-            age.secrets.ai_api_key = {
-              file = ./secrets/ai_api_key.age;
+            age.secrets.ai_api_key_REIKY_REI = {
+              file = ./secrets/ai_api_key_REIKY_REI.age;
               owner = "Reiky-REI";
             };
             age.identityPaths = [ "/home/Reiky-REI/.ssh/id_ed25519" ];

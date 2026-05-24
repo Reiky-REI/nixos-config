@@ -7,20 +7,28 @@
 #   查看解密:   agenix -d secrets/<name>.age -i ~/.ssh/id_ed25519
 #
 # 解密产物: /run/agenix/<name> (rebuild 时自动生成)
-# 加载方式: zsh 启动时自动 source /run/agenix/ai_api_key
-#
-# 当前可用公钥:
-#   Reiky-REI@cook (主机的 SSH 公钥)
+# 加载方式: zsh 启动时自动 source (按用户名匹配)
 
+# 当前可用的 SSH 公钥
 let
-  user_name = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMY282QEpZWkXv8oTomNEKt0snDqDYitvBSpY7TdlH5c Reiky-REI@cook";
+  reiky_key = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIMY282QEpZWkXv8oTomNEKt0snDqDYitvBSpY7TdlH5c Reiky-REI@cook";
 in {
-  "ai_api_key.age".publicKeys = [user_name];
+
+  # 每个用户的密钥文件，命名格式: ai_api_key_<USERNAME>.age
+  # 新加用户时:
+  #   1. 把用户的 SSH 公钥加到上方
+  #   2. 添加一行: "ai_api_key_<USERNAME>.age".publicKeys = [<key_name>];
+  #   3. 创建加密文件: agenix -e secrets/ai_api_key_<USERNAME>.age
+  "ai_api_key_REIKY_REI.age".publicKeys = [reiky_key];
+  "ai_api_key_cook.age".publicKeys = [reiky_key];  # 示例: 第二个用户的密钥
+
+  # 旧的通用名文件（保留兼容，可删除）
+  # "ai_api_key.age".publicKeys = [reiky_key];
 }
 
 # 换电脑/重装系统后的操作:
 # 1. 生成新 SSH 密钥:    ssh-keygen -t ed25519 -C "your@email"
 # 2. 查看公钥:           cat ~/.ssh/id_ed25519.pub
-# 3. 替换上面 user_name 的值
+# 3. 替换上方对应的公钥值
 # 4. 重新加密:           agenix -r secrets/ -i ~/.ssh/id_ed25519
 # 5. rebuild
