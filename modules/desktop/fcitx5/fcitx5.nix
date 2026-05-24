@@ -25,6 +25,7 @@
   i18n.inputMethod.fcitx5.addons = with pkgs; [
     qt6Packages.fcitx5-configtool
     qt6Packages.fcitx5-chinese-addons # 拼音、五笔等
+    fcitx5-gtk
   ];
   i18n.inputMethod.fcitx5.waylandFrontend = true;
 
@@ -71,4 +72,11 @@
     QT5_IM_MODULE = "fcitx";
     XMODIFIERS = "@im=fcitx";
   };
+
+  # 禁用 XDG autostart（由 niri spawn-at-startup 管理，避免在 Wayland socket 就绪前启动）
+  environment.etc."xdg/autostart/org.fcitx.Fcitx5.desktop".source = pkgs.writeText "fcitx5-autostart-hidden.desktop" ''
+    [Desktop Entry]
+    Type=Application
+    Hidden=true
+  '';
 }

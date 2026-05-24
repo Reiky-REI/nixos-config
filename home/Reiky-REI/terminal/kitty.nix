@@ -13,6 +13,7 @@ _: {
       bold_italic_font auto
       background_opacity 0.92
       background_blur 30
+      linux_display_server wayland
       hide_window_decorations yes
       confirm_os_window_close 0
       tab_bar_edge bottom
