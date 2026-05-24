@@ -38,7 +38,11 @@
       # secrets/ 目录中的 .age 文件在 rebuild 时由 agenix 自动解密到 /run/agenix/
       # 编辑密钥:  agenix -e secrets/<name>.age -i ~/.ssh/id_ed25519
       # 重加密:    agenix -r secrets/ -i ~/.ssh/id_ed25519
-      for file in /run/agenix/ai_api_key; do
+      #
+      # 按用户名自动加载对应的密钥文件:
+      #   ai_api_key_<USERNAME>.age → /run/agenix/ai_api_key_<USERNAME>
+      # 这样系统上的每个用户可以有自己的密钥文件。
+      for file in /run/agenix/ai_api_key_${USER}; do
         [ -f "$file" ] && source "$file"
       done
 

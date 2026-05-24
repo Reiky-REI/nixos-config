@@ -5,90 +5,125 @@
 ## 原理
 
 ```
-secrets/<name>.age (age 加密，可安全进 git)
+secrets/ai_api_key_<USER>.age (age 加密，可安全进 git)
   ↓ rebuild 时 agenix 用 SSH 私钥解密
-/run/agenix/<name> (明文，仅 root 可读)
-  ↓ zsh 启动时 source
-shell 环境变量 (DEEPSEEK_API_KEY, NIX_ACCESS_TOKEN 等)
+/run/agenix/ai_api_key_<USER> (明文)
+  ↓ zsh 按 ${USER} 自动 source
+shell 环境变量 (DEEPSEEK_API_KEY_<USER>, NIX_ACCESS_TOKEN 等)
 ```
+
+## 命名规则
+
+每个用户的密钥文件命名格式：`ai_api_key_<用户名>.age`
+
+- **Reiky-REI** → `ai_api_key_REIKY_REI.age` → 环境变量 `DEEPSEEK_API_KEY_REIKY_REI`
+- 新用户 `foo` → `ai_api_key_foo.age` → 环境变量 `DEEPSEEK_API_KEY_foo`
 
 ## 工作目录
 
-所有命令在仓库根目录 `/etc/nixos` 执行，或 cd 到 `secrets/`。
+```bash
+cd /etc/nixos/secrets
+# （所有 agenix 命令都从这里执行，因为当前目录需要 secrets.nix）
+```
 
 ## 日常操作
 
-### 编辑已有密钥
+### 编辑当前用户的密钥
 ```bash
-cd /etc/nixos
-agenix -e secrets/ai_api_key.age -i ~/.ssh/id_ed25519 --secrets-dir ./secrets
+cd /etc/nixos/secrets
+agenix -e ai_api_key_REIKY_REI.age -i ~/.ssh/id_ed25519
 ```
 
-文件格式是 shell exports，例如：
+文件中变量名要包含你的用户名：
 ```bash
-export DEEPSEEK_API_KEY="sk-..."
+export DEEPSEEK_API_KEY_REIKY_REI="sk-..."
 export NIX_ACCESS_TOKEN="ghp_..."
 ```
 
-### 新增一个密钥
+### 新增一个用户（例如：添加用户 "foo"）
+
+步骤如下：
+
 ```bash
-cd /etc/nixos/secrets
+# 1. 让 foo 提供他的 SSH 公钥
+#    cat ~/.ssh/id_ed25519.pub
 
-# 1. 在 secrets.nix 中添加条目
-#    "my_key.age".publicKeys = [user_name];
+# 2. 编辑 secrets/secrets.nix，把 foo 的公钥加进去
+#    let
+#      reiky_key = "ssh-ed25519 AAA...";
+#      foo_key   = "ssh-ed25519 BBB...";
+#    in {
+#      "ai_api_key_REIKY_REI.age".publicKeys = [reiky_key];
+#      "ai_api_key_foo.age".publicKeys       = [foo_key];
+#    }
 
-# 2. 创建加密文件
-echo 'export MY_SECRET="value"' > /tmp/my_plain
-agenix -e my_key.age -i ~/.ssh/id_ed25519
-# 编辑器打开后把 /tmp/my_plain 的内容粘贴进去，保存
+# 3. 把 foo 的密钥内容写到临时文件
+echo 'export DEEPSEEK_API_KEY_foo="sk-..."
+export NIX_ACCESS_TOKEN_foo="ghp_..."' > /tmp/foo_plain
 
-# 3. 在需要使用的地方 source (例如 zsh.nix)
-#    for file in /run/agenix/my_key; do
-#      [ -f "$file" ] && source "$file"
-#    done
+# 4. 创建加密文件（编辑器打开后粘贴 /tmp/foo_plain 内容）
+cat /tmp/foo_plain | agenix -e ai_api_key_foo.age -i ~/.ssh/id_ed25519
+
+# 5. 在 flake.nix 的 age.secrets 中添加 foo 的条目
+#    age.secrets.ai_api_key_foo = {
+#      file = ./secrets/ai_api_key_foo.age;
+#      owner = "foo";
+#    };
+
+# 6. rebuild，foo 的 zsh 会在启动时自动读取 /run/agenix/ai_api_key_foo
+```
+
+### 查看当前用户的密钥（不解密文件）
+```bash
+cat /run/agenix/ai_api_key_REIKY_REI
+```
+
+### 查看加密文件内容
+```bash
+agenix -d ai_api_key_REIKY_REI.age -i ~/.ssh/id_ed25519
 ```
 
 ### 重加密所有密钥
-换 SSH 密钥后必须重加密：
+换了 SSH 密钥或改了 secrets.nix 后：
 ```bash
-agenix -r secrets/ -i ~/.ssh/id_ed25519 --secrets-dir ./secrets
+agenix -r -i ~/.ssh/id_ed25519
 ```
 
-### 查看解密内容（不编辑）
-```bash
-agenix -d secrets/ai_api_key.age -i ~/.ssh/id_ed25519 --secrets-dir ./secrets
+## 系统集成说明
+
+### flake.nix 中的配置
+```nix
+age.secrets.ai_api_key_REIKY_REI = {
+  file = ./secrets/ai_api_key_REIKY_REI.age;  # 源文件
+  owner = "Reiky-REI";                         # 解密后文件所有者
+};
+age.identityPaths = [ "/home/Reiky-REI/.ssh/id_ed25519" ];
 ```
 
-## 换电脑 / 重装系统
+### zsh 中的自动加载
+```nix
+# home/Reiky-REI/shell/zsh.nix
+for file in /run/agenix/ai_api_key_${USER}; do
+  [ -f "$file" ] && source "$file"
+done
+```
 
-1. 生成新 SSH 密钥：
-   ```bash
-   ssh-keygen -t ed25519 -C "your@email"
-   ```
-
-2. 查看公钥：
-   ```bash
-   cat ~/.ssh/id_ed25519.pub
-   ```
-
-3. 编辑 `secrets/secrets.nix`，将 `user_name` 替换为新公钥
-
-4. 将私钥内容发给旧电脑（或用旧私钥解密原有文件重新加密）
-
-5. Run `agenix -r secrets/ -i ~/.ssh/id_ed25519 --secrets-dir ./secrets`
-
-6. Rebuild
+### age.secrets 名限制
+age.secrets 键名只能包含 `[a-zA-Z0-9_-]`，所以用户名中的连字符需要替换为下划线：
+- 用户 `Reiky-REI` → age.secrets 键为 `ai_api_key_REIKY_REI`
+- 但 `/run/agenix/` 中文件名可以带连字符（由 age file 名决定）
 
 ## 当前密钥清单
 
-| 文件 | 用途 | 解密路径 | 加载位置 |
+| 文件 | 用户 | 解密路径 | 环境变量 |
 |------|------|----------|----------|
-| `ai_api_key.age` | AI API Key + GitHub Token | `/run/agenix/ai_api_key` | zsh initContent |
+| `ai_api_key_REIKY_REI.age` | Reiky-REI | `/run/agenix/ai_api_key_REIKY_REI` | `DEEPSEEK_API_KEY_REIKY_REI`, `NIX_ACCESS_TOKEN` |
 
 ## 故障排查
 
 | 症状 | 原因 | 解决 |
 |------|------|------|
-| `no identity matched` | 私钥不在 agent 或与 secrets.nix 不匹配 | `ssh-add ~/.ssh/id_ed25519` 或更新 secrets.nix |
-| `/run/agenix/` 为空 | rebuild 未运行或 agenix 模块未启用 | 重新 `nixos-rebuild switch` |
-| `agenix -e` 找不到 secrets.nix | 不在正确目录 | `--secrets-dir ./secrets` 或 cd 到 secrets/ |
+| `no identity matched` | 私钥不在 agent 或与 secrets.nix 不匹配 | `ssh-add ~/.ssh/id_ed25519` |
+| `permission denied: /run/agenix/...` | 文件 root 所有 | 设 `age.secrets.<name>.owner = "你的用户名"` |
+| `/run/agenix/` 为空 | rebuild 未运行 | 重新 `nixos-rebuild switch` |
+| `agenix -e` 报 attribute missing | secrets.nix 无对应条目 | 在 secrets.nix 中添加文件条目 |
