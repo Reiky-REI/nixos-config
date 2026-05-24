@@ -1,7 +1,10 @@
-{pkgs-unstable, ...}: {
+{
+  pkgs-unstable,
+  ...
+}: {
   programs.vscode = {
     enable = true;
-    mutableExtensionsDir = true;
     package = pkgs-unstable.vscode;
+    mutableExtensionsDir = true;
   };
 }

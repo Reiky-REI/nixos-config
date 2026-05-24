@@ -9,5 +9,5 @@
 
   # host-specific 硬件参数
   boot.kernelParams = [ "ahci.mobile_lpm_policy=1" ];
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages_6_12;
 }

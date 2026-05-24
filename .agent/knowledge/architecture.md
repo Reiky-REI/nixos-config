@@ -9,11 +9,21 @@ flake.nix → hosts/{hostname}/default.nix → modules/{common,hardware,desktop,
 ## 各层职责
 - **modules/common/** — 全局基础设置 (nix, nixpkgs, time, i18n, fonts, shell 等)
 - **modules/hardware/** — CPU/GPU/蓝牙/音频设备相关策略
-- **modules/desktop/** — Wayland/X11 会话栈、display manager、compositor (仅 NixOS 系统级选项)
-- **modules/networking/** — 网络、代理、防火墙、SSH、VPN
-- **modules/services/** — 后台 daemon、系统能力服务 (管道/打印/MPD/Flatpak)
+- **modules/desktop/** — Wayland/X11 会话栈、display manager、compositor、fcitx5、通知、空闲管理、xwayland-satellite
+- **modules/networking/** — 网络、代理、防火墙、SSH、VPN、Clash
+- **modules/services/** — 后台 daemon、系统能力服务 (管道/打印/MPD/Flatpak/polkit)
 - **modules/development/** — 系统级开发工具链和平台支持
-- **home/{username}/** — 用户态配置 (shell/editor/apps/WM 配置/终端工具)
+- **home/{username}/** — 用户态配置
+
+### home/Reiky-REI/ 内部结构
+- **desktop/** — 桌面环境: compositors (Hyprland/Niri)、launcher (rofi)、wallpaper、noctalia
+- **apps/** — GUI 应用: 浏览器/通讯/媒体/办公/系统信息
+- **tools/** — CLI 工具: 基础工具/搜索/查看器/监控
+- **editors/** — 编辑器/IDE/终端复用器/Git 工具
+- **dev/** — 开发语言包 (nodejs/python/go/rust 等)
+- **shell/** — shell 配置 (zsh + powerlevel10k)
+- **terminal/** — 终端模拟器 (kitty, alacritty)
+- **music/** — 音乐播放器 (ncmpcpp, go-musicfox)
 
 ## 分类决策规则
 - daemon / 后台长期运行 → **services**

@@ -6,18 +6,16 @@
 }: {
   imports = [
     ./shell
-    ./programs
     ./terminal
     ./music
-    ./hyprland
-    ./niri
-    ./rofi
-    ./wallpaper
-    ./noctalia
+    ./desktop
+    ./apps
+    ./tools
+    ./editors
+    ./dev
   ];
 
   home.packages = with pkgs; [
-    xwayland-satellite # xwayland support
     libnotify
   ];
 
@@ -26,11 +24,10 @@
     mkdir -p "${config.home.homeDirectory}/screenshot"
   '';
 
-  services.polkit-gnome.enable = true; # 权限认证
-
-  # 消息通知
+  services.polkit-gnome.enable = true;
   services.swaync.enable = true;
   services.swayidle.enable = true;
+
   # catppuccin.swaync = {
   #   enable = true;
   #   flavor = "mocha";
