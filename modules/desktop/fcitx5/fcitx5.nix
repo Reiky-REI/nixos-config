@@ -55,6 +55,7 @@
         "PreeditEnabledByDefault" = "False";
       };
       "Hotkey/TriggerKeys" = {"0" = "Super+space";};
+      "Hotkey/EnumerateForwardForInputWindow" = {"0" = "Shift_L"; "1" = "Shift_R";};
     };
     addons.classicui.globalSection.Theme = "catppuccin-mocha-mauve";
   };

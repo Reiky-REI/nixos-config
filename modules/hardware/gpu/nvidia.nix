@@ -1,19 +1,24 @@
 {
-  config,
   pkgs,
+  lib,
   ...
 }: {
-  services.xserver.videoDrivers = ["nvidia"];
+  hardware.graphics.enable = true;
 
-  hardware.graphics = {
-    enable = true;
-  };
+  services.xserver.videoDrivers = ["amdgpu" "nvidia"];
 
   hardware.nvidia = {
-    modesetting = {
-      enable = true;
-    };
+    modesetting.enable = true;
     open = false;
     nvidiaSettings = true;
+
+    prime = {
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
+      };
+      nvidiaBusId = "PCI:0:1:0:0";
+      amdgpuBusId = "PCI:0:6:0:0";
+    };
   };
 }

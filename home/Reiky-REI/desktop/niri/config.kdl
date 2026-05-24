@@ -4,7 +4,7 @@ prefer-no-csd //移除终端等应用的标题栏
 spawn-at-startup "noctalia-shell"
 spawn-at-startup "swww-daemon"
 spawn-at-startup "fcitx5"
-// spawn-at-startup "noctalia-shell"
+spawn-at-startup "nm-applet"
 spawn-sh-at-startup "sh -c 'wayvnc 0.0.0.0'"
 
 environment {  
@@ -464,3 +464,5 @@ binds {
     // moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
 }
+
+
