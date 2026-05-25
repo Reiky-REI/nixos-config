@@ -4,6 +4,7 @@
     youtube-music
     spotify
     splayer
+    bilibili
   ];
 
   programs.mpv.enable = true;
