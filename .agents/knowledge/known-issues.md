@@ -41,6 +41,11 @@ catppuccin release-25.11 中以下子模块不可用，已全部注释：
 - flake eval/build 使用 git staging 中的源文件，未 `git add` 的新文件会报 `path does not exist`
 - 在 flake output 中 import 新文件时，必须先 stage (`git add`) 再 eval
 
+## linuxPackages_latest (kernel 7.0.9+) 缺少 ip_tables.ko
+- `CONFIG_NETFILTER_XTABLES_LEGACY` 未开启 → 无 `ip_tables.ko`，`iptables-legacy` 不可用
+- 需要 nftables 的应用 (如 Waydroid) 需 patch 改用 `nft` 命令
+- Waydroid 修复方式: overlay 修补 `waydroid-net.sh`，设 `LXC_USE_NFT=true` + 添加 `nftables` 到 PATH
+
 ## 代理与网络
 - 代理: `http://127.0.0.1:7897`
 - GitHub token: `.agents/config/token` (gitignore 保护)
