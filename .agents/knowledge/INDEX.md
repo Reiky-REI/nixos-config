@@ -11,6 +11,7 @@
 ## Available Skills
 | Name | Description |
 |------|-------------|
+| nixos-manager | NixOS 配置安全管理 — 修改/验证/提交/应用工作流 |
 | rebuild | NixOS rebuild 操作指引 — 标准构建、长时间编译、加速 |
 | secrets | agenix 密钥管理操作 — 编辑/新增/查看/重加密 |
 | networking | 代理/GitHub token/镜像源/SSH 配置 |
@@ -21,3 +22,4 @@
 | retros/2026-05-24-restructure | 仓库分层架构重构 |
 | retros/2026-05-24-home-reorg | Home 重组 + 蓝牙 + 快捷键 + NVIDIA |
 | retros/2026-05-24-cleanup | 清理优化 + secrets 隔离 + gitignore |
+| retros/2026-05-25-opencode-merge | NixOpencodeMEOW 合并 — opencode 系统安装 + development 子目录化 |
