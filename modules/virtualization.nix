@@ -11,4 +11,7 @@
     ];
   };
   programs.virt-manager.enable = true;
+
+  # waydroid
+  virtualisation.waydroid.enable = true;
 }
