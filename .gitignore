@@ -1,3 +1,4 @@
-.agent/config/token
-.agent/plans/20*/
-.agent/sessions/20*/
+.agents/config/token
+.agents/config/bot-token
+.agents/plans/20*/
+.agents/sessions/20*/
