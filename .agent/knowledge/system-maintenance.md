@@ -242,4 +242,5 @@ nixos-option <option.path>
 - 构建时需 `performance` governor 加速, 停 `power-profiles-daemon`
 - 补丁文件需 `git add` 才能被 flake 识别
 
-**待验证**: 蓝牙补丁内核重启后 `hciconfig hci0 UP`
+**结果**: 非内核改动全部通过验证 (kernel 7.0.9, NVIDIA 580.142, niri config valid, fcitx5/swww/wayvnc/clash/nm-applet 均已启动)
+**蓝牙**: 需补丁内核全量编译后重启验证 (`systemd-run` 方式在重建部分有记录)
