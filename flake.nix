@@ -94,6 +94,16 @@
               (final: prev: {
                 niri = pkgs-unstable.niri;
               })
+              # 修补 waydroid-net.sh 使用 nftables
+              # (kernel 7.0.9 linuxPackages_latest 缺少 ip_tables.ko)
+              (final: prev: {
+                waydroid = prev.waydroid.overrideAttrs (old: {
+                  preFixup = (old.preFixup or "") + ''
+                    substituteInPlace $out/lib/waydroid/data/scripts/.waydroid-net.sh-wrapped \
+                      --replace-fail 'LXC_USE_NFT="false"' 'LXC_USE_NFT="true"'
+                  '';
+                });
+              })
             ];
           })
 
