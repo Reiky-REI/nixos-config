@@ -1,0 +1,10 @@
+# 复盘: opencode 默认模型改为 deepseek-v4-flash + Nix 管理化
+
+## 改动
+- `opencode.json`: `model` → `deepseek/deepseek-v4-flash`，provider 新增 `deepseek-v4-flash` 模型条目
+- `lib/opencode-config.nix`: 新增 `rootModel` 导出
+- `.agents/config/generate-opencode.sh`: 读取 `rootModel` 并在 `patch_json` 中写入 model 字段
+
+## 效果
+- `just generate-opencode` 现在同时同步 `instructions` + `model`，不再会被手写改动回退
+- 默认模型统一入口在 Nix 侧（`lib/opencode-config.nix`）

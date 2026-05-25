@@ -10,6 +10,7 @@ let
     "../../.agents/knowledge/INDEX.md"
     "../../.agents/knowledge/conventions.md"
   ];
+  rootModel = "deepseek/deepseek-v4-flash";
 in {
-  inherit rootInstructions hostInstructions;
+  inherit rootInstructions hostInstructions rootModel;
 }
