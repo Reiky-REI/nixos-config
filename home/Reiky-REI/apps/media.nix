@@ -3,7 +3,7 @@
     vlc
     youtube-music
     spotify
-    netease-cloud-music-gtk
+    splayer
   ];
 
   programs.mpv.enable = true;
