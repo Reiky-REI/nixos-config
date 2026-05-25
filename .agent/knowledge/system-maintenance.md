@@ -22,11 +22,11 @@ flake.nix
 |------|------|--------|----------|
 | `modules/common/` | 全局基础 | nix settings, timezone, i18n, fonts, zsh, sudo | 桌面策略, 硬件驱动 |
 | `modules/hardware/` | 硬件策略 | microcode, GPU, bluetooth, intel-media-driver, firmware | 软件包, 服务 |
-| `modules/desktop/` | 桌面基础 | hyprland/niri 系统启用, ly DM, xwayland, steam, fcitx5 配置 | 用户态 WM 配置文件 |
+| `modules/desktop/` | 桌面基础 | hyprland/niri 系统启用, ly DM, xwayland, steam, fcitx5 配置, 通知, idle | 用户态 WM 配置文件 |
 | `modules/networking/` | 网络 | NetworkManager, 代理, 防火墙, SSH, clash | 浏览器, 应用 |
-| `modules/services/` | 系统服务 | pipewire, mpd, flatpak, CUPS, udisks2, timesyncd, 电源管理 | 用户交互应用 |
+| `modules/services/` | 系统服务 | pipewire, mpd, flatpak, CUPS, udisks2, timesyncd, 电源管理, polkit | 用户交互应用 |
 | `modules/development/` | 开发工具链 | wine, winetricks, CUDA | 编辑器 (放 home) |
-| `home/Reiky-REI/` | 用户态 | 应用, shell, WM 配置, 主题, 壁纸, 终端工具 | daemon, 内核参数 |
+| `home/Reiky-REI/` | 用户态 | `desktop/` WM 配置, `apps/` GUI 应用, `tools/` CLI 工具, `editors/`, `dev/`, shell, terminal, music | daemon, 内核参数 |
 | `secrets/` | 加密密钥 | agenix 加密文件 | — |
 
 ## 3. 分层决策规则
@@ -56,13 +56,15 @@ daemon / 后台长期运行  → modules/services/
 | 硬件 | `hosts/MEOW/hardware.nix`, `modules/hardware/default.nix` |
 | 输入法 (fcitx5) | `modules/desktop/fcitx5/fcitx5.nix` |
 | Hyprland 系统启用 | `modules/desktop/default.nix` |
-| Hyprland 用户配置 | `home/Reiky-REI/hyprland/` |
-| Niri 配置 | `home/Reiky-REI/niri/` |
+| Hyprland 用户配置 | `home/Reiky-REI/desktop/hyprland/` |
+| Niri 配置 | `home/Reiky-REI/desktop/niri/` |
 | Shell (zsh) | `home/Reiky-REI/shell/zsh.nix` |
 | 终端 | `home/Reiky-REI/terminal/{kitty,alacritty}.nix` |
-| 应用 | `home/Reiky-REI/programs/app.nix` |
-| 开发工具 | `home/Reiky-REI/programs/development/dev.nix` |
-| 主题 | `home/Reiky-REI/programs/tool.nix` (bat/fzf/btop/cava 被注释) |
+| 应用 | `home/Reiky-REI/apps/{browser,communication,media,office}.nix` |
+| CLI 工具 | `home/Reiky-REI/tools/` |
+| 编辑器 | `home/Reiky-REI/editors/neovim.nix` |
+| 开发工具 | `home/Reiky-REI/dev/` |
+| 桌面组件 (rofi/wallpaper/rofi) | `home/Reiky-REI/desktop/` |
 
 ## 5. 已知问题 & 注意事项
 
@@ -84,11 +86,27 @@ daemon / 后台长期运行  → modules/services/
 - 首次 switch 后 mpd 可能报 `Address already in use`
 - 解决: `sudo killall mpd && sudo systemctl start mpd`
 
-### 5.4 拼写错误 (上游遗留)
-- `modules/hardware/gpu/nvidia.nix`: `videoDirvers` (应为 `videoDrivers`), `grephics` (应为 `graphics`)
-- `modules/hardware/gpu/cuda.nix`: `cudaa_nvcc` (应为 `cuda_nvcc`)
+### 5.4 已知内核补丁
+MediaTek MT7922 蓝牙 `hci0: Failed to send wmt func ctrl (-22)` 错误。
+- **根因**: 内核 commit `634a4408c061` 严格校验 WMT 事件包长度, MT7922 固件合法发送短包
+- **修复**: 打上游 commit `e3ac0d9f1a20` 等价补丁 (6.12.91+ / 7.1-rc1+)
+- **当前**: `patches/btmtk-wmt-fix.patch` 已打过, 待 nixpkgs 更新到含修复的内核后移除
+- **加速编译**: `performance` governor + 停 `power-profiles-daemon` + `systemd-run` 避开超时
 
-### 5.5 代理与网络
+### 5.5 已知排障列表
+
+| 问题 | 根因 | 修复 |
+|------|------|------|
+| Niri 配置失效, spawn-at-startup 全不执行 | Niri 26.04 不支持 submap, KDL 解析失败 | 用 `niri validate` 验证; 不用 submap |
+| swaync/swayidle 移到 NixOS modules 报不存在 | 它们是 HM 选项, NixOS 没有 | 放在 `home/default.nix` |
+| fcitx5 `"Behavior/OverrideEnabled"` 不存在 | fcitx5 NixOS module 的 settings 类型严格 | 只放预定义的 key |
+| `linuxPackages_lts` 不存在 | nixpkgs 25.11 移除了 | 用 `linuxPackages_6_12` 或具体版本 |
+| `nodejs_23` 不存在 | 只有 nodejs_22 | 用 `nodejs` |
+| tmux `better-mousemode` 不存在 | nixpkgs 移除 | 删除该 plugin |
+| vim `settings.clipboard`/`cursorcolumn` 不存在 | HM 25.11 严格类型 | 全部移入 `extraConfig` |
+| `luajit` + `lua` 的 `luaconf.h` 冲突 | 两个包提供同文件 | 删 `luajit` |
+
+### 5.6 代理与网络
 - 代理: `http://127.0.0.1:7897`
 - GitHub token: `.agent/config/token` (gitignore 保护)
 - 镜像: TUNA, USTC
@@ -101,8 +119,12 @@ daemon / 后台长期运行  → modules/services/
 # 验证 (不切换)
 sudo .agent/config/rebuild.sh dry-activate
 
-# 切换
+# 切换 (静默, 后台编译)
 sudo .agent/config/rebuild.sh switch
+
+# 切换 + 显示编译进度 (长时间编译时加 -v 可以看到具体在编哪个包)
+sudo .agent/config/rebuild.sh switch -v
+sudo .agent/config/rebuild.sh switch --verbose
 
 # 手动
 sudo env http_proxy=http://127.0.0.1:7897 https_proxy=http://127.0.0.1:7897 \
@@ -110,6 +132,23 @@ sudo env http_proxy=http://127.0.0.1:7897 https_proxy=http://127.0.0.1:7897 \
   nixos-rebuild switch --flake /etc/nixos#NixMEOW \
   --option substituters "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store https://mirrors.ustc.edu.cn/nix-channels/store https://cache.nixos.org" \
   --option access-tokens "github.com=$(cat .agent/config/token)"
+```
+
+### 查看编译状态 (switch 正在跑时)
+```bash
+# 查看 nix 进程是否存活
+ps aux | grep nix.*build
+
+# 查当前 generation, 出现新 gen 即构建完毕
+sudo nix-env -p /nix/var/nix/profiles/system --list-generations | tail -3
+
+# 查看 build 日志 (如之前的编译已结束)
+nix log /nix/store/*-nixos-system-NixMEOW*.drv 2>/dev/null | tail
+
+# 加速编译 (大包如 kernel/NVIDIA 模块时):
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+echo none | sudo tee /sys/block/nvme*/queue/scheduler
+sudo sysctl -w vm.swappiness=10
 ```
 
 ### 新增系统模块
@@ -148,3 +187,29 @@ nixos-option <option.path>
 - 系统层只管 NixOS options，home-manager options 放 home 层
 - git commit 用中文描述
 - 改动后先 `dry-activate`，通过再 `switch`
+
+## 8. Session 日志
+
+### 2026-05-24 — Home 重组 + 蓝牙修复
+
+**分支**: `feat/home-reorg-bluez-binds`
+**Commits**: `72c0edd`, `1f86ffb`, (待提交 btmtk 补丁)
+
+**做了什么**:
+1. Home 目录重组: 新结构 `desktop/apps/tools/editors/dev`
+2. NVIDIA PRIME 卸载: RTX 4070 独显接入, `nvidia-offload` 调用
+3. Hyprland submap: Super+Q → Q/Enter 确认, Esc/C 取消
+4. Fcitx5: 左右 Shift 切换中英文
+5. Clash: 从 XDG autostart 改为 WM 层启动 (niri + hyprland)
+6. 蓝牙 MT7922: 诊断 `-22` 错误, 打内核补丁 `patches/btmtk-wmt-fix.patch`
+
+**关键踩坑**:
+- Niri 不支持 submap, 不要试图用 (26.04 及之前)
+- home-manager 选项 (swaync/swayidle/polkit-gnome) 不能移到 NixOS modules
+- fcitx5 NixOS module 的 settings 类型严格, 只接受预定义 key
+- `linuxPackages_lts` 在 nixpkgs 25.11 不存在
+- `kernelPatches` 导致内核全量重编 (~2 小时), 用 `systemd-run` 避超时
+- 构建时需 `performance` governor 加速, 停 `power-profiles-daemon`
+- 补丁文件需 `git add` 才能被 flake 识别
+
+**待验证**: 蓝牙补丁内核重启后 `hciconfig hci0 UP`
