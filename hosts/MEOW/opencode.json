@@ -1,0 +1,27 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "lsp": {
+    "nixd": {
+      "command": ["nixd"],
+      "extensions": [".nix"],
+      "initialization": {
+        "formatting": {
+          "command": ["nixfmt"]
+        },
+        "options": {
+          "nixos": {
+            "expr": "(builtins.getFlake \"/etc/nixos\").nixosConfigurations.NixMEOW.options"
+          }
+        }
+      }
+    },
+    "bash": {
+      "command": ["bash-language-server", "start"],
+      "extensions": [".sh", ".bash"]
+    },
+    "yaml-ls": {
+      "command": ["yaml-language-server", "--stdio"],
+      "extensions": [".yaml", ".yml"]
+    }
+  }
+}
