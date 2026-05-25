@@ -8,6 +8,15 @@
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
+  nix.settings.substituters = [
+    "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+    "https://mirrors.ustc.edu.cn/nix-channels/store"
+    "https://cache.nixos.org"
+  ];
+  nix.settings.trusted-public-keys = [
+    "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
+  ];
+
   # timezone and local
   time.timeZone = "Asia/Shanghai";
   # Select internationalisation properties.
@@ -47,6 +56,9 @@
       };
     };
   };
+
+  nix.optimise.automatic = true;
+  nix.optimise.dates = [ "04:00" ];
 
   # nix gc
   nix.gc = {

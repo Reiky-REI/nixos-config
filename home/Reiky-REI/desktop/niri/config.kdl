@@ -6,6 +6,7 @@ spawn-at-startup "swww-daemon"
 spawn-at-startup "fcitx5"
 spawn-at-startup "nm-applet"
 spawn-at-startup "clash-verge"
+spawn-at-startup "waydroid" "session" "start"
 spawn-sh-at-startup "sh -c 'wayvnc 0.0.0.0'"
 
 environment {  

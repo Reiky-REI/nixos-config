@@ -5,6 +5,7 @@
 }: {
   imports = [
     ./gpu
+    ./bluetooth/btmtk-fix.nix
   ];
 
   hardware.bluetooth.enable = true;

@@ -11,12 +11,6 @@
 
   programs.niri.enable = true;
 
-  programs.hyprland = {
-    enable = true;
-    withUWSM = true;
-    xwayland.enable = true;
-  };
-
   services.displayManager.ly.enable = true;
 
   services.xserver.enable = true;
