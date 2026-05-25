@@ -135,20 +135,50 @@ sudo env http_proxy=http://127.0.0.1:7897 https_proxy=http://127.0.0.1:7897 \
 ```
 
 ### 查看编译状态 (switch 正在跑时)
-```bash
-# 查看 nix 进程是否存活
-ps aux | grep nix.*build
 
+#### 方法 A: systemd-run 后台跑 (推荐, 不超时)
+```bash
+# 启动
+sudo systemd-run --unit=nix-rebuild --description="NixOS rebuild" \
+  --same-dir --working-directory=/etc/nixos \
+  --setenv=http_proxy=http://127.0.0.1:7897 \
+  --setenv=https_proxy=http://127.0.0.1:7897 \
+  --setenv=NIX_ACCESS_TOKEN="$(sudo cat /etc/nixos/.agent/config/token)" \
+  nixos-rebuild switch --flake /etc/nixos#NixMEOW --print-build-logs \
+  --option substituters "..." \
+  --option access-tokens "github.com=$(sudo cat /etc/nixos/.agent/config/token)"
+
+# 看实时进度 (tail -f)
+journalctl -u nix-rebuild --no-pager -f
+
+# 看最近 N 行
+journalctl -u nix-rebuild --no-pager -n 20
+
+# 怎么看卡在哪:
+#   building 'kernel/drivers/bluetooth/btmtk.o' → 在编内核
+#   building 'nvidia-x11-580.142-7.0.9'       → 在编 NVIDIA 模块 (最慢)
+#   linking kernel vmlinux                     → 快结束了
+```
+
+#### 方法 B: 直接在终端跑 (简单, 但会超时)
+```bash
+sudo .agent/config/rebuild.sh switch -v
+```
+
+#### 检查通用的进度指标
+```bash
 # 查当前 generation, 出现新 gen 即构建完毕
 sudo nix-env -p /nix/var/nix/profiles/system --list-generations | tail -3
 
-# 查看 build 日志 (如之前的编译已结束)
+# 查看 build 日志 (构建已结束后)
 nix log /nix/store/*-nixos-system-NixMEOW*.drv 2>/dev/null | tail
 
 # 加速编译 (大包如 kernel/NVIDIA 模块时):
 echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+echo performance | sudo tee /sys/devices/system/cpu/cpu*/cpufreq/energy_performance_preference
 echo none | sudo tee /sys/block/nvme*/queue/scheduler
 sudo sysctl -w vm.swappiness=10
+sudo systemctl stop power-profiles-daemon
 ```
 
 ### 新增系统模块
