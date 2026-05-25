@@ -24,11 +24,17 @@ description: 安全管理 NixOS 配置，包括文件编辑、git 操作、nixos
 - 生成符合 Conventional Commits 的提交信息，格式：`nixos(config): 修改说明`
 - 提交前让用户确认变更内容
 
-## 5. 最终应用
-- 询问用户是否执行 `nixos-rebuild switch --flake .#<hostname>`
-- 提醒用户该操作会立即生效，建议在 dry-run 通过后进行
+## 5. 最终应用 ⚠️
+
+**🚨 此系统有 NVIDIA PRIME 混合显示！switch 会崩 compositor！**
+- `nixos-rebuild switch` 重启 `polkit.service` → compositor 失去 DRM master → 黑屏硬重启
+- **AI 不得主动执行 `switch`**
+- **AI 默认执行 `nixos-rebuild build`**，然后提示用户手动处理：
+  - 内核未变 → 用户自己 `sudo nixos-rebuild switch`
+  - 内核已变 → 用户应 `reboot`
+- 如果用户明确要求立即生效并接受风险，可例外
 
 ## 安全限制
-- **绝对不允许** 未经用户确认执行 `nixos-rebuild switch`
+- **绝对不允许** 未经用户确认执行 `nixos-rebuild switch`（即使确认，也需详细说明崩溃风险）
 - **绝对不允许** 直接删除 `/etc/nixos/` 下的文件
 - **绝对不允许** 执行 `git push --force` 到 main 分支

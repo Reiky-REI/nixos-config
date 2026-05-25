@@ -7,7 +7,7 @@
   ];
 
   boot.kernelParams = [ "ahci.mobile_lpm_policy=1" ];
-  boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelPackages = pkgs.linuxPackages;
 
   boot.extraModprobeConfig = ''
     options btusb enable_autosuspend=0 reset=1
