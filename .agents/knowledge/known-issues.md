@@ -37,6 +37,10 @@ catppuccin release-25.11 中以下子模块不可用，已全部注释：
 - vim `settings.*` 在 HM 25.11 中多数 key 不支持，应移入 `extraConfig`
 - `linuxPackages_lts` 在 nixpkgs 25.11 不存在 (改用 `linuxPackages_6_12` 或具体版本)
 
+## Flake eval: import 的文件需先 git add
+- flake eval/build 使用 git staging 中的源文件，未 `git add` 的新文件会报 `path does not exist`
+- 在 flake output 中 import 新文件时，必须先 stage (`git add`) 再 eval
+
 ## 代理与网络
 - 代理: `http://127.0.0.1:7897`
 - GitHub token: `.agents/config/token` (gitignore 保护)

@@ -60,7 +60,9 @@
       inherit system;
       config.allowUnfree = true;
     };
+    opencodeConfig = import ./lib/opencode-config.nix { flakeRoot = self; };
   in {
+    inherit opencodeConfig;
     nixosConfigurations = {
       NixMEOW = nixpkgs.lib.nixosSystem {
         inherit system;

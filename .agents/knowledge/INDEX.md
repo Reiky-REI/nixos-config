@@ -23,3 +23,4 @@
 | retros/2026-05-24-home-reorg | Home 重组 + 蓝牙 + 快捷键 + NVIDIA |
 | retros/2026-05-24-cleanup | 清理优化 + secrets 隔离 + gitignore |
 | retros/2026-05-25-opencode-merge | NixOpencodeMEOW 合并 — opencode 系统安装 + development 子目录化 |
+| retros/2026-05-25-opencode-instructions | opencode instructions Nix 自动管理 — lib + generate 脚本 + justfile |
