@@ -2,7 +2,7 @@
 # AI 专用 commit + push 脚本
 # 
 # 用 opencode[bot] 身份提交, bot token 推送
-# 写法:  .agent/config/commit.sh -m "type: 描述"
+# 写法:  .agents/config/commit.sh -m "type: 描述"
 #        .agent/config/commit.sh --amend          # 修正上次 AI 提交
 
 set -euo pipefail
