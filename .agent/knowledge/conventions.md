@@ -43,8 +43,8 @@
 - 涉及 kernel / systemd unit 的改动后建议 `systemctl reboot`
 
 ## AI Agent 工作流
-- 操作前先读 `.agent/knowledge/` 下的架构和约定文档
+- 操作前必读三份核心文档: `architecture.md` + `conventions.md` + `system-maintenance.md`
 - 改 Nix 配置前先验证选项是否存在: `nix eval` / 查 nixpkgs 源码
 - 修改 home-manager 选项前确认它是 HM 还是 NixOS 选项 (不要混用)
-- 每次 `rebuild switch` 完成后在 `.agent/knowledge/session-logs/` 写复盘日志
-- 日志模板见 `.agent/knowledge/_template.md`
+- 每次 `rebuild switch` 完成后, 将复盘日志追加到 `system-maintenance.md` 末尾的「Session 日志」章节
+- 常见坑和经验也写入 `system-maintenance.md` 的对应章节, 不要新建独立文件
