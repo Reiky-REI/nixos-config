@@ -46,6 +46,13 @@
         [ -f "$file" ] && source "$file"
       done
 
+      # === Claude Code + cc-switch 本地代理 ===
+      # env 由 cc-switch 管理（~/.claude/settings.json），这里只设代理地址
+      # cc-switch 本地代理处理 Anthropic bridge 验证，避免 "Not logged in"
+      export ANTHROPIC_BASE_URL=http://127.0.0.1:15721
+      export ANTHROPIC_AUTH_TOKEN=proxy-placeholder
+      export CLAUDE_CODE_EFFORT_LEVEL=max
+
       # === 代理设置 ===
       export http_proxy=http://127.0.0.1:7897
       export https_proxy=http://127.0.0.1:7897

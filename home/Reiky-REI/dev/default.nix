@@ -2,6 +2,10 @@
   pkgs,
   ...
 }: {
+  imports = [
+    ./claude-code.nix
+  ];
+
   home.packages = with pkgs; [
     typst
     nodejs
