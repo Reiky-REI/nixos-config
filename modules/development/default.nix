@@ -1,9 +1,6 @@
 {
-  pkgs,
-  ...
-}: {
-  environment.systemPackages = with pkgs; [
-    wineWowPackages.stable
-    winetricks
+  imports = [
+    ./wine
+    ./opencode
   ];
 }
