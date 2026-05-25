@@ -20,7 +20,7 @@
 2. 对照当前系统状态，写**真实可用的代码**
 3. 通过 `nixos-rebuild dry-build` 验证
 4. 通过 `bash /etc/nixos/.agent/blueprint/verify.sh <phase>` 验证
-5. **每完成一个步骤，立即写记录到 `.agent/knowledge/session-logs/`**（见下方「记录铁律」）
+5. **每完成一个步骤，立即写记录到 `.agent/knowledge/`**（见下方「记录铁律」）
 
 **千万不要**：
 - 直接复制粘贴伪代码到 `/etc/nixos/`
@@ -39,7 +39,7 @@
 
 **每个步骤完成后必须写记录**。不是建议，是强制。
 
-记录位置: `.agent/knowledge/session-logs/`
+记录位置: `.agent/knowledge/`
 
 文件名格式: `步骤N-简短描述.md`
 
@@ -92,7 +92,7 @@
 
 **延续会话指南**：
 - 每次新会话开始：先跑 `verify.sh <phase>` 确认当前阶段过了哪些验证
-- 读完 `.agent/knowledge/session-logs/` 最近 5 篇记录——了解前面的 AI 做了什么、踩了什么坑
+- 读完 `.agent/knowledge/` 下的系统维护文档——了解前面的 AI 工作记录
 - 如果上次会话未完成某阶段：跳过已验证步骤，从未通过那步继续
 - 如果间隔很久：`nix flake update` + 重跑 `verify.sh <phase>` 确保依赖不过时
 
@@ -483,7 +483,7 @@ pkgs.python3Packages.buildPythonPackage rec {
 前提: 步骤 6 完成
 ```
 
-用 opencode + file-organizer skill 在真实 Downloads 上先 dry-run，确认后再实际运行。完成后写复盘到 `.agent/knowledge/session-logs/`。
+用 opencode + file-organizer skill 在真实 Downloads 上先 dry-run，确认后再实际运行。完成后写复盘到 `.agent/knowledge/`。
 
 ---
 
@@ -580,7 +580,7 @@ bash /etc/nixos/.agent/blueprint/verify.sh phase2
 ```
 
 **设计意图** [伪]:
-在 rebuild.sh 成功后追加 knowledge-recorder 调用，基于 git diff 和 activity.jsonl，按 `_template.md` 格式生成复盘，写入 `session-logs/`。
+在 rebuild.sh 成功后追加 knowledge-recorder 调用，基于 git diff 和 activity.jsonl，按 `system-maintenance.md` 中的《知识记录模板》章节格式生成复盘，写入 `.agent/knowledge/`。
 
 ---
 
@@ -598,7 +598,7 @@ bash /etc/nixos/.agent/blueprint/verify.sh phase2
 ### 步骤 13: gno 知识库索引
 
 ```
-目标: 让 AI 能搜索已有的 troubleshooting
+目标: 让 AI 能搜索已有的经验记录（整合在 system-maintenance.md 中）
 前提: gno 已集成
 ```
 
@@ -698,8 +698,8 @@ bash /etc/nixos/.agent/blueprint/verify.sh phase6
 - [ ] git reflog 显示本次 checkpoint 提交
 
 ### 文档
-- [ ] .agent/knowledge/session-logs/ 有本次复盘
-- [ ] 新的 troubleshooting 条目已写入
+- [ ] .agent/knowledge/ 有本次复盘
+- [ ] 伪代码中验证通过的部分标记为 [已验证]
 - [ ] 伪代码中验证通过的部分标记为 [已验证]
 ```
 
@@ -730,9 +730,9 @@ openclaw 占用资源过多
 
 1. 读取 .agent/CONSTITUTION.md（如有）
    → 明确今天不能违反哪些原则
-2. 读取 .agent/knowledge/architecture.md
-   → 了解系统结构
-3. 读取 .agent/knowledge/session-logs/ 最近 5 篇复盘
+2. 读取 .agent/knowledge/system-maintenance.md
+   → 了解系统结构、约定、已知问题、复盘模板
+3. 读取 .agent/knowledge/ 下的经验记录
    → 吸取之前 AI 的教训——这是跨会话知识传递的唯一桥梁
 4. git log --oneline -10 && git tag -l "step-*"
    → 确认工作区状态、最新变更、已完成步骤
@@ -741,7 +741,7 @@ openclaw 占用资源过多
 6. 看本文档对应阶段的步骤
    → 从上次未完成的那一步继续
 7. 开始工作
-8. 每完成一步: git commit + 写 session-logs
+8. 每完成一步: git commit + 写知识记录
 9. 阶段结束: git tag "step-N-done" + 写完整复盘
 ```
 

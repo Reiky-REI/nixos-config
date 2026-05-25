@@ -48,9 +48,7 @@
 - ✅ Flatpak
 
 ### 知识管理
-- ✅ `.agent/knowledge/` AI 知识库
-- ✅ `.agent/knowledge/session-logs/` 复盘记录
-- ✅ `.agent/knowledge/troubleshooting/` 解决方案库
+- ✅ `system-maintenance.md` AI 系统维护手册（含架构、约定、排障、复盘模板）
 - ✅ `.agent/knowledge/FAQ.md` 常见问题索引
 - ✅ `.agent/blueprint/` 蓝图设计文档
 - ✅ `.agent/STARTUP.md` AI 启动清单
@@ -128,17 +126,12 @@
 │   ├── env.sh              环境变量
 │   └── token              GitHub token
 ├── knowledge/
-│   ├── architecture.md     仓库架构
-│   ├── conventions.md      编码约定
-│   ├── system-maintenance.md 系统维护
+│   ├── system-maintenance.md 系统维护（架构·约定·复盘模板·排障）
 │   ├── secrets.md          密钥管理
 │   ├── current-status.md   本文档 ←
 │   ├── boundaries.md       AI 权限边界
 │   ├── FAQ.md              常见问题
-│   ├── _template.md        复盘模板
 │   ├── examples/           验证过的代码
-│   ├── session-logs/       复盘记录
-│   └── troubleshooting/    解决方案库
 ├── plans/                  实施计划
 └── sessions/               会话记录
 ```
