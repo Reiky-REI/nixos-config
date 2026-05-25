@@ -122,8 +122,8 @@ touch home/Reiky-REI/<module-name>/default.nix
 
 ```bash
 # 使用 .agent/config/rebuild.sh (自动设置 proxy + GitHub token)
-sudo .agent/config/rebuild.sh         # dry-activate (默认)
-sudo .agent/config/rebuild.sh switch  # 实际切换
+sudo .agents/config/rebuild.sh         # dry-activate (默认)
+sudo .agents/config/rebuild.sh switch  # 实际切换
 
 # 或手动执行
 export NIX_ACCESS_TOKEN=ghp_...
