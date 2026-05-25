@@ -25,3 +25,5 @@
 ## Git 提交
 - 提交信息语言不限，与仓库历史风格一致即可
 - 每次验证通过后提交一个步骤
+- **人类**提交直接用 `git commit`
+- **AI 提交**使用 `.agent/config/commit.sh`（自动用 bot 身份 + bot token push）
