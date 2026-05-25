@@ -8,11 +8,11 @@
 ## ✅ AI 可以做
 
 ### 文件操作
-- 读 `.agent/` 目录下的所有文档
-- 写 `.agent/knowledge/session-logs/`（跨会话记录）
-- 写 `.agent/knowledge/troubleshooting/`（新增解决方案）
-- 写 `.agent/knowledge/examples/`（保存验证过的代码）
-- 写 `.agent/knowledge/FAQ.md`（追加新的问题和解决方案）
+- 读 `.agents/` 目录下的所有文档
+- 写 `.agents/knowledge/retros/`（跨会话记录）
+- 写 `.agents/knowledge/known-issues.md`（新增解决方案）
+- 写 `.agents/knowledge/`（保存验证过的代码）
+- 写 `.agents/knowledge/known-issues.md`（追加新的问题和解决方案）
 - 写 `~/.config/opencode/skills/`（新增 skill）
 - 读 `/etc/nixos/` 下的所有 .nix 文件
 - 写 `/etc/nixos/` 下的 .nix 文件（需 git branch）
@@ -24,7 +24,7 @@
 
 ### 开发操作
 - 在自己的 home 下编译/运行代码
-- 写 derivation 到 `.agent/tools/`
+- 写 derivation 到 `.agents/tools/`
 - Nix eval 验证表达式
 
 ---
@@ -38,7 +38,7 @@
 | 读/写 `~/.gnupg/` | GPG 私钥泄露 |
 | 读/写 `/run/agenix/` | 解密后的密钥绝不暴露 |
 | 读 `~/Documents/private/` | 用户隐私数据 |
-| 将密钥写入 session-logs 或 git commit | 永久泄露 |
+| 将密钥写入 retros 或 git commit | 永久泄露 |
 
 ### 系统权限
 | 禁止操作 | 原因 |

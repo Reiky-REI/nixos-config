@@ -10,7 +10,7 @@
 ### `error: flake 'github:xxx' not found`
 **原因**: flake input 不可达（网络问题或 repo 重命名）  
 **解决**: 检查 clash 代理是否运行 → `curl -x http://127.0.0.1:7897 https://github.com`  
-**相关**: `.agent/config/rebuild.sh` 自动注入代理
+**相关**: `.agents/config/rebuild.sh` 自动注入代理
 
 ### `error: hash mismatch in file ...`
 **原因**: 上游包更新了但 hash 没跟上  
@@ -79,7 +79,7 @@ ls -la /home/ai-agent  # 确认权限
 
 ### push 被拒绝
 **原因**: 使用 HTTP 而非 SSH，需要 token  
-**解决**: 检查 `.agent/config/token` 中的 GitHub token 是否有效。
+**解决**: 检查 `.agents/config/token` 中的 GitHub token 是否有效。
 `git remote set-url origin git@github.com:Reiky-REI/nixos-config.git`
 
 ### 分支混乱

@@ -136,7 +136,7 @@ case "$PHASE" in
     echo "═══════════════════════════════════════════"
     
     verify P4.1 phase4 "CONSTITUTION.md exists and has constraints" \
-      'test -f /etc/nixos/.agent/CONSTITUTION.md && grep -q "不可" /etc/nixos/.agent/CONSTITUTION.md' 2
+      'test -f /etc/nixos/.agents/CONSTITUTION.md && grep -q "不可" /etc/nixos/.agents/CONSTITUTION.md' 2
     
     verify P4.2 phase4 "sentinel log is writable by sentinel" \
       'sudo -u ai-sentinel test -w /var/lib/ai-sentinel/sentinel.jsonl 2>/dev/null || \
@@ -165,10 +165,9 @@ case "$PHASE" in
     echo "═══════════════════════════════════════════"
     
     verify P5.1 phase5 "session recap template exists" \
-      'test -f /etc/nixos/.agent/knowledge/_template.md'
     
     verify P5.2 phase5 "at least one session recap exists" \
-      'test -n "$(find /etc/nixos/.agent/knowledge/session-logs/ -name "*.md" 2>/dev/null)"' || true
+      'test -n "$(find /etc/nixos/.agents/knowledge/retros/ -name "*.md" 2>/dev/null)"' || true
     
     verify P5.3 phase5 "community API reachable" \
       'curl -s --connect-timeout 10 -x http://127.0.0.1:7897 \
@@ -189,7 +188,6 @@ case "$PHASE" in
     echo "═══════════════════════════════════════════"
     
     verify P6.1 phase6 "learn directory structure exists" \
-      'test -d ~/.config/ai-companion/learn/subjects && test -f ~/.config/ai-companion/learn/subjects/_template.md' || true
     
     verify P6.2 phase6 "learn companion skill exists" \
       'test -f ~/.config/opencode/skills/learn-companion/SKILL.md 2>/dev/null || \

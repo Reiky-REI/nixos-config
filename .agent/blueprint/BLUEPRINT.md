@@ -418,7 +418,6 @@ Reiky-REI (人类)
 |-------|---------|---------|------|
 | usage-analyst | timer weekly | 只能调参，不改变结构 | 更新 organize-rules.toml |
 | community-opportunist | daily 搜集 + weekly 提案 | 外部信号 → pulse 过滤 → human → 提案 | 提案 PR |
-| knowledge-recorder | 每次 rebuild 后 + 会话结束后 | 按 _template.md 格式 | session recap + 知识更新 |
 
 **每个 Skill 的元结构**:
 ```yaml
@@ -487,12 +486,11 @@ Layer 0: 不可触碰 (CONSTITUTION.md)
   ├── AI 在会话结束后运行 knowledge-recorder
   ├── 分析 transcript → 提取关键决策
   ├── 对照 git diff → 关联代码变更
-  └── 按 _template.md 格式生成复盘
 
 第 3 级: 知识沉淀 (Curated) — 自动
   ├── gno FTS5 索引所有知识库
   ├── Honcho Dream 管道（可选）→ 发现"surprise"模式
-  ├── 匹配已有的 troubleshooting/*.md
+  ├── 匹配已有的 known-issues.md
   └── 更新或新增知识点
 
 第 4 级: 技能导出 (Executable) — 需人类审查
@@ -633,7 +631,7 @@ deny:    ~/.ssh/**      ~/.gnupg/**      ~/Documents/private/**
 每个目录可以有自己的 `.ai-rules.toml`，告诉 AI 这个目录的特性。  
 AI 在目录中工作时，先读这个配置；也可以在目录中积累经验后更新它。
 
-相当于每个目录里有一个小的 `.agent/`。
+相当于每个目录里有一个小的 `.agents/`。
 
 ```toml
 # ~/Downloads/.ai-rules.toml
@@ -793,7 +791,6 @@ MCP / 感知:
   flake.nix             [修改]  新增 llm-agents + mcp-nixos inputs + 5 个用户+组定义
   modules/services/ai/  [新建]  default.nix, ollama.nix, timers.nix
   home/Reiky-REI/ai/    [新建]  default.nix, skills/default.nix, mcp.nix, companion-dirs.nix
-  ~/.config/ai-companion/  [新建]  learn/subjects/_template.md + files/
   新增 5 个 Linux 用户定义
 
 验证:

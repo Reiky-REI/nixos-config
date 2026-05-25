@@ -10,8 +10,8 @@
 ### 第 1 步：建立约束意识
 
 ```bash
-cat /etc/nixos/.agent/CONSTITUTION.md 2>/dev/null || echo "宪法尚未创建——这是你的首要任务"
-cat /etc/nixos/.agent/knowledge/boundaries.md
+cat /etc/nixos/.agents/CONSTITUTION.md 2>/dev/null || echo "宪法尚未创建——这是你的首要任务"
+cat /etc/nixos/.agents/knowledge/boundaries.md
 ```
 - [ ] 明确今天不能违反哪些原则
 - [ ] 明确自己能做什么、绝对不能做什么
@@ -40,8 +40,8 @@ bash /etc/nixos/.agent/blueprint/verify.sh phase1  # 改为当前阶段
 ### 第 4 步：吸取前人教训（最关键）
 
 ```bash
-ls -lt /etc/nixos/.agent/knowledge/ | head -10
-head -100 /etc/nixos/.agent/knowledge/system-maintenance.md | tail -60
+ls -lt /etc/nixos/.agents/knowledge/ | head -10
+head -100 /etc/nixos/.agents/knowledge/INDEX.md | tail -60
 ```
 - [ ] 读完最近 **至少 3 篇** 复盘
 - [ ] 特别关注 🔴 踩过的坑和 ⚠️ 未解决问题
@@ -50,7 +50,7 @@ head -100 /etc/nixos/.agent/knowledge/system-maintenance.md | tail -60
 ### 第 5 步：了解系统拓扑
 
 ```bash
-cat /etc/nixos/.agent/knowledge/current-status.md
+cat /etc/nixos/.agents/knowledge/current-status.md
 ```
 - [ ] 知道系统已有哪些功能，AI 不应重复
 - [ ] 知道当前阶段优先级
@@ -58,7 +58,7 @@ cat /etc/nixos/.agent/knowledge/current-status.md
 ### 第 6 步：检查待办
 
 ```bash
-grep -r "TODO\|FIXME\|⚠️" /etc/nixos/.agent/knowledge/ --include="*.md" -l 2>/dev/null
+grep -r "TODO\|FIXME\|⚠️" /etc/nixos/.agents/knowledge/ --include="*.md" -l 2>/dev/null
 ```
 - [ ] 知道了哪些问题等着解决
 
@@ -69,8 +69,8 @@ grep -r "TODO\|FIXME\|⚠️" /etc/nixos/.agent/knowledge/ --include="*.md" -l 2
 ### 第 7 步：记录本次工作
 
 ```bash
-# 写入知识记录，格式见 system-maintenance.md 中的《知识记录模板》
-vim /etc/nixos/.agent/knowledge/步骤N-简短描述.md
+# 写入知识记录，格式见 INDEX.md 中的《知识记录模板》
+vim /etc/nixos/.agents/knowledge/步骤N-简短描述.md
 ```
 - [ ] 写了「做了什么」「文件列表」「构建结果」
 - [ ] 写了 🔴 踩过的坑（如果有）
@@ -81,7 +81,7 @@ vim /etc/nixos/.agent/knowledge/步骤N-简短描述.md
 
 ```bash
 cd /etc/nixos
-git add .agent/knowledge/ .agent/knowledge/examples/  # 记录和经验
+git add .agents/knowledge/ .agents/knowledge/  # 记录和经验
 git add -p  # 选择性地 stage 构建改动
 git commit -m "nixos(<scope>): <描述>  Ref: step-<N>"
 git tag "step-<N>-done" -m "Phase X Step N: 验证通过"
@@ -98,7 +98,7 @@ git tag "step-<N>-done" -m "Phase X Step N: 验证通过"
 |---------|-------|
 | CONSTITUTION.md 不存在 | **停止构建。先创建宪法。** |
 | 找不到知识记录 | 你是第一个来构建的 AI——从头开始 |
-| `system-maintenance.md` 中知识记录模板不可用 | 先读 BLUEPRINT.md 了解复盘格式 |
+| `INDEX.md` 中知识记录模板不可用 | 先读 BLUEPRINT.md 了解复盘格式 |
 | verify.sh 完全没跑过 | 从 Phase 1 Step 1 开始 |
 | 间隔了 30 天以上 | 先 `nix flake update` + 重跑当前 phase 的 verify.sh |
 | git 工作区不干净 | 先 stash 或 commit，不要带着脏状态开始 |

@@ -33,7 +33,7 @@
 
 ### 密钥管理
 - ✅ agenix (age 加密, ai_api_key_REIKY_REI)
-- ✅ GitHub token (`.agent/config/token`)
+- ✅ GitHub token (`.agents/config/token`)
 
 ### 用户态
 - ✅ zsh + powerlevel10k
@@ -48,15 +48,15 @@
 - ✅ Flatpak
 
 ### 知识管理
-- ✅ `system-maintenance.md` AI 系统维护手册（含架构、约定、排障、复盘模板）
-- ✅ `.agent/knowledge/FAQ.md` 常见问题索引
+- ✅ `INDEX.md` AI 系统维护手册（含架构、约定、排障、复盘模板）
+- ✅ `.agents/knowledge/known-issues.md` 常见问题索引
 - ✅ `.agent/blueprint/` 蓝图设计文档
-- ✅ `.agent/STARTUP.md` AI 启动清单
-- ✅ `.agent/knowledge/boundaries.md` AI 权限边界
+- ✅ `.agents/STARTUP.md` AI 启动清单
+- ✅ `.agents/knowledge/boundaries.md` AI 权限边界
 
 ### 自动化
-- ✅ `.agent/config/rebuild.sh` 一键 rebuild
-- ✅ `.agent/config/env.sh` 环境变量注入
+- ✅ `.agents/config/rebuild.sh` 一键 rebuild
+- ✅ `.agents/config/env.sh` 环境变量注入
 
 ---
 
@@ -113,7 +113,7 @@
 /etc/nixos/home/Reiky-REI/dev/               开发工具
 /etc/nixos/home/Reiky-REI/tools/             CLI 工具
 
-.agent/
+.agents/
 ├── STARTUP.md             AI 启动清单 🔴必读
 ├── CONSTITUTION.md        AI 宪法(待创建
 ├── blueprint/             蓝图设计
@@ -126,11 +126,11 @@
 │   ├── env.sh              环境变量
 │   └── token              GitHub token
 ├── knowledge/
-│   ├── system-maintenance.md 系统维护（架构·约定·复盘模板·排障）
+│   ├── INDEX.md 系统维护（架构·约定·复盘模板·排障）
 │   ├── secrets.md          密钥管理
 │   ├── current-status.md   本文档 ←
 │   ├── boundaries.md       AI 权限边界
-│   ├── FAQ.md              常见问题
+│   ├── known-issues.md              常见问题
 │   ├── examples/           验证过的代码
 ├── plans/                  实施计划
 └── sessions/               会话记录
@@ -149,5 +149,5 @@ WM:        Niri
 系统包管理: nixpkgs 25.11 (flake locked)
 用户包管理: home-manager
 密钥管理:   agenix
-构建命令:   sudo .agent/config/rebuild.sh switch
+构建命令:   sudo .agents/config/rebuild.sh switch
 ```

@@ -258,8 +258,8 @@ done
 ### P4.1 CONSTITUTION.md 存在
 ```bash
 # 验证命令
-test -f /etc/nixos/.agent/CONSTITUTION.md && \
-grep -q "不可" /etc/nixos/.agent/CONSTITUTION.md
+test -f /etc/nixos/.agents/CONSTITUTION.md && \
+grep -q "不可" /etc/nixos/.agents/CONSTITUTION.md
 ```
 - **PASS**: 宪法文件存在且包含"不可"约束
 - **FAIL (级别 2 — 严重)**: 缺少宪法约束，停止后续 Phase
@@ -329,7 +329,6 @@ sudo -u ai-agent nixos-rebuild switch --flake /etc/nixos 2>&1 | grep -q "not all
 ### P5.1 复盘模板存在
 ```bash
 # 验证命令
-test -f /etc/nixos/.agent/knowledge/_template.md
 ```
 - **PASS**: 模板可用
 - **FAIL (级别 1)**: 模板缺失
@@ -345,7 +344,7 @@ git -C /etc/nixos status --porcelain | wc -l
 ### P5.3 复盘自动生成功能可用
 ```bash
 # 验证命令 (SKIP — 需要实际 rebuild 后运行)
-test -f /etc/nixos/.agent/knowledge/session-logs/*.md 2>/dev/null
+test -f /etc/nixos/.agents/knowledge/retros/*.md 2>/dev/null
 ```
 - **PASS**: 至少有一篇复盘
 - **SKIP**: 无复盘时不阻断
@@ -384,7 +383,6 @@ grep -q "CONSTITUTION.md" /etc/nixos/home/Reiky-REI/ai/skills/usage-analyst.nix 
 ```bash
 # 验证命令
 test -d ~/.config/ai-companion/learn/subjects && \
-test -f ~/.config/ai-companion/learn/subjects/_template.md
 ```
 - **PASS**: 目录和模板就位
 - **FAIL (级别 1)**: 目录未创建
@@ -433,7 +431,7 @@ nixos-rebuild build --flake /etc/nixos 2>&1 | grep -v "warning"
 ### C.4 CONSTITUTION.md 未被修改
 ```bash
 # 验证命令
-sha256sum /etc/nixos/.agent/CONSTITUTION.md | diff - <(echo "expected-hash") 2>/dev/null || echo "check manually"
+sha256sum /etc/nixos/.agents/CONSTITUTION.md | diff - <(echo "expected-hash") 2>/dev/null || echo "check manually"
 ```
 - **PASS**: hash 未变（首次运行时记录期望 hash）
 
@@ -517,7 +515,7 @@ case "$PHASE" in
   phase4|all)
     echo "=== Phase 4: Security ==="
     verify P4.1 phase4 "CONSTITUTION.md exists" \
-      'test -f /etc/nixos/.agent/CONSTITUTION.md' 2
+      'test -f /etc/nixos/.agents/CONSTITUTION.md' 2
     verify P4.7 phase4 "agent cannot write sentinel" \
       'sudo -u ai-agent touch /var/lib/ai-sentinel/test 2>&1 | grep -q "denied\|Permission"' 2
     verify P4.8 phase4 "agent cannot switch" \
@@ -526,7 +524,6 @@ case "$PHASE" in
   phase5|all)
     echo "=== Phase 5: Self-Evolution ==="
     verify P5.1 phase5 "recap template exists" \
-      'test -f /etc/nixos/.agent/knowledge/_template.md'
     ;;
   phase6|all)
     echo "=== Phase 6: Learning ==="
