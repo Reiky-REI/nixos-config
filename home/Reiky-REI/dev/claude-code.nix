@@ -1,9 +1,8 @@
 {
-  pkgs-unstable,
+  pkgs,
   ...
 }: {
-  programs.claude-code = {
-    enable = true;
-    package = pkgs-unstable.claude-code;
-  };
+  home.packages = with pkgs; [
+    claude-code
+  ];
 }
