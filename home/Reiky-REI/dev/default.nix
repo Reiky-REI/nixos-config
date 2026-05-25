@@ -7,6 +7,7 @@
     nodejs
     python3
     go
+    xmake
     gcc
     cmake
     gnumake
