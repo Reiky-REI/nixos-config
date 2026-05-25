@@ -3,5 +3,6 @@
     obsidian
     logseq
     kdePackages.dolphin
+    wpsoffice-cn
   ];
 }
