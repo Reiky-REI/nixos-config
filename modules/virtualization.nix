@@ -14,4 +14,11 @@
 
   # waydroid
   virtualisation.waydroid.enable = true;
+
+  environment.systemPackages = with pkgs; [
+    waydroid-helper
+    nftables
+  ];
+
+  boot.kernelModules = [ "nf_tables" ];
 }
