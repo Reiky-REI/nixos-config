@@ -14,7 +14,7 @@ AI Agent 与人类协作的系统配置、需求规划、执行记录中心。
 │   ├── architecture.md
 │   ├── conventions.md
 │   ├── secrets.md
-│   └── system-maintenance.md
+│   └── INDEX.md
 │
 ├── config/                        ← 配置脚本
 │   ├── env.sh
@@ -136,6 +136,6 @@ EOF
 - **架构设计**：见 `knowledge/architecture.md`
 - **编码约定**：见 `knowledge/conventions.md`
 - **密钥管理**：见 `knowledge/secrets.md`
-- **系统维护**：见 `knowledge/system-maintenance.md`
+- **系统维护**：见 `knowledge/INDEX.md`
 - **工作流细节**：见 `WORKFLOW.md`
 
