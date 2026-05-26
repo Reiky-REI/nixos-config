@@ -1,16 +1,4 @@
 {
-  "hooks": {
-    "PostCommand": [
-      {
-        "command": "nixos-rebuild build*",
-        "description": "build \u5b8c\u6210\u540e\u63d0\u793a\u5199\u590d\u76d8",
-        "hook": "echo \"\ud83d\udca1 nixos-rebuild \u5b8c\u6210\uff0c\u5982\u9700\u5199\u590d\u76d8: \u521b\u5efa .agents/knowledge/retros/<date>-<topic>.md\""
-      }
-    ],
-    "PreCommit": [
-      "just generate-claude 2>/dev/null || true"
-    ]
-  },
   "permissions": {
     "allow": [
       "Bash(git *)",
