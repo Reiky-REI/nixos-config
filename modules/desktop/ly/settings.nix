@@ -8,14 +8,14 @@
     box_title = "NixMEOW";
 
     animation = "colormix";
-    colormix_col1 = "0xAA8F00FF";
-    colormix_col2 = "0xAAA020F0";
-    colormix_col3 = "0xAA817295";
-    animation_timeout_sec = 0;
+    colormix_col1 = "0x668F00FF";
+    colormix_col2 = "0x66A020F0";
+    colormix_col3 = "0x66817295";
+    animation_timeout_sec = 1;
 
     bigclock = "en";
     bigclock_12hr = false;
-    bigclock_seconds = false;
+    bigclock_seconds = true;
 
     clock = "%a %H:%M";
     default_input = "login";
