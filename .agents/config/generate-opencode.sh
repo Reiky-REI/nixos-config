@@ -13,27 +13,32 @@ ROOT_AGENT_PLAN_PROMPT=$(nix eval .#opencodeConfig.rootAgentPlanPrompt --json)
 
 patch_json() {
     local file="$1"
-    local instructions_json="$2"
-    local model="$3"
-    local default_agent="$4"
-    local plan_prompt="$5"
     python3 -c "
-import json
-with open('$file') as f:
+import json, sys
+
+file = sys.argv[1]
+cfg_raw = json.loads(sys.argv[2])
+model_raw = sys.argv[3]
+agent_raw = sys.argv[4]
+prompt_raw = sys.argv[5]
+
+with open(file) as f:
     cfg = json.load(f)
-cfg['instructions'] = $instructions_json
-if '$model':
-    cfg['model'] = '$model'
-if '$default_agent':
-    cfg['default_agent'] = '$default_agent'
-if '$plan_prompt':
+
+cfg['instructions'] = cfg_raw
+if model_raw:
+    cfg['model'] = json.loads(model_raw)
+if agent_raw:
+    cfg['default_agent'] = json.loads(agent_raw)
+if prompt_raw:
     cfg.setdefault('agent', {})
     cfg['agent'].setdefault('plan', {})
-    cfg['agent']['plan']['prompt'] = '$plan_prompt'
-with open('$file', 'w') as f:
+    cfg['agent']['plan']['prompt'] = json.loads(prompt_raw)
+
+with open(file, 'w') as f:
     json.dump(cfg, f, indent=2)
     f.write('\n')
-"
+" "$file" "$2" "$3" "$4" "$5"
     echo "  patched $file"
 }
 

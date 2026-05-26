@@ -32,7 +32,7 @@ AI 工作纪律：
 ### 关于彼此
 - OpenCode: AI coding assistant, 主配 `.agents/` 体系
 - Claude Code: AI coding assistant (我), git 身份 `claude-code[bot]`
-- 两者工具能力不同，但代码约定一致
+- 两者工具能力不同，但代码约定一致。详见下方「OpenCode 对齐方式」
 
 ### Claude Code 特有机制
 - **Hooks 自动化**: Claude Code 支持 pre-commit/post-command hooks（定义在 `.claude/settings.json`）
@@ -40,7 +40,17 @@ AI 工作纪律：
   - PostCommand: nixos-rebuild build 后提示写复盘
 - **持久化记忆**: 跨会话保留上下文（路径见 CLAUDE.md）
 - **Plan mode**: 修改配置前内置架构设计方案步骤
-- OpenCode 无上述机制，Workflow 中对齐方式见 CLAUDE.md "与 OpenCode 的对齐规则"
+
+### OpenCode 对齐方式
+
+OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude 的工作流：
+
+| 场景 | OpenCode 做法 |
+|------|-------------|
+| 配置自动生成 | 改完 `lib/opencode-config.nix` 后手动执行 `just generate-opencode` |
+| 复盘提醒 | plan prompt 中内置"改完写复盘"步骤 |
+| 跨会话上下文 | 开工前读 `retros/` 了解进度 |
+| Plan mode | `default_agent = "plan"` + plan prompt 内置开工检查清单 |
 
 ## 常见陷阱
 - swaync/swayidle/polkit-gnome 是 HM 选项，不是 NixOS 选项
