@@ -8,5 +8,6 @@
     ./development
     ./virtualization.nix
     ./documentation.nix
+    ./fonts.nix
   ];
 }
