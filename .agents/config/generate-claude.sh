@@ -8,11 +8,6 @@ ROOT=$(git -C "$(dirname "$0")/../.." rev-parse --show-toplevel)
 cd "$ROOT"
 
 echo "Reading config from Nix..."
-nix eval .#claudeConfig.settings --json | python3 -c "
-import sys, json
-with open('.claude/settings.json', 'w') as f:
-    json.dump(json.load(sys.stdin), f, indent=2)
-    f.write('\n')
-"
+nix eval .#claudeConfig.settings --json > .claude/settings.json
 echo "  generated .claude/settings.json"
 echo "Done."
