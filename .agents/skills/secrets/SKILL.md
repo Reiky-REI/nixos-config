@@ -1,6 +1,7 @@
 ---
 name: secrets
 description: agenix 密钥管理操作 — 编辑/新增/查看/重加密
+agents: [opencode, claude]
 ---
 
 ## 工作目录

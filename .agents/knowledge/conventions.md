@@ -22,8 +22,17 @@
 - `TERMINAL` → home (用户偏好)
 - `XDG_DATA_DIRS` (flatpak) → services
 
-## Git 提交
+## Git 工作流 (多 AI 协作)
 - 提交信息语言不限，与仓库历史风格一致即可
 - 每次验证通过后提交一个步骤
-- **人类**提交直接用 `git commit`
-- **AI 提交**使用 `.agent/config/commit.sh`（自动用 bot 身份 + bot token push）
+- **始终在 feature branch 上工作**，禁止直接在 main 上修改
+- 开工前执行 `git status` + `git branch` 确认工作区干净
+- **OpenCode 提交**使用 `.agents/config/commit.sh`（bot 身份）
+- **Claude Code 提交**用 `git -c user.name="claude-code[bot]" -c user.email="claude-code[bot]@users.noreply.github.com" commit`（bot 身份）
+- 提交后推送到 origin，由人工或另一个 AI review 后合并到 main
+
+## 多 AI 协作规范
+- 两个 AI 都遵守 `.agents/` 下的全部约定
+- 修改复杂配置前先读 `known-issues.md` 避免踩坑
+- 新知识及时补充到对应知识文件或 `known-issues.md`
+- 配置变更后必须写复盘到 `retros/`

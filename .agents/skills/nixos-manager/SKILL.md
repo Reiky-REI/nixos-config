@@ -1,6 +1,7 @@
 ---
 name: nixos-manager
 description: 安全管理 NixOS 配置，包括文件编辑、git 操作、nixos-rebuild 试运行等。
+agents: [opencode, claude]
 ---
 
 # NixOS 配置管理技能

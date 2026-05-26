@@ -1,6 +1,7 @@
 ---
 name: rebuild
 description: NixOS rebuild 操作指引 — 标准构建、长时间编译、加速
+agents: [opencode, claude]
 ---
 
 ## 🚨 安全第一规则

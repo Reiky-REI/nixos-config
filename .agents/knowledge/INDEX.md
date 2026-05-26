@@ -8,13 +8,15 @@
 | secrets.md | agenix, 加密, 密钥 | 管理加密密钥、新增用户时 |
 | known-issues.md | 已知问题, 排障, 兼容性 | 遇到报错、排查问题时 |
 
-## Available Skills
-| Name | Description |
-|------|-------------|
-| nixos-manager | NixOS 配置安全管理 — 修改/验证/提交/应用工作流 |
-| rebuild | NixOS rebuild 操作指引 — 标准构建、长时间编译、加速 |
-| secrets | agenix 密钥管理操作 — 编辑/新增/查看/重加密 |
-| networking | 代理/GitHub token/镜像源/SSH 配置 |
+## Skill 索引
+> 统一入口: `SKILLS.md` — 按场景查找，包含全部技能元信息
+
+| 技能 | 描述 | 适用 |
+|------|------|------|
+| [nixos-manager](../SKILLS.md#配置管理) | NixOS 配置安全管理 — 修改/验证/提交/应用工作流 | opencode, claude |
+| [rebuild](../SKILLS.md#配置管理) | NixOS rebuild 操作指引 — 构建/switch/后台编译/加速 | opencode, claude |
+| [secrets](../SKILLS.md#配置管理) | agenix 密钥管理 — 编辑/新增/查看/重加密 | opencode, claude |
+| [networking](../SKILLS.md#网络--环境) | 代理/GitHub token/镜像源/SSH 配置 | opencode, claude |
 
 ## 复盘索引
 | 复盘 | 对应任务 |

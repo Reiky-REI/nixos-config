@@ -1,6 +1,7 @@
 ---
 name: networking
 description: 代理/GitHub token/镜像源/SSH 配置
+agents: [opencode, claude]
 ---
 
 ## 代理设置
