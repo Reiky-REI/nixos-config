@@ -22,6 +22,7 @@ config.nix (用户标识定义)
 - 所有用户标识符统一在此定义，其他地方通过 `specialArgs` 引用
 - 变量传递路径: `config.nix → flake.nix specialArgs/extraSpecialArgs → NixOS/home-manager 模块`
 - 新增用户: 改 `config.nix` 中的定义，`secrets/secrets.nix` 添加公钥，创建对应 `.age` 文件
+- **已知耦合**：`home/{username}/` 目录名与 `config.nix` 的 `username` 值需要保持一致。修改用户名时需要同时重命名目录和改 `config.nix`。当前未自动化，属于半完成抽象。
 
 ## 分类决策规则
 - daemon / 后台长期运行 → **services**

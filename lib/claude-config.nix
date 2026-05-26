@@ -4,8 +4,10 @@
 #
 # OpenCode 对应: opencode.json 的 instructions / agent / permission
 # Claude 特有: hooks 自动化（OpenCode 无此机制）
-{ flakeRoot, username }:
-let
+{
+  flakeRoot,
+  username,
+}: let
   inherit (builtins) readFile;
 in {
   # ===== settings.json 内容（项目级，提交到仓库）=====

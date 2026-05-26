@@ -59,7 +59,7 @@
   };
 
   nix.optimise.automatic = true;
-  nix.optimise.dates = [ "04:00" ];
+  nix.optimise.dates = ["04:00"];
 
   # nix gc
   nix.gc = {

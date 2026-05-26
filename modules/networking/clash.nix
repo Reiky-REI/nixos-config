@@ -1,5 +1,4 @@
-_:
-{
+_: {
   programs.clash-verge = {
     enable = true;
     # package = pkgs-unstable.clash-verge-rev;

@@ -1,3 +1,3 @@
-{ pkgs-unstable, ... }: {
-  environment.systemPackages = [ pkgs-unstable.opencode ];
+{pkgs-unstable, ...}: {
+  environment.systemPackages = [pkgs-unstable.opencode];
 }

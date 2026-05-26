@@ -121,7 +121,17 @@ touch home/{username}/<module-name>/default.nix
 - `TERMINAL` → `home/{username}/`
 - `XDG_DATA_DIRS` (flatpak) → `modules/services/`
 
-## 9. Rebuild
+## 9. Just 命令
+
+```bash
+just fmt          # 格式化所有 nix 文件 (alejandra)
+just check-fmt    # 预览格式化改动
+just lint         # 静态分析 (statix)
+just check        # 完整验证：fmt check + lint + nix flake check
+just rebuild      # 构建配置
+```
+
+## 10. Rebuild
 
 ```bash
 # 使用 .agent/config/rebuild.sh (自动设置 proxy + GitHub token)
@@ -137,7 +147,7 @@ sudo env \
   nixos-rebuild switch --flake /etc/nixos#NixMEOW
 ```
 
-## 10. 排查配置归属错误
+## 11. 排查配置归属错误
 
 - 选项不存在 → 检查模块是否在正确的层（系统 vs home），以及是否被导入
 - 选项冲突 → 在对应模块的 `default.nix` 中搜索该选项定义

@@ -1,12 +1,16 @@
-{ config, lib, pkgs, modulesPath, ... }:
-
 {
+  config,
+  lib,
+  pkgs,
+  modulesPath,
+  ...
+}: {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
     ../../hardware-configuration.nix
   ];
 
-  boot.kernelParams = [ "ahci.mobile_lpm_policy=1" ];
+  boot.kernelParams = ["ahci.mobile_lpm_policy=1"];
   boot.kernelPackages = pkgs.linuxPackages;
 
   boot.extraModprobeConfig = ''

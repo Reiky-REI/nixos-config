@@ -5,6 +5,7 @@
 # 修改后执行 nixos-rebuild build --flake /etc/nixos#NixMEOW 验证。
 {
   # 系统登录用户名（也是 home 目录名）
+  # 注意：home/ 目录名需与此值保持一致，两者同时修改
   username = "Reiky-REI";
 
   # 显示名称（用于 /etc/passwd 的 description 字段）

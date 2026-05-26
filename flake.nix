@@ -67,13 +67,18 @@
       config.allowUnfree = true;
     };
     user = import ./config.nix;
-    opencodeConfig = import ./lib/opencode-config.nix { flakeRoot = self; };
+    opencodeConfig = import ./lib/opencode-config.nix {flakeRoot = self;};
     claudeConfig = import ./lib/claude-config.nix {
       flakeRoot = self;
       username = user.username;
     };
   in {
     inherit opencodeConfig claudeConfig;
+
+    formatter.${system} = nixpkgs.legacyPackages.${system}.alejandra;
+
+    checks.${system}.nixos = self.nixosConfigurations.NixMEOW.config.system.build.toplevel;
+
     nixosConfigurations = {
       NixMEOW = nixpkgs.lib.nixosSystem {
         inherit system;
@@ -94,7 +99,7 @@
               file = ./secrets/ai_api_key_REIKY_REI.age;
               owner = user.username;
             };
-            age.identityPaths = [ "/home/${user.username}/.ssh/id_ed25519" ];
+            age.identityPaths = ["/home/${user.username}/.ssh/id_ed25519"];
           }
 
           ({
@@ -107,53 +112,7 @@
               (final: prev: {
                 niri = pkgs-unstable.niri;
               })
-              # 修补 waydroid-net.sh 使用 nftables
-              # (kernel 7.0.9 linuxPackages_latest 缺少 ip_tables.ko)
-              (final: prev: {
-                waydroid = prev.waydroid.overrideAttrs (old: {
-                  preFixup = let
-                    pkgs = prev;
-                    inherit (pkgs) lib dnsmasq getent iproute2 iptables nftables
-                      gawk kmod lxc util-linux wl-clipboard runtimeShell;
-                  in ''
-                    substituteInPlace $out/lib/waydroid/data/scripts/waydroid-net.sh \
-                      --replace-fail 'LXC_USE_NFT="false"' 'LXC_USE_NFT="true"'
-
-                    makeWrapperArgs+=("''${gappsWrapperArgs[@]}")
-
-                    patchShebangs --host $out/lib/waydroid/data/scripts
-                    wrapProgram $out/lib/waydroid/data/scripts/waydroid-net.sh \
-                      --prefix PATH ":" ${
-                        lib.makeBinPath [
-                          dnsmasq
-                          getent
-                          iproute2
-                          iptables
-                          nftables
-                        ]
-                      }
-
-                    wrapPythonProgramsIn $out/lib/waydroid/ "${
-                      lib.concatStringsSep " " (
-                        [
-                          "$out"
-                        ]
-                        ++ (old.propagatedBuildInputs or [])
-                        ++ [
-                          gawk
-                          kmod
-                          lxc
-                          util-linux
-                          wl-clipboard
-                        ]
-                      )
-                    }"
-
-                    substituteInPlace $out/lib/waydroid/tools/helpers/*.py \
-                      --replace '"sh"' '"${runtimeShell}"'
-                  '';
-                });
-              })
+              # waydroid .net 脚本 overlay（定义在 modules/virtualization.nix）
             ];
           })
 

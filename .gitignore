@@ -2,4 +2,5 @@
 .agents/config/bot-token
 .agents/plans/20*/
 .agents/sessions/20*/
+.claude/worktrees/
 result

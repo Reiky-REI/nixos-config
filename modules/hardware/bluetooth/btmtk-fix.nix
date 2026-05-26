@@ -3,8 +3,7 @@
   lib,
   config,
   ...
-}:
-let
+}: let
   kernel = config.boot.kernelPackages.kernel;
   kernelVersion = kernel.modDirVersion;
   kernelBuild = "${kernel.dev}/lib/modules/${kernelVersion}/build";
@@ -13,9 +12,10 @@ let
     name = "btmtk-patched-${kernelVersion}";
 
     # 我们不使用 src（自行从 kernel.src tarball 选择性提取）
-    phases = [ "buildPhase" "installPhase" ];
+    phases = ["buildPhase" "installPhase"];
 
-    nativeBuildInputs = [ pkgs.gnutar pkgs.xz ]
+    nativeBuildInputs =
+      [pkgs.gnutar pkgs.xz]
       ++ kernel.moduleBuildDependencies;
 
     buildPhase = ''
@@ -54,5 +54,5 @@ let
     '';
   };
 in {
-  boot.extraModulePackages = [ patched-btmtk ];
+  boot.extraModulePackages = [patched-btmtk];
 }

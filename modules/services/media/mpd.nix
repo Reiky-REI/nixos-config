@@ -1,4 +1,4 @@
-{ username, ... }: {
+{username, ...}: {
   services.mpd.enable = true;
   services.mpd = {
     musicDirectory = "/home/${username}/music";
