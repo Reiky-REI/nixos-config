@@ -19,6 +19,6 @@
 
     clock = "%a %H:%M";
     default_input = "login";
-    asterisk = "q(>w<)p";
+    asterisk = "♥";
   };
 }
