@@ -20,6 +20,6 @@
 - 提交: `e5dab66` feat: QA 工具链
 
 ## 注意事项
-- pre-commit hook 依赖 `python3`，当前运行环境没有，用 `--no-verify` 跳过
+- ~~pre-commit hook 依赖 `python3`，当前运行环境没有，用 `--no-verify` 跳过~~ → 已修复：`nix eval --json >` 取代 `python3`，零外部依赖
 - waydroid overlay 原在 flake.nix 中内联，现归到 `modules/virtualization.nix`，与 waydroid 配置同处一个模块
 - `niri = pkgs-unstable.niri` overlay 仍留在 flake.nix（依赖 `pkgs-unstable`，无法轻易移出）
