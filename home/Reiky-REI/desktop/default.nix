@@ -1,5 +1,6 @@
 {
   imports = [
+    ./capture
     ./niri
     ./rofi
     ./wallpaper

@@ -1,17 +1,27 @@
 # NixMEOW — Claude Code 工作指南
 
 本仓库由 **Claude Code** 和 **OpenCode** 共同维护。
-共享约定统一放在 `.agents/` 目录下。开工前请先阅读：
+共享约定统一放在 `.agents/` 下。
 
-- `config.nix` — 用户配置中心（username 等标识统一在此定义）
-- `.agents/AGENTS.md` — 总指南 & 协作规则
-- `.agents/SKILLS.md` — 技能索引 (按场景查找操作流程)
-- `.agents/knowledge/INDEX.md` — 全部知识索引
-- `.agents/knowledge/conventions.md` — 编码约定
-- `.agents/knowledge/known-issues.md` — 已知问题 & 避坑
-- `.agents/knowledge/architecture.md` — 仓库架构
+## ⚠️ 开机强制流程 — 每次会话先执行，不可跳过
 
-> 以 `.agents/` 为准，不另设重复知识源。
+全部读完再开工。边读边写总结到 memory，便于跨会话追溯。
+
+1. **AGENTS.md** → `.agents/AGENTS.md` — 总纪律、协作规则、Git 工作流
+2. **INDEX.md** → `.agents/knowledge/INDEX.md` — 知识索引 & 复盘清单
+3. **conventions.md** → `.agents/knowledge/conventions.md` — 编码约定 & 分层规则
+4. **known-issues.md** → `.agents/knowledge/known-issues.md` — 已知问题 & 避坑
+5. **architecture.md** → `.agents/knowledge/architecture.md` — 仓库架构
+6. **读近期复盘** → 扫 INDEX.md 中复盘列表，读最近 3-5 条了解当前状态
+7. **读持久化记忆** → 读 `MEMORY.md`，加载上次会话记录的 user/project/feedback
+
+按需加载（此时可根据已读的 INDEX.md 判断是否需要）：
+- 遇到报错时查 known-issues.md
+- 管理密钥时读 `secrets.md`
+- 需要操作流程时读 `SKILLS.md` → 对应技能文件
+
+> 等同于 OpenCode 的 `instructions: [AGENTS.md, INDEX.md, conventions.md]`。
+> 不加载直接开工 → 不熟悉仓库 → 必然踩坑。
 
 ## 配置自动生成
 
@@ -27,13 +37,12 @@ just generate-all       # 全部生成
 - 生成脚本：`.agents/config/generate-claude.sh`
 - 用户名等标识读取自 `config.nix`，修改后重新 `just generate-claude` 即可同步
 
-## 开工流程
+## 工作流
 
-1. **读入口** — 先读 `.agents/AGENTS.md` `.agents/knowledge/INDEX.md` `.agents/knowledge/conventions.md`
-2. **Plan mode** — 修改配置前先进入 Plan mode 设计方案
-3. **查已知问题** — 遇到报错先查 `.agents/knowledge/known-issues.md`
-4. **改完验证** — `nixos-rebuild build --flake /etc/nixos#NixMEOW`
-5. **写复盘** — 配置变更完成后写复盘到 `.agents/knowledge/retros/`
+1. **Plan mode** — 修改配置前先进入 Plan mode 设计方案
+2. **查已知问题** — 遇到报错先查 `.agents/knowledge/known-issues.md`
+3. **改完验证** — `nixos-rebuild build --flake /etc/nixos#NixMEOW`
+4. **写复盘** — 配置变更完成后写复盘到 `.agents/knowledge/retros/`
 
 ## 与 OpenCode 的对齐规则
 
@@ -45,4 +54,11 @@ just generate-all       # 全部生成
 
 ## 持久化记忆
 
-Claude Code 的记忆系统位于 `/home/Reiky-REI/.claude/projects/-etc-nixos/memory/`，用于跨会话保留项目上下文。需要时直接存取。
+Claude Code 的记忆系统位于 `/home/Reiky-REI/.claude/projects/-etc-nixos/memory/`，用于跨会话保留项目上下文。
+
+**每次会话必须执行：**
+- **开工** → 先读 `MEMORY.md` 回顾上次上下文
+- **收工** → 写关键进展、用户偏好、踩坑经验到 memory（不写复盘替代 memory，两者并存）
+
+memory 存什么：无法从代码/git 推导的信息（用户偏好、决策原因、反馈、项目状态）。
+复盘归复盘（`.agents/knowledge/retros/`），memory 归 memory，不互相替代。
