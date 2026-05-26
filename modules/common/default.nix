@@ -41,21 +41,12 @@
   fonts.packages = with pkgs; [
     noto-fonts
     noto-fonts-cjk-sans
-    noto-fonts-cjk-serif
     noto-fonts-color-emoji
 
     dejavu_fonts
 
-    liberation_ttf
-
     nerd-fonts.fira-code
     nerd-fonts.jetbrains-mono
-
-    wqy_zenhei
-    wqy_microhei
-
-    arphic-ukai
-    arphic-uming
   ];
 
   fonts = {
@@ -63,83 +54,10 @@
     fontconfig = {
       enable = true;
       defaultFonts = {
-        serif = ["Noto Serif" "Noto Serif CJK SC" "AR PL UMing CN" "Liberation Serif"];
-        sansSerif = ["Noto Sans" "Noto Sans CJK SC" "WenQuanYi Zen Hei" "Liberation Sans"];
-        monospace = ["Fira Code" "Liberation Mono"];
+        serif = ["Noto Serif" "Noto Serif CJK SC"];
+        sansSerif = ["Noto Sans" "Noto Sans CJK SC"];
+        monospace = ["Fira Code"];
       };
-      localConf = ''
-        <fontconfig>
-        <!-- WPS Office Windows font aliases -->
-        <alias>
-          <family>SimSun</family>
-          <prefer>
-            <family>AR PL UMing CN</family>
-            <family>Noto Serif CJK SC</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>SimHei</family>
-          <prefer>
-            <family>WenQuanYi Zen Hei</family>
-            <family>Noto Sans CJK SC</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>KaiTi</family>
-          <prefer>
-            <family>AR PL UKai CN</family>
-            <family>Noto Serif CJK SC</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>FangSong</family>
-          <prefer>
-            <family>AR PL UKai CN</family>
-            <family>Noto Serif CJK SC</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>Microsoft YaHei</family>
-          <prefer>
-            <family>WenQuanYi Micro Hei</family>
-            <family>Noto Sans CJK SC</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>Microsoft JhengHei</family>
-          <prefer>
-            <family>WenQuanYi Micro Hei</family>
-            <family>Noto Sans CJK SC</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>Times New Roman</family>
-          <prefer>
-            <family>Liberation Serif</family>
-            <family>Noto Serif</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>NSimSun</family>
-          <prefer>
-            <family>AR PL UMing CN</family>
-            <family>Noto Serif CJK SC</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>MingLiU</family>
-          <prefer>
-            <family>AR PL UMing CN</family>
-          </prefer>
-        </alias>
-        <alias>
-          <family>PMingLiU</family>
-          <prefer>
-            <family>AR PL UMing CN</family>
-          </prefer>
-        </alias>
-        </fontconfig>
-      '';
     };
   };
 
