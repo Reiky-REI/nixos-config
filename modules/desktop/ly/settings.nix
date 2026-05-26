@@ -8,9 +8,9 @@
     box_title = "NixMEOW";
 
     animation = "colormix";
-    colormix_col1 = "0x00FF00FF";
-    colormix_col2 = "0x00FF69B4";
-    colormix_col3 = "0x008F00FF";
+    colormix_col1 = "0x008F00FF";
+    colormix_col2 = "0x00817295";
+    colormix_col3 = "0x00555D50";
     animation_timeout_sec = 0;
 
     bigclock = "en";
@@ -19,6 +19,6 @@
 
     clock = "%a %H:%M";
     default_input = "login";
-    asterisk = "*";
+    asterisk = "q(>w<)p";
   };
 }
