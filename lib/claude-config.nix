@@ -31,21 +31,8 @@ in {
       ];
     };
 
-    # hooks — Claude Code 特有机制，OpenCode 无对应
-    hooks = {
-      # pre-commit: 确保 settings 与 Nix 数据源同步
-      PreCommit = [
-        "just generate-claude 2>/dev/null || true"
-      ];
-      # PostCommand 指令：在特定命令后记录复盘（轻量提醒）
-      PostCommand = [
-        {
-          command = "nixos-rebuild build*";
-          description = "build 完成后提示写复盘";
-          hook = ''echo "💡 nixos-rebuild 完成，如需写复盘: 创建 .agents/knowledge/retros/<date>-<topic>.md"'';
-        }
-      ];
-    };
+    # hooks 已废弃。复盘提醒由 justfile 的 rebuild recipe 内置，
+    # git commit 前同步配置由 .git/hooks/pre-commit 负责。
   };
 
   # ===== CLAUDE.md 中由 Nix 管理的内容片段 =====
