@@ -5,6 +5,7 @@
 }: {
   imports = [
     ./clash.nix
+    ./tailscale.nix
   ];
 
   networking.networkmanager.enable = true;
