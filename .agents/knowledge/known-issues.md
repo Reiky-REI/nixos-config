@@ -67,6 +67,55 @@ catppuccin release-25.11 中以下子模块不可用，已全部注释：
 - 需要 nftables 的应用 (如 Waydroid) 需 patch 改用 `nft` 命令
 - Waydroid 修复方式: overlay 修补 `waydroid-net.sh`，设 `LXC_USE_NFT=true` + 添加 `nftables` 到 PATH
 
+## Nix eval 性能：`nix flake check` 全量评估极慢
+
+### 现象
+`nix flake check`（即 `just check` 中的最终步骤）耗时 **2:30+**，远高于预期。
+`nix eval .#nixosConfigurations.NixMEOW...` 纯评估耗时 **3:06**（171s user CPU）。
+
+### 根因
+1. **`checks.${system}.nixos` output**（QA 工具链 `e5dab66` 加入）定义为 `self.nixosConfigurations.NixMEOW.config.system.build.toplevel`，强制 `nix flake check` 完整评估整个系统配置
+2. `nix flake check` 还会单独验证 `nixosConfigurations.NixMEOW` output，导致**全量评估执行两次**
+3. 纯 eval 不走 daemon 的 eval cache，每次都是冷启动评估
+4. 本 flake 含 2 个 nixpkgs inputs（stable + unstable）+ 5 个 flake inputs，模块数 153 个 `.nix` 文件，closure ~36GB / 24K paths
+
+### 基准数据（2026-05-26）
+
+| 命令 | 耗时 | 说明 |
+|------|------|------|
+| `nixos-rebuild build`（增量/无变更） | 7-8s | 正常，daemon eval cache 命中 |
+| `nixos-rebuild build`（首次/冷） | 1:37 | 含 36GB substitute 下载，镜像 380MB/s |
+| `nix flake check` | 2:30 | 两次全量 eval，无缓存 |
+| `nix eval .#formatter.x86_64-linux` | 3s | 仅 formatter，快速 |
+| `nix eval .#claudeConfig.settings` | 0.2s | 属性查找，极快 |
+| `nix eval .#nixosConfigurations...toplevel.drvPath` | 3:06 | 全量评估，最慢 |
+
+### 对策
+- **`nix flake check` 预期 2-3 分钟**，日常验证不依赖它
+- 日常验证用 `just rebuild`（即 `nixos-rebuild build`），增量仅 7-8s
+- `just check` 中的 `nix flake check` 步骤只在提交前或 CI 中跑
+- 若需加速 eval：考虑减少 flake inputs、模块拆分优化，但收益有限（Nix eval 是单线程的）
+- `nixos-rebuild build` 走 daemon cache，始终是日常验证的首选命令
+
+## 构建性能：资源瓶颈导致构建慢/失败
+
+### 现象
+- `nixos-rebuild build` 增量 **7-8s**（正常），但冷构建或涉及 unstable 包时极慢
+- 上次后台 build 耗时 **20h+ CPU** 后因 `[Errno 2]` failed
+- 构建期间系统卡顿、swap 使用攀升
+
+### 根因
+1. **磁盘空间危机**（首要原因）：`/nix/store` 分区 100G，已用 **88G (93%)**，仅剩 ~7G。Nix 构建需要临时空间，93% 意味着构建时频繁抢最后几 G 地盘
+2. **内存过载**：14G RAM + `max-jobs = auto`（24路并行）→ 内存不足 → **swap 颠簸**（从 473MB 飙到 1.1G）→ I/O 爆炸
+3. **479 个 system profile 残留**：大量旧 generation 和旧版本包被 GC root 锁住无法回收（3 个 rustc 版本 ~3GB、2 个 nvidia 驱动 ~1.8GB、2 个 clang/llvm ~2.8GB）
+4. **GC 策略太保守**：每周运行一次，删 ≥7 天前 → 跟不上配置变更频率
+5. **4 个 unstable 包无 binary cache**：niri / opencode / neovide / vscode 从 unstable 取，TUNA/USTC 不缓存 → 每次都本地编译
+
+### 对策
+- **紧急**：`nix store gc --delete-older-than 3d` + 删 stale `result` symlink
+- **配置**：`max-jobs = 8` + `min-free = 5G` / `max-free = 10G` + GC 改为 daily / ≥3d
+- **工作流**：日常验证用 `just rebuild`（7-8s），`just check` 只在提交前跑
+
 ## 代理与网络
 - 代理: `http://127.0.0.1:7897`
 - GitHub token: `.agents/config/token` (gitignore 保护)

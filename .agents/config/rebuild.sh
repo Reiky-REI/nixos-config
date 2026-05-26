@@ -23,6 +23,4 @@ sudo env \
   http_proxy="$http_proxy" \
   https_proxy="$https_proxy" \
   NIX_ACCESS_TOKEN="$NIX_ACCESS_TOKEN" \
-  nixos-rebuild "$MODE" --flake /etc/nixos#NixMEOW \
-  --option substituters "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store https://mirrors.ustc.edu.cn/nix-channels/store https://cache.nixos.org" \
-  --option access-tokens "github.com=${NIX_ACCESS_TOKEN}"
+  nixos-rebuild "$MODE" --flake /etc/nixos#NixMEOW

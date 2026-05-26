@@ -17,6 +17,9 @@
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
   ];
+  nix.settings.max-jobs = 8;
+  nix.settings.min-free = 5368709120;
+  nix.settings.max-free = 10737418240;
 
   # timezone and local
   time.timeZone = "Asia/Shanghai";
@@ -64,8 +67,8 @@
   # nix gc
   nix.gc = {
     automatic = lib.mkDefault true;
-    dates = lib.mkDefault "weekly";
-    options = lib.mkDefault "--delete-older-than 7d";
+    dates = lib.mkDefault "daily";
+    options = lib.mkDefault "--delete-older-than 3d";
   };
 
   # allow none nix packages
