@@ -8,9 +8,9 @@
     box_title = "NixMEOW";
 
     animation = "colormix";
-    colormix_col1 = "0x008F00FF";
-    colormix_col2 = "0x00817295";
-    colormix_col3 = "0x00555D50";
+    colormix_col1 = "0x004b2c78";
+    colormix_col2 = "0x002a2a66";
+    colormix_col3 = "0x003d3d8c";
     animation_timeout_sec = 0;
 
     bigclock = "en";
