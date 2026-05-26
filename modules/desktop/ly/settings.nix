@@ -11,7 +11,7 @@
     colormix_col1 = "0x668F00FF";
     colormix_col2 = "0x66A020F0";
     colormix_col3 = "0x66817295";
-    animation_timeout_sec = 1;
+    animation_timeout_sec = 0;
 
     bigclock = "en";
     bigclock_12hr = false;
