@@ -13,7 +13,7 @@ AI 工作纪律：
 1. **instructions** 始终在 context: AGENTS.md + INDEX.md + conventions.md
 2. 先读 **INDEX.md** → 按需读知识文件
 3. 读 **INDEX.md** 中的 skill 清单 → 需要时加载 skill
-4. 任务完成后写 **复盘** 到 retros/
+4. 任务完成后写 **复盘** 到 knowledge/retros/
 5. 坑出现 2 次 → 提炼到 known-issues.md
 
 ## 多 AI 协作规则
@@ -23,10 +23,10 @@ AI 工作纪律：
 2. **开工前检查** — `git status` + `git branch`，确认没有未提交变更或进行中的分支
 3. **改完先 build** — `nixos-rebuild build --flake /etc/nixos#NixMEOW` 通过后再提交
 4. **提交后推送分支** — 让另一个 AI 或用户来 merge 到 main
-5. **复盘不可少** — 任何配置变更完成后写一条到 `retros/`
+5. **复盘不可少** — 任何配置变更完成后写一条到 `knowledge/retros/`
 
 ### 冲突预防
-- 如果发现非自己创建的分支，先看看 `retros/` 里有没有对应说明再做
+- 如果发现非自己创建的分支，先看看 `knowledge/retros/` 里有没有对应说明再做
 - 同一时间段尽量不碰同一模块文件
 
 ### 关于彼此
@@ -49,7 +49,7 @@ OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude �
 |------|-------------|
 | 配置自动生成 | 改完 `lib/opencode-config.nix` 后手动执行 `just generate-opencode` |
 | 复盘提醒 | plan prompt 中内置"改完写复盘"步骤 |
-| 跨会话上下文 | 开工前读 `retros/` 了解进度 |
+| 跨会话上下文 | 开工前读 `knowledge/retros/` 了解进度 |
 | Plan mode | `default_agent = "plan"` + plan prompt 内置开工检查清单 |
 
 ## 常见陷阱

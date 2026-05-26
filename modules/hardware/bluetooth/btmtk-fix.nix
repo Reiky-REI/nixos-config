@@ -27,7 +27,7 @@
         linux-${kernelVersion}/drivers/bluetooth/btmtk.h
 
       # 打 WMT 事件校验补丁
-      patch -p1 < ${../../../patches/btmtk-wmt-fix.patch}
+      patch -p1 < ${./patches/btmtk-wmt-fix.patch}
 
       # 创建最小 Kbuild（只编译 btmtk.ko）
       echo 'obj-m := btmtk.o' > drivers/bluetooth/Kbuild

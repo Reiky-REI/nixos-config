@@ -24,7 +24,7 @@ catppuccin release-25.11 中以下子模块不可用，已全部注释：
 - 现象: `hci0: Failed to send wmt func ctrl (-22)`
 - 根因: 内核 commit `634a4408c061` 严格校验 WMT 事件包长
 - 修复: 打上游 commit `e3ac0d9f1a20` 等价补丁 (6.12.91+ / 7.1-rc1+)
-- 补丁已就绪: `patches/btmtk-wmt-fix.patch`
+- 补丁已就绪: `modules/hardware/bluetooth/patches/btmtk-wmt-fix.patch`
 
 ## Niri 配置
 ### keybind 属性名

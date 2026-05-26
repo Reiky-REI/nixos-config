@@ -19,6 +19,69 @@
       cp -r prebuilts/* $out/
     '';
 in {
+  # waydroid-net.sh nftables 补丁 overlay
+  # (kernel 7.0.9 linuxPackages_latest 缺少 ip_tables.ko)
+  nixpkgs.overlays = [
+    (final: prev: {
+      waydroid = prev.waydroid.overrideAttrs (old: {
+        preFixup = let
+          pkgs = prev;
+          inherit
+            (pkgs)
+            lib
+            dnsmasq
+            getent
+            iproute2
+            iptables
+            nftables
+            gawk
+            kmod
+            lxc
+            util-linux
+            wl-clipboard
+            runtimeShell
+            ;
+        in ''
+          substituteInPlace $out/lib/waydroid/data/scripts/waydroid-net.sh \
+            --replace-fail 'LXC_USE_NFT="false"' 'LXC_USE_NFT="true"'
+
+          makeWrapperArgs+=("''${gappsWrapperArgs[@]}")
+
+          patchShebangs --host $out/lib/waydroid/data/scripts
+          wrapProgram $out/lib/waydroid/data/scripts/waydroid-net.sh \
+            --prefix PATH ":" ${
+            lib.makeBinPath [
+              dnsmasq
+              getent
+              iproute2
+              iptables
+              nftables
+            ]
+          }
+
+          wrapPythonProgramsIn $out/lib/waydroid/ "${
+            lib.concatStringsSep " " (
+              [
+                "$out"
+              ]
+              ++ (old.propagatedBuildInputs or [])
+              ++ [
+                gawk
+                kmod
+                lxc
+                util-linux
+                wl-clipboard
+              ]
+            )
+          }"
+
+          substituteInPlace $out/lib/waydroid/tools/helpers/*.py \
+            --replace '"sh"' '"${runtimeShell}"'
+        '';
+      });
+    })
+  ];
+
   # docker
   virtualisation.docker.enable = true;
 

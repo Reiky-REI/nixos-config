@@ -19,10 +19,4 @@
 | [networking](../SKILLS.md#网络--环境) | 代理/GitHub token/镜像源/SSH 配置 | opencode, claude |
 
 ## 复盘索引
-| 复盘 | 对应任务 |
-|------|---------|
-| retros/2026-05-24-restructure | 仓库分层架构重构 |
-| retros/2026-05-24-home-reorg | Home 重组 + 蓝牙 + 快捷键 + NVIDIA |
-| retros/2026-05-24-cleanup | 清理优化 + secrets 隔离 + gitignore |
-| retros/2026-05-25-opencode-merge | NixOpencodeMEOW 合并 — opencode 系统安装 + development 子目录化 |
-| retros/2026-05-25-opencode-instructions | opencode instructions Nix 自动管理 — lib + generate 脚本 + justfile |
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 19 篇）

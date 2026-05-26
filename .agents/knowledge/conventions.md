@@ -43,4 +43,4 @@
 - 两个 AI 都遵守 `.agents/` 下的全部约定
 - 修改复杂配置前先读 `known-issues.md` 避免踩坑
 - 新知识及时补充到对应知识文件或 `known-issues.md`
-- 配置变更后必须写复盘到 `retros/`
+- 配置变更后必须写复盘到 `knowledge/retros/`

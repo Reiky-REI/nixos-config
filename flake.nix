@@ -112,7 +112,7 @@
               (final: prev: {
                 niri = pkgs-unstable.niri;
               })
-              # waydroid .net 脚本 overlay（定义在 modules/virtualization.nix）
+              # waydroid .net 脚本 overlay（定义在 modules/virtualization/default.nix）
             ];
           })
 

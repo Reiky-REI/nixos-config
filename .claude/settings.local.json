@@ -71,7 +71,11 @@
       "Bash(fc-scan /nix/store/m7rs2r4kkn9rfwj5cnr1qvhflzislsx5-source-han-serif-2.003/share/fonts/opentype/source-han-serif/SourceHanSerif.ttc)",
       "Bash(fc-scan /nix/store/86p6v4kimny6xq6jgbsaj5vp9dlaid2q-lxgw-wenkai-1.521/share/fonts/truetype/LXGWWenKai-Regular.ttf)",
       "Bash(fc-scan /nix/store/yn8mysvyh8r10kfkxznzgcms0sfl41zn-unifont-16.0.03/share/fonts/unifont.otb)",
-      "Bash(fc-scan /nix/store/ja6vpg73v96nhlnn144ydm3rls0m2wik-noto-fonts-cjk-sans-2.004/share/fonts/opentype/noto-cjk/NotoSansCJK-VF.otf.ttc)"
+      "Bash(fc-scan /nix/store/ja6vpg73v96nhlnn144ydm3rls0m2wik-noto-fonts-cjk-sans-2.004/share/fonts/opentype/noto-cjk/NotoSansCJK-VF.otf.ttc)",
+      "Bash(sudo chown Reiky-REI:users /etc/nixos/.agents/knowledge/conventions.md /etc/nixos/.agents/knowledge/known-issues.md)",
+      "Bash(sudo chown Reiky-REI:users /etc/nixos/.agents/knowledge/INDEX.md)",
+      "Bash(sudo chown *)",
+      "Bash(sudo rm *)"
     ]
   }
 }

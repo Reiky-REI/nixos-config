@@ -6,7 +6,7 @@
     ./networking
     ./services
     ./development
-    ./virtualization.nix
-    ./documentation.nix
+    ./virtualization
+    ./documentation
   ];
 }

@@ -7,7 +7,7 @@
 }: {
   imports = [
     (modulesPath + "/installer/scan/not-detected.nix")
-    ../../hardware-configuration.nix
+    ./hardware-configuration.nix
   ];
 
   boot.kernelParams = ["ahci.mobile_lpm_policy=1"];
