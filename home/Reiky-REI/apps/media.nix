@@ -5,7 +5,6 @@
     spotify
     splayer
     cider
-    bilibili
   ];
 
   programs.mpv.enable = true;
