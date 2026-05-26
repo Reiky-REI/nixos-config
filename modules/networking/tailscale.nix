@@ -9,18 +9,20 @@
   networking.firewall.allowedUDPPorts = [41641];
 
   # 持久化 Tailscale 状态: 首次手动 sudo tailscale up 后重启自动重连
+  # --timeout 5 防止未认证时无限阻塞 systemd
   systemd.services.tailscale-autoconnect = {
     description = "Automatic connection to Tailscale";
     after = ["network-pre.target" "tailscale.service"];
     wants = ["network-pre.target" "tailscale.service"];
     wantedBy = ["multi-user.target"];
     serviceConfig.Type = "oneshot";
+    serviceConfig.Restart = "on-failure";
     script = let
       tailscale = "${pkgs.tailscale}/bin/tailscale";
     in ''
       sleep 2
       ${tailscale} status > /dev/null 2>&1 && exit 0
-      ${tailscale} up --accept-routes --accept-dns
+      ${tailscale} up --accept-routes --accept-dns --timeout 5
     '';
   };
 }
