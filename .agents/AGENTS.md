@@ -34,6 +34,14 @@ AI 工作纪律：
 - Claude Code: AI coding assistant (我), git 身份 `claude-code[bot]`
 - 两者工具能力不同，但代码约定一致
 
+### Claude Code 特有机制
+- **Hooks 自动化**: Claude Code 支持 pre-commit/post-command hooks（定义在 `.claude/settings.json`）
+  - PreCommit: 提交前自动 `just generate-claude` 同步配置
+  - PostCommand: nixos-rebuild build 后提示写复盘
+- **持久化记忆**: 跨会话保留上下文（路径见 CLAUDE.md）
+- **Plan mode**: 修改配置前内置架构设计方案步骤
+- OpenCode 无上述机制，Workflow 中对齐方式见 CLAUDE.md "与 OpenCode 的对齐规则"
+
 ## 常见陷阱
 - swaync/swayidle/polkit-gnome 是 HM 选项，不是 NixOS 选项
 - Niri 不支持 Hyprland 式 submap，用 `switch-to-named-submap`

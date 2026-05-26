@@ -1,6 +1,11 @@
 generate-opencode:
     .agents/config/generate-opencode.sh
 
+generate-claude:
+    .agents/config/generate-claude.sh
+
+generate-all: generate-opencode generate-claude
+
 # 下载 APK 并安装到 Waydroid
 install-apk name url:
     curl -L -o /tmp/{{name}}.apk {{url}}

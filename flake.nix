@@ -68,8 +68,12 @@
     };
     user = import ./config.nix;
     opencodeConfig = import ./lib/opencode-config.nix { flakeRoot = self; };
+    claudeConfig = import ./lib/claude-config.nix {
+      flakeRoot = self;
+      username = user.username;
+    };
   in {
-    inherit opencodeConfig;
+    inherit opencodeConfig claudeConfig;
     nixosConfigurations = {
       NixMEOW = nixpkgs.lib.nixosSystem {
         inherit system;
