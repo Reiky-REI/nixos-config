@@ -5,11 +5,11 @@ ROOT=$(git -C "$(dirname "$0")/../.." rev-parse --show-toplevel)
 cd "$ROOT"
 
 echo "Reading config from Nix..."
-ROOT_INSTRUCTIONS=$(nix eval .#opencodeConfig.rootInstructions --json)
-HOST_INSTRUCTIONS=$(nix eval .#opencodeConfig.hostInstructions --json)
-ROOT_MODEL=$(nix eval .#opencodeConfig.rootModel --json)
-ROOT_DEFAULT_AGENT=$(nix eval .#opencodeConfig.rootDefaultAgent --json)
-ROOT_AGENT_PLAN_PROMPT=$(nix eval .#opencodeConfig.rootAgentPlanPrompt --json)
+ROOT_INSTRUCTIONS=$(nix eval --accept-flake-config .#opencodeConfig.rootInstructions --json)
+HOST_INSTRUCTIONS=$(nix eval --accept-flake-config .#opencodeConfig.hostInstructions --json)
+ROOT_MODEL=$(nix eval --accept-flake-config .#opencodeConfig.rootModel --json)
+ROOT_DEFAULT_AGENT=$(nix eval --accept-flake-config .#opencodeConfig.rootDefaultAgent --json)
+ROOT_AGENT_PLAN_PROMPT=$(nix eval --accept-flake-config .#opencodeConfig.rootAgentPlanPrompt --json)
 
 patch_json() {
     local file="$1"

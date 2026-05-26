@@ -8,6 +8,6 @@ ROOT=$(git -C "$(dirname "$0")/../.." rev-parse --show-toplevel)
 cd "$ROOT"
 
 echo "Reading config from Nix..."
-nix eval .#claudeConfig.settings --json > .claude/settings.json
+nix eval .#claudeConfig.settings --json --accept-flake-config > .claude/settings.json
 echo "  generated .claude/settings.json"
 echo "Done."
