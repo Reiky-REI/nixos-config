@@ -2,8 +2,10 @@
 
 ## 分层结构
 ```
-flake.nix → hosts/{hostname}/default.nix → modules/{common,hardware,desktop,...}
-                                         → home/{username}/
+config.nix (用户标识定义)
+  → flake.nix (import 并通过 specialArgs 传递 username/fullName)
+    → hosts/{hostname}/default.nix → modules/{common,hardware,desktop,...}
+                                   → home/{username}/
 ```
 
 ## 各层职责
@@ -14,6 +16,12 @@ flake.nix → hosts/{hostname}/default.nix → modules/{common,hardware,desktop,
 - **modules/services/** — 后台 daemon、系统能力服务 (管道/打印/MPD/Flatpak/polkit)
 - **modules/development/** — 系统级开发工具链和平台支持
 - **home/{username}/** — 用户态配置
+
+## 用户配置中心
+- `config.nix` — 仓库根目录，定义 `username`、`fullName`、`githubHandle`
+- 所有用户标识符统一在此定义，其他地方通过 `specialArgs` 引用
+- 变量传递路径: `config.nix → flake.nix specialArgs/extraSpecialArgs → NixOS/home-manager 模块`
+- 新增用户: 改 `config.nix` 中的定义，`secrets/secrets.nix` 添加公钥，创建对应 `.age` 文件
 
 ## 分类决策规则
 - daemon / 后台长期运行 → **services**

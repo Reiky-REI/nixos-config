@@ -92,12 +92,17 @@ agenix -r -i ~/.ssh/id_ed25519
 ## 系统集成说明
 
 ### flake.nix 中的配置
+用户名来自 `config.nix` 的 `username` 变量（通过 `specialArgs` 传递）：
 ```nix
+# config.nix 中定义
+{ username = "Reiky-REI"; ... }
+
+# flake.nix 中通过 user.username 引用
 age.secrets.ai_api_key_REIKY_REI = {
-  file = ./secrets/ai_api_key_REIKY_REI.age;  # 源文件
-  owner = "Reiky-REI";                         # 解密后文件所有者
+  file = ./secrets/ai_api_key_REIKY_REI.age;
+  owner = user.username;           # 从 config.nix 读取
 };
-age.identityPaths = [ "/home/Reiky-REI/.ssh/id_ed25519" ];
+age.identityPaths = [ "/home/${user.username}/.ssh/id_ed25519" ];
 ```
 
 ### zsh 中的自动加载

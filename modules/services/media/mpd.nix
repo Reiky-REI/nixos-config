@@ -1,7 +1,7 @@
-{ ... }: {
+{ username, ... }: {
   services.mpd.enable = true;
   services.mpd = {
-    musicDirectory = "/home/Reiky-REI/music";
+    musicDirectory = "/home/${username}/music";
     extraConfig = ''
       audio_output {
         type "pipewire"

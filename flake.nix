@@ -66,6 +66,7 @@
       inherit system;
       config.allowUnfree = true;
     };
+    user = import ./config.nix;
     opencodeConfig = import ./lib/opencode-config.nix { flakeRoot = self; };
   in {
     inherit opencodeConfig;
@@ -75,6 +76,8 @@
 
         specialArgs = {
           inherit inputs pkgs-unstable;
+          username = user.username;
+          fullName = user.fullName;
         };
 
         modules = [
@@ -85,9 +88,9 @@
           {
             age.secrets.ai_api_key_REIKY_REI = {
               file = ./secrets/ai_api_key_REIKY_REI.age;
-              owner = "Reiky-REI";
+              owner = user.username;
             };
-            age.identityPaths = [ "/home/Reiky-REI/.ssh/id_ed25519" ];
+            age.identityPaths = [ "/home/${user.username}/.ssh/id_ed25519" ];
           }
 
           ({
@@ -157,13 +160,17 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
-            home-manager.extraSpecialArgs = {inherit inputs pkgs-unstable;};
-            home-manager.users.Reiky-REI = {
+            home-manager.extraSpecialArgs = {
+              inherit inputs pkgs-unstable;
+              username = user.username;
+              fullName = user.fullName;
+            };
+            home-manager.users.${user.username} = {
               imports = [
                 catppuccin.homeModules.catppuccin
                 agenix.homeManagerModules.default
                 noctalia.homeModules.default
-                ./home/Reiky-REI
+                ./home/${user.username}
               ];
               home.packages = [
                 CookNixvim.packages.${system}.default

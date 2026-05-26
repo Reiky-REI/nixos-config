@@ -1,10 +1,11 @@
 {
   lib,
   pkgs,
+  username,
   ...
 }: {
   # users setting
-  nix.settings.trusted-users = ["root" "Reiky-REI"];
+  nix.settings.trusted-users = ["root" username];
   nixpkgs.config.allowUnfree = true;
   nix.settings.experimental-features = ["nix-command" "flakes"];
 

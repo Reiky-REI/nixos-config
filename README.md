@@ -8,17 +8,18 @@
 
 ```
 flake.nix → hosts/MEOW/default.nix  → modules/{common,hardware,desktop,...}
-                                     → home/Reiky-REI/
+                                     → home/{username}/
 ```
 
 - **系统入口**：`flake.nix` 拼装输入输出 → `hosts/MEOW/default.nix` 作为 composition root
 - **系统模块**：`modules/*` 存放 NixOS 系统级选项（daemon、kernel、硬件、桌面基础设施）
-- **用户模块**：`home/Reiky-REI/` 存放 home-manager 用户级选项（应用、shell、editor、WM 配置）
+- **用户模块**：`home/{username}/` 存放 home-manager 用户级选项（应用、shell、editor、WM 配置）
 
 ## 3. 目录树
 
 ```
 /etc/nixos/
+├── config.nix                      # 用户配置中心 (username/fullName/githubHandle)
 ├── flake.nix                      # 入口：输入输出 + 系统实例
 ├── flake.lock                     # 锁定依赖版本
 ├── hardware-configuration.nix     # nixos-generate-config 生成，不动
@@ -37,7 +38,7 @@ flake.nix → hosts/MEOW/default.nix  → modules/{common,hardware,desktop,...}
 │   ├── virtualization.nix         # Docker / libvirtd
 │   └── documentation.nix          # man pages
 ├── home/
-│   └── Reiky-REI/
+│   └── {username}/
 │       ├── default.nix            # 用户态入口
 │       ├── hyprland/              # Hyprland WM (home-manager)
 │       ├── niri/                  # Niri WM (home-manager)
@@ -63,7 +64,7 @@ flake.nix → hosts/MEOW/default.nix  → modules/{common,hardware,desktop,...}
 | 网络 | `modules/networking/` | NetworkManager、代理、防火墙、SSH | 网络应用（浏览器等） |
 | 服务 | `modules/services/` | PipeWire、MPD、Flatpak、CUPS、udisks2、电源管理 | 用户交互应用 |
 | 开发 | `modules/development/` | wine、CUDA 工具链 | 编辑器配置（放 home） |
-| 用户态 | `home/Reiky-REI/` | 应用、shell、编辑器、WM 配置文件、终端工具、GUI apps | 系统 daemon、内核参数 |
+| 用户态 | `home/{username}/` | 应用、shell、编辑器、WM 配置文件、终端工具、GUI apps | 系统 daemon、内核参数 |
 
 ## 5. 职责边界
 
@@ -71,7 +72,7 @@ flake.nix → hosts/MEOW/default.nix  → modules/{common,hardware,desktop,...}
 |------|------|
 | **Host** (`hosts/MEOW/`) | 仅作 composition root：imports + host-specific 配置（用户定义、hostname、boot loader、stateVersion） |
 | **Module** (`modules/*`) | NixOS 系统选项：daemon、kernel、hardware、系统能力、图形会话基础设施 |
-| **Home** (`home/Reiky-REI/`) | home-manager 用户选项：应用、shell、editor、WM config、终端工具、用户偏好 |
+| **Home** (`home/{username}/`) | home-manager 用户选项：应用、shell、editor、WM config、终端工具、用户偏好 |
 
 ### 系统层 vs Home 层
 
@@ -92,13 +93,15 @@ touch modules/<category>/<module-name>/default.nix
 
 ## 7. 如何新增一个 home module
 
+> `{username}` 即 `config.nix` 中定义的 `username` 值，当前为 `Reiky-REI`。
+
 ```bash
 # 1. 创建模块目录
-mkdir -p home/Reiky-REI/<module-name>
-touch home/Reiky-REI/<module-name>/default.nix
+mkdir -p home/{username}/<module-name>
+touch home/{username}/<module-name>/default.nix
 
 # 2. 在 default.nix 中编写 home-manager 选项
-# 3. 在 home/Reiky-REI/default.nix 的 imports 中添加 ./<module-name>
+# 3. 在 home/{username}/default.nix 的 imports 中添加 ./<module-name>
 ```
 
 ## 8. 软件归类判断规则
@@ -115,7 +118,7 @@ touch home/Reiky-REI/<module-name>/default.nix
 **环境变量归类**：
 - `NIXOS_OZONE_WL` → `modules/desktop/`
 - `QT_IM_MODULE` / `XMODIFIERS` → `modules/desktop/fcitx5/`
-- `TERMINAL` → `home/Reiky-REI/`
+- `TERMINAL` → `home/{username}/`
 - `XDG_DATA_DIRS` (flatpak) → `modules/services/`
 
 ## 9. Rebuild
@@ -139,4 +142,4 @@ sudo env \
 - 选项不存在 → 检查模块是否在正确的层（系统 vs home），以及是否被导入
 - 选项冲突 → 在对应模块的 `default.nix` 中搜索该选项定义
 - 行为不符合预期 → 检查 `hosts/MEOW/default.nix` 是否包含不应在 composition root 中的配置
-- 找不到模块 → 检查 `modules/default.nix` 或 `home/Reiky-REI/default.nix` 的 imports
+- 找不到模块 → 检查 `modules/default.nix` 或 `home/{username}/default.nix` 的 imports

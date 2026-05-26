@@ -16,6 +16,13 @@
 - home-manager options (`home.packages`, `home.file`, `programs.waybar` 等) 放在 home 层
 - `environment.sessionVariables` 按语义拆分到对应模块
 
+## 用户标识集中管理
+- 用户名及相关标识统一在仓库根目录 `config.nix` 中定义
+- NixOS 模块通过 `specialArgs` 接收 `username` 和 `fullName` 参数
+- home-manager 模块通过 `extraSpecialArgs` 接收
+- 新增/删改用户时只需修改 `config.nix`，所有模块自动引用新值
+- 详见 `architecture.md` 中的变量传递路径
+
 ## 环境变量归类
 - `NIXOS_OZONE_WL` → desktop
 - `QT_IM_MODULE` / `XMODIFIERS` → desktop/fcitx5 (输入法)

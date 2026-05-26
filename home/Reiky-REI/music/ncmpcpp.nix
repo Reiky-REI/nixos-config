@@ -1,13 +1,13 @@
-{pkgs, ...}: {
+{ config, pkgs, ... }: {
   home.packages = with pkgs; [
     mpc
   ];
 
   programs.ncmpcpp = {
     enable = true;
-    mpdMusicDir = "/home/Reiky-REI/music";
+    mpdMusicDir = "${config.home.homeDirectory}/music";
     settings = {
-      lyrics_directory = "/home/Reiky-REI/music";
+      lyrics_directory = "${config.home.homeDirectory}/music";
       store_lyrics_in_song_dir = "yes";
     };
   };

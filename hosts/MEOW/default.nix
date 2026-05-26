@@ -1,7 +1,9 @@
 {
+  config,
+  fullName,
   lib,
   pkgs,
-  config,
+  username,
   ...
 }: {
   imports = [
@@ -14,10 +16,10 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  users.users.Reiky-REI = {
-    description = "__Reiky__";
+  users.users.${username} = {
+    description = "__${fullName}__";
     isNormalUser = true;
-    home = "/home/Reiky-REI";
+    home = "/home/${username}";
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     hashedPassword = "$y$j9T$RQ9/Mj/mI5O8AhOnB.3gJ/$mRmKCYV3q7zKoFF1asu5oZNfBNRE4uHDloKQM7Eq5G3";
