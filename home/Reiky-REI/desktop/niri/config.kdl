@@ -71,19 +71,17 @@ layout {
     }
     default-column-width { proportion 0.5; }
     focus-ring {
+        off
+        // width 4
+        // active-color "#fec5f5"
+        // inactive-color "#363a4f"
+    }
+
+    border {
         // off
         width 4
         active-color "#fec5f5"
         inactive-color "#363a4f"
-        // active-color "#7fc8ff"
-        // inactive-color "#505050"
-    }
-
-    border {
-        off 
-        width 4
-        active-color "#ffc87f"
-        inactive-color "#505050"
         urgent-color "#9b0000"
     }
 
