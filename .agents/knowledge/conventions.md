@@ -41,8 +41,27 @@
 - 提交并验证通过后，**自己合并回 main**（除非标注需要 review）
 - **合并后立即删分支**: `git branch -d <分支名>` + `git push origin --delete <分支名>`
 
+## 复盘格式
+复盘强制使用以下 frontmatter 格式（AI 写复盘时自动生成）：
+
+```yaml
+---
+date: YYYY-MM-DD
+module: 改动的文件路径
+tags: [标签1, 标签2]
+related:
+  - ../retros/关联复盘.md (关联原因)
+  - ../../known-issues.md (相关章节)
+---
+```
+
+- `module`: 主要改动路径，如 `modules/common/default.nix`
+- `tags`: 便于搜索，如 `性能`, `build`, `niri`, `noctalia`, `nix-config`
+- `related`: 手动关联相关复盘、已知问题、决策记录。AI 写复盘时顺手加
+- 轻量级变更（一行改动/git typo）不写复盘
+
 ## 多 AI 协作规范
 - 两个 AI 都遵守 `.agents/` 下的全部约定
 - 修改复杂配置前先读 `known-issues.md` 避免踩坑
 - 新知识及时补充到对应知识文件或 `known-issues.md`
-- 配置变更后必须写复盘到 `knowledge/retros/`
+- 仅非平凡变更才写复盘到 `knowledge/retros/`

@@ -116,7 +116,4 @@ catppuccin release-25.11 中以下子模块不可用，已全部注释：
 - **配置**：`max-jobs = 8` + `min-free = 5G` / `max-free = 10G` + GC 改为 daily / ≥3d
 - **工作流**：日常验证用 `just rebuild`（7-8s），`just check` 只在提交前跑
 
-## 代理与网络
-- 代理: `http://127.0.0.1:7897`
-- GitHub token: `.agents/config/token` (gitignore 保护)
-- 镜像: TUNA, USTC
+<!-- 代理/网络配置见 skills/networking/SKILL.md -->

@@ -3,6 +3,7 @@ name: secrets
 description: agenix 密钥管理操作 — 编辑/新增/查看/重加密
 agents: [opencode, claude]
 ---
+> 完整文档见 knowledge/secrets.md
 
 ## 工作目录
 ```bash
