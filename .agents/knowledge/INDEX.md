@@ -12,8 +12,13 @@
 | 目录 | 用途 | 何时写入 |
 |------|------|---------|
 | `retros/` | 变更复盘 | 标准/复杂任务完成后 |
-| `decisions/` | 决策记录（为什么这么选） | 复杂任务需做选型时 |
+| `decisions/` | 决策记录（为什么这么选） | 复杂任务需做选型、待办计划时 |
 | `maps/` | 依赖链 / 模块关系图 | 遇到复杂依赖关系时 |
+
+## 决策索引
+| 文件 | 标签 | 状态 |
+|------|------|------|
+| [nixos-26.05-upgrade-plan.md](decisions/nixos-26.05-upgrade-plan.md) | upgrade, waydroid, gbinder, niri | ⏳ 等待 26.05 正式版 |
 
 ## Skill 索引
 > 统一入口: `SKILLS.md` — 按场景查找，包含全部技能元信息
@@ -26,4 +31,4 @@
 | [networking](../SKILLS.md#网络--环境) | 代理/GitHub token/镜像源/SSH 配置 | opencode, claude |
 
 ## 复盘索引
-完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 24 篇）
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 25 篇）

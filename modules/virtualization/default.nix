@@ -105,6 +105,22 @@ in {
 
   boot.kernelModules = ["nf_tables"];
 
+  # gbinder: waydroid 1.5.4 使用 aidl3, 覆盖 NixOS 默认的 aidl2
+  # 否则 binder 协议不匹配导致 waydroidplatform 服务无法通信
+  environment.etc."gbinder.d/waydroid.conf" = lib.mkForce {
+    text = ''
+      [Protocol]
+      /dev/binder = aidl3
+      /dev/vndbinder = aidl3
+      /dev/hwbinder = hidl
+
+      [ServiceManager]
+      /dev/binder = aidl3
+      /dev/vndbinder = aidl3
+      /dev/hwbinder = hidl
+    '';
+  };
+
   # ARM 翻译层自动部署
   system.activationScripts.waydroid-arm-translation = lib.mkIf config.virtualisation.waydroid.enable (lib.mkAfter ''
         if [ -d /var/lib/waydroid ]; then
