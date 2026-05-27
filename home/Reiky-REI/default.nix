@@ -3,7 +3,14 @@
   pkgs,
   lib,
   ...
-}: {
+}:
+let
+  # MikuCat 光标主题打包
+  micucat-cursor = pkgs.runCommand "MikuCat" {} ''
+    mkdir -p $out/share/icons/MikuCat
+    cp -r ${../../pkgs/cursors/MikuCat}/* $out/share/icons/MikuCat/
+  '';
+in {
   imports = [
     ./shell
     ./terminal
@@ -50,12 +57,12 @@
     "x-scheme-handler/https" = "google-chrome.desktop";
   };
 
-  # 光标配置
+  # 光标配置 - MikuCat
   home.pointerCursor = {
     enable = true;
-    package = pkgs.adwaita-icon-theme;
-    name = "Adwaita";
-    size = 24;
+    package = micucat-cursor;
+    name = "MikuCat";
+    size = 32;
   };
 
   home.sessionVariables = {

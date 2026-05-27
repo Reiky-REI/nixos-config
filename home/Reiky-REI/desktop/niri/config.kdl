@@ -1,6 +1,12 @@
 // "/-" comments out the following node.
 // 公共启动项与 hyprland/hypr/autostart.conf 同步，修改时请同时更新
 prefer-no-csd //移除终端等应用的标题栏
+
+cursor {
+    xcursor-theme "MikuCat"
+    xcursor-size 32
+}
+
 spawn-at-startup "noctalia-shell"
 spawn-at-startup "swww-daemon"
 spawn-at-startup "fcitx5"
