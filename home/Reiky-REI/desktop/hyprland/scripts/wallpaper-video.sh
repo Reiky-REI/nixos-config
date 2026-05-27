@@ -3,7 +3,7 @@ set -euo pipefail
 
 CMD="${1:-toggle}"
 STATIC_DIR="$HOME/Pictures/Wallpapers/static"
-VIDEO_DIRS=("$HOME/Pictures/Wallpapers/videos" "$HOME/download")
+VIDEO_DIRS=("$HOME/Pictures/Wallpapers/videos" "$HOME/Downloads" "$HOME/download")
 
 case "$CMD" in
   start)
