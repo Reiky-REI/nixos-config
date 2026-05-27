@@ -35,6 +35,7 @@
 - 每次验证通过后提交一个步骤
 - **始终在 feature branch 上工作**，禁止直接在 main 上修改
 - 开工前执行 `git status` + `git branch` 确认工作区干净
+- **复盘先写再提交**: 配置变更完成后先写复盘，复盘和代码在同一个 commit 里
 - **OpenCode 提交**使用 `.agents/config/commit.sh`（bot 身份）
 - **Claude Code 提交**用 `git -c user.name="claude-code[bot]" -c user.email="claude-code[bot]@users.noreply.github.com" commit`（bot 身份）
 - 提交并验证通过后，**自己合并回 main**（除非标注需要 review）
