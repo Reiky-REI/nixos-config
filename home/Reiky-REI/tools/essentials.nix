@@ -6,6 +6,7 @@
     zip
     tldr
     entr
+    evtest
 
     wlr-randr
 

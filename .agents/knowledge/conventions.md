@@ -37,7 +37,8 @@
 - 开工前执行 `git status` + `git branch` 确认工作区干净
 - **OpenCode 提交**使用 `.agents/config/commit.sh`（bot 身份）
 - **Claude Code 提交**用 `git -c user.name="claude-code[bot]" -c user.email="claude-code[bot]@users.noreply.github.com" commit`（bot 身份）
-- 提交后推送到 origin，由人工或另一个 AI review 后合并到 main
+- 提交并验证通过后，**自己合并回 main**（除非标注需要 review）
+- **合并后立即删分支**: `git branch -d <分支名>` + `git push origin --delete <分支名>`
 
 ## 多 AI 协作规范
 - 两个 AI 都遵守 `.agents/` 下的全部约定

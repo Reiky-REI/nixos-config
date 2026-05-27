@@ -22,8 +22,9 @@ AI 工作纪律：
 1. **绝不直接在 main 上改** — 每个任务开一个 feature branch
 2. **开工前检查** — `git status` + `git branch`，确认没有未提交变更或进行中的分支
 3. **改完先 build** — `nixos-rebuild build --flake /etc/nixos#NixMEOW` 通过后再提交
-4. **提交后推送分支** — 让另一个 AI 或用户来 merge 到 main
-5. **复盘不可少** — 任何配置变更完成后写一条到 `knowledge/retros/`
+4. **提交后合回 main** — 提 PR 或直接合并，优先自己合（如需 review 则标注等待）
+5. **merge 后删分支** — 删除本地+远程分支，避免 stale branch 堆积
+6. **复盘不可少** — 任何配置变更完成后写一条到 `knowledge/retros/`
 
 ### 冲突预防
 - 如果发现非自己创建的分支，先看看 `knowledge/retros/` 里有没有对应说明再做
