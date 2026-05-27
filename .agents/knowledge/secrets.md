@@ -122,7 +122,7 @@ age.secrets 键名只能包含 `[a-zA-Z0-9_-]`，所以用户名中的连字符�
 
 | 文件 | 用户 | 解密路径 | 环境变量 |
 |------|------|----------|----------|
-| `ai_api_key_REIKY_REI.age` | Reiky-REI | `/run/agenix/ai_api_key_REIKY_REI` | `DEEPSEEK_API_KEY_REIKY_REI`, `NIX_ACCESS_TOKEN` |
+| `ai_api_key_REIKY_REI.age` | Reiky-REI | `/run/agenix/ai_api_key_REIKY_REI` | `DEEPSEEK_API_KEY_REIKY_REI`, `NIX_ACCESS_TOKEN`, `XIAOMI_API_KEY`, `XIAOMI_API_ENDPOINT` |
 
 ## 故障排查
 
