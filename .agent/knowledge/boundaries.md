@@ -8,14 +8,12 @@
 ## ✅ AI 可以做
 
 ### 文件操作
-- 读 `.agents/` 目录下的所有文档
-- 写 `.agents/knowledge/retros/`（跨会话记录）
-- 写 `.agents/knowledge/known-issues.md`（新增解决方案）
-- 写 `.agents/knowledge/`（保存验证过的代码）
-- 写 `.agents/knowledge/known-issues.md`（追加新的问题和解决方案）
+- 读 `.agent/` 目录下的所有文档
+- 写 `.agent/knowledge/`（跨会话记录）
+- 写 `.agent/knowledge/known-issues.md`（新增解决方案）
 - 写 `~/.config/opencode/skills/`（新增 skill）
-- 读 `/etc/nixos/` 下的所有 .nix 文件
-- 写 `/etc/nixos/` 下的 .nix 文件（需 git branch）
+- 读 `/etc/nixos/` 或 `/home/ai-code/nixos/` 下的 .nix 文件
+- 写工作目录下的 .nix 文件（需 git branch）
 
 ### 系统操作
 - 执行 `verify.sh` 自检

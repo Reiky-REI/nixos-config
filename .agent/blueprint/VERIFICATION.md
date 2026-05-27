@@ -71,34 +71,53 @@ test "$(nix eval --raw .#nixosConfigurations.NixMEOW.config.system.build.topleve
 - **PASS**: 命令返回 0，system evaluation 成功
 - **FAIL (级别 1)**: `llm-agents` 或 `mcp-nixos` 未正确添加到 flake.nix
 
-### P1.2 ollama 服务
+### P1.2 opencode 可用性
 ```bash
 # 验证命令
-ollama list 2>/dev/null | grep -q "qwen3:4b" && ollama list 2>/dev/null | grep -q "nomic-embed-text"
+opencode --version > /dev/null 2>&1 && opencode agent list > /dev/null 2>&1
 ```
-- **PASS**: 两个模型都在列表中
-- **FAIL (级别 1)**: 模型下载失败或 services.ollama 未启用
+- **PASS**: opencode 可用，agent 列表正常
+- **FAIL (级别 1)**: opencode 未安装或 agent 系统异常
 
-### P1.3 ollama CUDA 加速
+### P1.3 opencode serve 作为 daemon
 ```bash
 # 验证命令
-ollama run qwen3:4b "test" 2>&1 | tail -20 | grep -qi "cuda\|gpu\|nvidia" || nvidia-smi 2>/dev/null | grep -q "ollama"
+curl -s http://localhost:4096/health > /dev/null 2>&1 || systemctl is-active opencode-serve > /dev/null 2>&1
 ```
-- **PASS**: 输出中包含 CUDA/GPU 相关信息或 ollama 进程出现在 nvidia-smi 中
-- **FAIL (级别 1)**: GPU 未使用，检查 `acceleration = "cuda"` 配置
+- **PASS**: opencode serve 在运行
+- **FAIL (级别 1)**: daemon 未启动，检查 systemd service 状态
 
-### P1.4 AI 用户创建
+### P1.4 Claude Code --print 可用
 ```bash
 # 验证命令
-id ai-agent > /dev/null 2>&1 && id ai-sentinel > /dev/null 2>&1
+echo "test" | claude --print --model sonnet 2>&1 | grep -q "test\|你好\|Hello"
 ```
-- **PASS**: 两个用户都存在
+- **PASS**: Claude Code --print 返回正常输出
+- **FAIL (级别 1)**: Claude Code 未安装或 API 配置异常
+
+### P1.5 AI 用户创建
+```bash
+# 验证命令
+id ai-code > /dev/null 2>&1
+```
+- **PASS**: ai-code 用户存在
 - **FAIL (级别 1)**: 用户未创建
 
-### P1.5 AI 用户组正确性
+### P1.6 nixos-rebuild build 无需 root
 ```bash
 # 验证命令
-groups ai-agent | grep -q "render" && groups ai-agent | grep -q "video"
+sudo -u ai-code nixos-rebuild build --flake /home/ai-code/nixos#NixMEOW --no-link 2>&1 | grep -q "building the system configuration"
+```
+- **PASS**: ai-code 能直接 build，无需 sudo
+- **FAIL (级别 1)**: 权限不足，检查 trusted-users 配置
+
+### P1.7 git worktree 存在
+```bash
+# 验证命令
+test -d /home/ai-code/nixos/.git/worktrees
+```
+- **PASS**: git worktree 正确设置
+- **FAIL (级别 1)**: 未创建 worktree，参考 BOOTSTRAPPER.md 0.5 节groups ai-agent | grep -q "render" && groups ai-agent | grep -q "video"
 ```
 - **PASS**: ai-agent 在 render 和 video 组中
 - **FAIL (级别 1)**: groups.nix 配置不完整

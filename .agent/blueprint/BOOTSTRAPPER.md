@@ -1,6 +1,6 @@
 # NixMEOW AI-Native · 启动手册
 
-> 给负责构建此系统的 AI 的**可执行指引**。
+> 给负责构建此系统的 AI 的**可执行指引** (v2.1)。
 > 最终目标是实现 BLUEPRINT.md 中定义的完整系统。
 > 本文档描述构建顺序和验证方法——**不假设连续构建，每次会话从上次 checkpoint 继续**。
 
@@ -20,7 +20,7 @@
 2. 对照当前系统状态，写**真实可用的代码**
 3. 通过 `nixos-rebuild dry-build` 验证
 4. 通过 `bash /etc/nixos/.agent/blueprint/verify.sh <phase>` 验证
-5. **每完成一个步骤，立即写记录到 `.agents/knowledge/`**（见下方「记录铁律」）
+5. **每完成一个步骤，立即写记录到 `.agent/knowledge/`**（见下方「记录铁律」）
 
 **千万不要**：
 - 直接复制粘贴伪代码到 `/etc/nixos/`
@@ -39,7 +39,7 @@
 
 **每个步骤完成后必须写记录**。不是建议，是强制。
 
-记录位置: `.agents/knowledge/`
+记录位置: `.agent/knowledge/`
 
 文件名格式: `步骤N-简短描述.md`
 
@@ -123,10 +123,10 @@
 
 ```bash
 # 1. 确认当前 generation 可用
-sudo nixos-rebuild list-generations | head -5
+nixos-rebuild list-generations | head -5
 
-# 2. 先 dry-build (不应用)
-sudo nixos-rebuild dry-build --flake /etc/nixos#NixMEOW
+# 2. 先 build (不应用) — 不需要 sudo
+nixos-rebuild build --flake /home/ai-code/nixos#NixMEOW --no-link
 
 # 3. git 备份点（见 0.6 提交规范）
 cd /etc/nixos && git add -A && git commit -m "nixos(ai): checkpoint before <change>"
@@ -143,6 +143,41 @@ sudo nixos-rebuild --rollback
 ```
 主机名: NixMEOW
 NixOS channel: 25.11 (或更新的)
+主力 agent: opencode (已配置, DeepSeek V4 Flash 后端)
+已有代理: Clash Verge (localhost:7897, TUN 模式)
+已有密钥: agenix (ai_api_key_REIKY_REI)
+已有 AI 工具: opencode (TUI + serve + run), claude-code (CLI)
+已有提供商桥接: cc-switch (Claude Code ↔ DeepSeek)
+```
+
+### 0.5 关键发现：nixos-rebuild build 无需 root
+
+`nixos-rebuild build`（仅构建，不切换）**不需要 sudo**。只要用户在 `nix.settings.trusted-users` 中，可以直接运行：
+```bash
+# 已验证：trusted-user 可以直接 build
+nixos-rebuild build --flake /home/ai-code/nixos#NixMEOW --no-link
+```
+
+只有 `nixos-rebuild switch`（激活新配置）才需要 root。build + 手动 reboot 是最安全的流程。
+
+### 0.6 初始设置：git worktree
+
+构建前先建立 AI 的独立工作目录，避免与用户的工作目录冲突：
+
+```bash
+# 1. 创建 AI 用户的工作目录（共享组保证读写权限）
+git worktree add /home/ai-code/nixos
+
+# 2. AI 在此目录下工作，用户仍在 /etc/nixos/
+cd /home/ai-code/nixos
+
+# 3. 以后 build 时指向自己的工作目录
+nixos-rebuild build --flake /home/ai-code/nixos#NixMEOW
+```
+
+> AI 和用户可以同时在不同分支工作：`git worktree` 共享 `.git` 仓库，但工作目录和 index 相互独立。
+主机名: NixMEOW
+NixOS channel: 25.11 (或更新的)
 主力 agent: opencode (已配置, DeepSeek V3 后端)
 已有代理: Clash Verge (localhost:7897, TUN 模式)
 已有密钥: agenix (ai_api_key_REIKY_REI)
@@ -155,7 +190,7 @@ CPU: Intel
 配置文件: /etc/nixos/ (flake-based, 模块化)
 ```
 
-### 0.5 本文档中的代码标注
+### 0.7 本文档中的代码标注
 
 ```
 伪代码标记:
@@ -166,7 +201,7 @@ CPU: Intel
 请先 dry-build，验证通过后更新标记。
 ```
 
-### 0.6 Git 提交规范 — AI 必须遵守
+### 0.8 Git 提交规范 — AI 必须遵守
 
 > 提交信息是下一个 AI 理解「这段代码为什么存在」的第一线索。  
 > 混乱的提交 = 下一个 AI 迷失。

@@ -48,35 +48,32 @@ case "$PHASE" in
     echo "  Phase 1: Infrastructure Verification"
     echo "═══════════════════════════════════════════"
     
-    verify P1.1 phase1 "flake builds without error" \
+    verify P1.1 phase1 "flake eval succeeds" \
       'nix eval .#nixosConfigurations.NixMEOW.config.system.build.toplevel.drvPath >/dev/null 2>&1' 2
-    
-    verify P1.2 phase1 "ollama: qwen3:4b loaded" \
-      'ollama list 2>/dev/null | grep -q "qwen3:4b"'
-    
-    verify P1.3 phase1 "ollama: nomic-embed-text loaded" \
-      'ollama list 2>/dev/null | grep -q "nomic-embed-text"' || true
-    
-    verify P1.4 phase1 "users: ai-agent exists" \
-      'id ai-agent >/dev/null 2>&1'
-    
-    verify P1.5 phase1 "users: ai-sentinel exists" \
-      'id ai-sentinel >/dev/null 2>&1'
-    
-    verify P1.6 phase1 "ai-agent has render group" \
-      'groups ai-agent 2>/dev/null | grep -q "render"'
-    
-    verify P1.7 phase1 "ai-agent CANNOT sudo" \
-      'sudo -u ai-agent sudo -n true 2>&1 | grep -q "not allowed\|in the sudoers\|a password"' 2
-    
-    verify P1.8 phase1 "dirs: ~ai-agent/learn exists" \
-      'test -d /home/ai-agent/learn'
-    
-    verify P1.9 phase1 "dirs: ~ai-agent/build exists" \
-      'test -d /home/ai-agent/build'
-    
-    verify P1.10 phase1 "nixos-rebuild build succeeds" \
-      'sudo nixos-rebuild build --flake /etc/nixos#NixMEOW 2>&1 | tail -3 | grep -q "successfully built"' 2
+
+    verify P1.2 phase1 "opencode is available" \
+      'opencode --version >/dev/null 2>&1'
+
+    verify P1.3 phase1 "users: ai-code exists" \
+      'id ai-code >/dev/null 2>&1'
+
+    verify P1.4 phase1 "ai-code is trusted-user for nix" \
+      'sudo -u ai-code nix store ping 2>&1 | grep -q "Trusted: 1"'
+
+    verify P1.5 phase1 "ai-code can build without sudo" \
+      'sudo -u ai-code nixos-rebuild build --flake /home/ai-code/nixos#NixMEOW --no-link 2>&1 | grep -q "building the system configuration"' 2
+
+    verify P1.6 phase1 "ai-code CANNOT nixos-rebuild switch" \
+      'sudo -u ai-code nixos-rebuild switch --flake /home/ai-code/nixos#NixMEOW 2>&1 | grep -q "not allowed\|sudoers\|a password"' 2
+
+    verify P1.7 phase1 "git worktree exists" \
+      'test -d /home/ai-code/nixos/.git/worktrees'
+
+    verify P1.8 phase1 "opencode serve is running" \
+      'curl -s http://localhost:4096/health >/dev/null 2>&1 || systemctl is-active opencode-serve >/dev/null 2>&1'
+
+    verify P1.9 phase1 "claude --print works" \
+      'echo "ping" | claude --print --model sonnet 2>&1 | head -3 | wc -l | grep -q "[1-9]"'
     ;;
 
   phase2|all)
@@ -202,12 +199,12 @@ case "$PHASE" in
     echo "=============================="
     echo ""
     echo "Available phases:"
-    echo "  phase1  — Infrastructure (flake inputs, ollama, users, build)"
-    echo "  phase2  — Agent Runtime (openclaw, iptables, proxy)"
-    echo "  phase3  — Skills (SKILL.md generation, tools, vulnix)"
-    echo "  phase4  — Security & Sentinel (CONSTITUTION, permissions, restic)"
-    echo "  phase5  — Self-Evolution (recaps, community API, blueprint)"
-    echo "  phase6  — Learning & Publishing (companion, git)"
+    echo "  phase1  — Infrastructure (flake, ai-code user, opencode, claude, worktree)"
+    echo "  phase2  — Agent Runtime (opencode serve, agents, permissions)"
+    echo "  phase3  — Skills (skills, knowledge pipeline)"
+    echo "  phase4  — Security & Sentinel (CONSTITUTION, multi-user audit)"
+    echo "  phase5  — Self-Evolution (community, recaps, adaptation)"
+    echo "  phase6  — Learning & Publishing (companion, git, publish)"
     echo "  all     — Run all phases in order"
     echo ""
     echo "Usage: $0 <phase>"

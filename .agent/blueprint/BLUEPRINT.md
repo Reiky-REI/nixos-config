@@ -1,9 +1,19 @@
 # NixMEOW AI-Native 系统 · 完整蓝图
 
-> 版本: v2.0  
+> 版本: v2.1  
 > 本文档是 NixMEOW AI-Native 操作系统设计的 **唯一权威参考**。  
 > 整合了生态调研、博弈论分析、实战验证、角色分类、自进化体系。  
 > 本文档定义**最终目标**——实现路径见 BOOTSTRAPPER.md，验证标准见 VERIFICATION.md。
+
+> **🔄 v2.1 修正说明 (2026-05-28)**  
+> 本文档原设计基于理论推演，部分假设在实战中得到了修正。  
+> 以下是关键新发现（已在对应章节补充详细内容）：
+> - `opencode serve` 已提供 headless AI daemon，无需自建
+> - `claude --print` 提供非交互式 AI 执行引擎
+> - `opencode agent` 体系可替代部分 Unix 用户角色隔离
+> - `nix.settings.trusted-users` 使 `nixos-rebuild build` 无需 root
+> - git worktree 实现人/AI 并行工作
+> - `.agents/` 复盘+已知问题知识体系已在 main 分支验证有效
 
 ---
 
@@ -105,10 +115,12 @@ AI 是学徒开发者 > AI 是托管进程
   参数自适应 · 社区提案 · 工具自构建 · 经验积累
 
 第 2 层: Agent 运行时
-  Copilot(副驾驶) · Companion(伴侣) · System Agent(管家) · Explorer(探索者)
+  角色: Copilot(副驾驶) · Companion(伴侣) · System Agent(管家) · Explorer(探索者)
+  底座: opencode serve (daemon) · opencode agent (角色隔离)
+  引擎: Claude Code --print (AI 任务执行) · opencode run (非交互任务)
 
 第 1 层: 协议与感知
-  mcp-nixos · systemd · inotify · swaync · auditd
+  opencode ACP · opencode run --attach · mcp-nixos · systemd · auditd
 
 第 0 层: 安全基座
   Linux DAC(用户组) · Nix 原生防护 · iptables · restic · PEA Sentinel
@@ -146,6 +158,8 @@ Proposer     = Sandbox Explorer（只有提议权，无执行权）
 不依赖应用层沙箱。用 **Linux DAC + 用户组 + POSIX 权限**。
 
 ### 用户定义
+
+> **🔄 实战修正**：以下 5 用户设计是最终目标。初始实施时，可用一个 `ai-code` 用户配合 OpenCode agent 体系替代，用 OpenCode agent 的权限隔离实现角色分离（见第 7 节）。`trusted-users` + `security.sudo.extraRules` 替代 sudo 白名单。
 
 ```
 Reiky-REI (uid=1000)
@@ -238,6 +252,12 @@ nix.settings.allowed-users = ["root" "@wheel"];
 # ai-agent 不在 wheel 组，无法直接使用 nix daemon
 ```
 
+> **🔄 实战修正**：`nix.settings.trusted-users` 是比 sudo 更轻量的授权方式。`trusted-users` 可以：
+> - 直接执行 `nixos-rebuild build`（无需 sudo）
+> - 使用 flake 中声明的自定义 substituters
+> - 执行 `nix store gc`
+> 实际测试验证：非 root trusted-user 执行 `nixos-rebuild build` 成功走到构建阶段，无权限错误。只有 `switch` 需要 root（更新 system profile + 激活）。
+
 ---
 
 ## 5. 网络审计与代理链
@@ -318,6 +338,8 @@ networking.firewall.extraCommands = ''
 
 ## 7. 五角色 Agent 体系
 
+> **🔄 实战修正**：人和 AI 在同一 git 仓库工作时的冲突问题，通过 git worktree 解决。AI 的工作目录独立于用户的主工作目录，分支互不干扰。详见 BOOTSTRAPPER.md 初始设置。
+
 ### 角色间委托关系
 
 ```
@@ -346,14 +368,19 @@ Reiky-REI (人类)
             └── 通知 Reiky-REI: 异常 → swaync
 ```
 
+> **🔄 实战修正**：角色不再各自占用一个 systemd service。`opencode serve` 作为统一 daemon 底座运行，每个角色通过 `opencode agent create` 定义为 OpenCode agent。  
+> opencode agent 的 `--permissions`/`--tools` 参数提供细粒度工具访问控制（read/edit/bash/glob/grep/webfetch 等），加上 OpenCode JSON permission rules 的模式匹配，可替代部分 Linux DAC 用户组隔离。  
+> Claude Code `--print` 作为 AI 级任务执行引擎，处理需要自然语言理解的复杂任务。  
+> 任务提交通道：`opencode run --attach http://localhost:<port>`（非交互）或 `opencode --attach`（交互式 TUI）。
+
 ### 角色详细定义
 
-**Copilot (ai-copilot, uid=1011)**
+**Copilot (ai-copilot, uid=1011) / OpenCode plan agent**
 - 定位: 像输入法一样贴身
 - 交互: zsh 补全建议、命令纠错、快速问答
-- 工具: shell function + opencode --plan 模式
-- 权限: 最低。只读 ai-reader 组。不能写任何文件，不能执行任何命令
-- 实现: 优先用 zsh history + fzf 增强补全，AI copilot 留接口后续本地小模型
+- 工具: shell function + opencode plan agent（只读模式）
+- 权限: 最低。只读，不能写任何文件，不能执行任何命令
+- 实现: OpenCode plan agent（已有 `edit`: deny 规则）+ zsh history + fzf
 
 **Companion (ai-companion, uid=1012)**
 - 定位: 私人 AI 伴侣
@@ -362,12 +389,14 @@ Reiky-REI (人类)
 - 权限: 低。读共享目录，写自己知识库。不执行系统命令
 - 核心职责: 学习陪伴、知识图谱、**会话后经验记录**
 
-**System Agent (ai-agent, uid=1001)**
+**System Agent (ai-agent, uid=1001) / OpenCode executor agent**
 - 定位: 后台系统维护者
-- 交互: systemd timer 触发，swaync 通知结果
-- 工具: opencode (skill 模式) + organize-tool + vulnix + restic
+- 交互: systemd timer 触发 / `opencode run --attach` 接收任务
+- 底座: opencode serve（常驻 daemon）
+- 工具: opencode executor agent + claude --print + organize-tool + vulnix + restic
 - 权限: 中。受限 sudo + 组共享目录读写
 - 核心职责: 文件整理、安全监控、磁盘清理、备份、社区监控
+- 关键能力: AI 级任务通过 `claude --print --allowedTools "Read,Edit,Bash" --permission-mode bypassPermissions` 执行
 
 **Sandbox Explorer (ai-sandbox, uid=1013)**
 - 定位: 被委托的测试者
@@ -745,9 +774,9 @@ systemd.timers = {
 🔧 = 自建 Nix module / script
 
 推理引擎:
-  ✅ ollama (本地模型)                ✅ opencode (主力 coding)
-  🔷 openclaw (后台助手)              🔷 bernstein (多agent编排, 按需)
-  ✅ llama-cpp (可选本地推理)
+  ✅ ollama (本地模型)                ✅ opencode (TUI + serve + run)
+  ✅ claude-code (--print 非交互执行)  ✅ cc-switch (Claude Code 代理桥接)
+  🔷 bernstein (多agent编排, 按需)
 
 MCP / 感知:
   ✅ mcp-nixos (反幻觉)               ✅ watchexec (文件监听)
@@ -767,6 +796,10 @@ MCP / 感知:
 代理 / 审计:
   🔷 cli-proxy-api (API 审计代理)       ✅ clash-verge (已有)
 
+AI 系统服务:
+  ✅ opencode serve (headless daemon)   ✅ opencode run (非交互任务)
+  ✅ opencode agent (角色定义)          ✅ claude --print (AI 引擎)
+
 安全基座:
   Linux DAC (用户组权限)               auditd (内核级审计)
   systemd cgroups (资源限制)            iptables/nftables (网络强制)
@@ -784,95 +817,110 @@ MCP / 感知:
 
 ## 17. 实施路线图
 
-### Phase 1: 基础设施 + 用户组
+> **🔄 实战修正**：以下路线图已根据 `opencode serve`、`claude --print`、git worktree 等实战发现更新。Phase 1-2 优先用现有工具快速实现功能，Phase 3+ 逐步细化到完整的多用户设计。
+
+### Phase 1: 基础用户 + 工作目录
+
+```
+目标: AI 有独立身份、独立工作目录，能和用户并行工作
+
+改动:
+  config.nix            [修改]  新增 ai-code 用户定义
+  flake.nix             [修改]  specialArgs 传递 aiUsername
+  hosts/<host>/default  [修改]  users.users.ai-code + sudo 受限规则
+  modules/common/       [修改]  trusted-users 加 ai-code
+  home/ai-code/         [新建]  gitconfig, bashrc, SSH 目录
+
+手动步骤:
+  groupadd nixconfig                 # 共享组
+  chown -R :nixconfig /etc/nixos     # 读写权限
+  chmod -R g+rw /etc/nixos
+  git worktree add /home/ai-code/nixos  # AI 独立工作目录
+
+验证:
+  nixos-rebuild build 零错误
+  id ai-code 确认用户存在且组正确
+  sudo -u ai-code nixos-rebuild build --flake /home/ai-code/nixos#NixMEOW --no-link
+  sudo -u ai-code git switch -c ai/test  # 确认可独立工作
+  sudo -u ai-code nixos-rebuild switch → PERMISSION DENIED (或需用户确认)
+```
+
+### Phase 2: AI Daemon (opencode serve)
+
+```
+目标: opencode serve 作为常驻 daemon，接收任务
+
+改动:
+  systemd service: opencode-serve.service (以 ai-code 身份运行)
+  opencode agent create "executor"     # 读写执行
+  opencode agent create "planner"      # 只读规划
+  opencode agent create "reviewer"     # 代码审查
+
+验证:
+  opencode serve --port 4096 (systemd service 启动正常)
+  opencode run --attach http://localhost:4096 --agent planner "分析当前配置"
+  opencode run --attach http://localhost:4096 --agent executor "build 验证"
+  claude --print "检查 /home/ai-code/nixos/flake.nix" (AI 执行引擎)
+```
+
+### Phase 3: 扩展至多用户 + 角色体系
+
+```
+目标: 从 ai-code 单一用户扩展至 5 角色多用户设计
+
+改动:
+  hosts/<host>/default  [修改]  新增 ai-sentinel, ai-sandbox, ai-copilot, ai-companion 用户
+  modules/security/     [新建]  用户组定义 (ai-shared, ai-reader, ai-builder, ai-auditor)
+  modules/security/     [新建]  目录权限矩阵
+  modules/security/     [新建]  sentinel-rules.nix (审计规则)
+
+验证:
+  id ai-agent / id ai-sentinel / id ai-companion / id ai-copilot / id ai-sandbox
+  各用户组正确，目录权限隔离生效
+  sudo -u ai-sentinel systemctl stop ai-agent (sentinel 可停 agent)
+  sudo -u ai-agent systemctl stop ai-sentinel (agent 不能停 sentinel → PERMISSION DENIED)
+```
+
+### Phase 4: Skills 矩阵 + 知识管道
+
+```
+目标: AI 拥有可编程技能，经验自动积累
+
+改动:
+  .agent/knowledge/     [新建]  复盘记录 + known-issues 积累
+  skills/               [新建]  系统层/用户层技能定义
+  claude --print        [集成]  复杂任务通过 AI 引擎执行
+
+验证:
+  手动复盘记录能被下一个 AI 读取和理解
+  AI 通过 opencode run 提交任务被 daemon 正确执行
+```
+
+### Phase 5: 安全基座 + 哨兵
 
 ```
 改动:
-  flake.nix             [修改]  新增 llm-agents + mcp-nixos inputs + 5 个用户+组定义
-  modules/services/ai/  [新建]  default.nix, ollama.nix, timers.nix
-  home/Reiky-REI/ai/    [新建]  default.nix, skills/default.nix, mcp.nix, companion-dirs.nix
-  新增 5 个 Linux 用户定义
+  sentinel systemd service  独立审计服务
+  auditd 规则              内核级审计
+  CONSTITUTION.md          代理宪法
+  iptables uid 强制代理     网络逃逸防护
 
 验证:
-  nixos-rebuild build --flake /etc/nixos#NixMEOW 零错误
-  ollama list 显示 qwen3:4b + nomic-embed-text
-  systemctl list-timers | grep ai- 显示 10+ timer
-  id ai-agent, id ai-sentinel 确认正确组
-  sudo -u ai-agent nixos-rebuild switch → PERMISSION DENIED
-```
-
-### Phase 2: Agent 运行时
-
-```
-改动:
-  modules/services/ai/openclaw-daemon.nix  [新建]  openclaw systemd service
-  iptables 规则                             强制 uid 只能走代理
-
-验证:
-  systemctl --user status openclaw-gateway 正常
-  power-aware: 拔电源 → agent 暂停
-  curl google.com (as ai-agent) → 被 iptables REJECT
-  curl localhost:7897 (as ai-agent) → 正常
-```
-
-### Phase 3: Skills 矩阵
-
-```
-改动:
-  home/Reiky-REI/ai/skills/  11 个 skill .nix → SKILL.md 生成
-  organize-tool derivation
-  .ai-rules.toml 配置生成
-
-验证:
-  ~/.config/opencode/skills/ 包含 11+3 个 SKILL.md
-  每个 SKILL.md 有正确 YAML frontmatter
-  organize sim 正确分类测试 Downloads
-  vulnix --system 正确报告
-```
-
-### Phase 4: 安全基座 + 哨兵
-
-```
-改动:
-  modules/services/ai/sandbox.nix   bubblewrap 声明式沙箱
-  home/Reiky-REI/ai/audit.nix      activity.jsonl + restic snapshot
-  sentinel-rules.nix               哨兵规则
-  CONSTITUTION.md                  代理宪法
-
-验证:
-  activity.jsonl 在文件操作后正确写入
-  restic snapshots --tag pre-ai-change 显示快照
-  sentinel 检测到异常 → notify-send
+  哨兵检测越界操作 → notify-send
   nixos-rebuild --rollback 成功回滚
 ```
 
-### Phase 5: 自进化 + 经验管道
+### Phase 6: 自进化 + 学习陪伴
 
 ```
 改动:
-  knowledge-recorder skill
-  community-opportunist skill
-  usage-analyst skill
-  gno 知识引擎集成
-  .organize-rules.toml parser
+  community-pulse skill     社区感知
+  usage-analyst skill       参数自适应
+  learn-companion skill     学习陪伴
 
 验证:
-  rebuild 后自动生成 session recap
   社区 RSS 每周摘要无误
   参数自适应不越过安全下限
-```
-
-### Phase 6: 学习陪伴 + 发布
-
-```
-改动:
-  learn-companion skill
-  publisher skill
-  ClawHub publish 集成 (可选)
-
-验证:
-  learn-companion 能总结学习笔记
-  publisher 能自动发布博客
 ```
 
 ---
@@ -909,6 +957,15 @@ MCP / 感知:
 | **AutoGen** | — | 可对话 agent、GroupChatManager |
 | **Goose CLI** | 45k | Extensions trait (模块化)、MCP 标准 |
 | **Letta Code** | — | 双阶段学习、记忆块、Git-backed memory |
+
+### 实战验证的工具
+
+| 工具 | 角色 | 实战发现 |
+|------|------|---------|
+| **opencode** (v1.15+) | 主力 AI agent | `opencode serve` 提供 headless daemon，`opencode run --attach` 用于非交互任务提交，`opencode agent create` 定义角色和权限。已在本项目 main 分支长期使用，DeepSeek V3/V4 Flash 后端。 |
+| **Claude Code** (v2.1+) | AI 执行引擎 | `claude --print --allowedTools "Read,Edit,Bash" --permission-mode bypassPermissions` 可用于 AI 级复杂任务的非交互执行。支持 `--output-format json` 结构化结果。`--max-budget-usd` 可控制单次任务成本。 |
+| **cc-switch** | 提供商桥接 | 通过 `ANTHROPIC_BASE_URL=http://127.0.0.1:15721` 代理 DeepSeek API 到 Claude Code，已在本项目验证可用。 |
+| **`.agents/` 知识体系** | 经验积累 | retros + known-issues + skills 三层结构已在 main 分支验证有效。AI 通过复盘记录跨会话传递经验。 |
 
 ### 安全工具参考
 
