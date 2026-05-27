@@ -3,7 +3,7 @@
 set -euo pipefail
 
 # 配置
-WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/.config/wallpaper}"
+WALLPAPER_DIR="${WALLPAPER_DIR:-$HOME/Pictures/Wallpapers/static}"
 ROFI_THEME="${ROFI_THEME:-$HOME/.config/rofi/themes/wallpaper_2_line.rasi}"
 
 # 启动 swww 守护进程

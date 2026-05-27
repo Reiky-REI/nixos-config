@@ -224,6 +224,7 @@ binds {
     Mod+Shift+Return hotkey-overlay-title="打开终端(浮动): alacritty" { spawn "alacritty" "--class" "floating_terminal"; }
     Mod+D hotkey-overlay-title="打开应用启动器: fuzzel" { spawn "fuzzel"; }
     Mod+Shift+W hotkey-overlay-title="切换壁纸: swww" { spawn "~/.config/wallpaper/script/swww-rofi.sh"; }
+    Mod+Ctrl+W hotkey-overlay-title="切换视频壁纸: mpvpaper" { spawn "~/.config/wallpaper/script/wallpaper-video.sh" "toggle"; }
     Mod+G hotkey-overlay-title="截图与录屏" { spawn "~/.config/hypr/scripts/capture.sh"; }
     Mod+E hotkey-overlay-title="yazi文件管理器" { spawn "alacritty" "-e" "yazi"; }
     Mod+B hotkey-overlay-title="打开谷歌浏览器" { spawn "google-chrome-stable"; }

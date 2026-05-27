@@ -136,6 +136,7 @@
                 ./home/${user.username}
               ];
               home.packages = [
+                pkgs-unstable.mpvpaper
                 CookNixvim.packages.${system}.default
               ];
             };

@@ -16,4 +16,10 @@ _: {
     source = ./swww-rofi.sh;
     executable = true;
   };
+
+  #---------视频壁纸控制脚本--------#
+  home.file.".config/wallpaper/script/wallpaper-video.sh" = {
+    source = ./wallpaper-video.sh;
+    executable = true;
+  };
 }
