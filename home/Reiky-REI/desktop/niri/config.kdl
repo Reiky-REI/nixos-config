@@ -9,10 +9,17 @@ spawn-at-startup "clash-verge"
 spawn-at-startup "waydroid" "session" "start"
 spawn-sh-at-startup "sh -c 'wayvnc 0.0.0.0'"
 
-environment {  
-    LANG "zh_CN.UTF-8"  
+blur {
+  passes 2
+  offset 3.0
+  noise 0.03
+  saturation 1.0
+}
+
+environment {
+    LANG "zh_CN.UTF-8"
     LC_ALL "zh_CN.UTF-8"
-    // LC_MESSAGES "en_US.UTF-8"  
+    // LC_MESSAGES "en_US.UTF-8"
 }
 
 input {
@@ -80,7 +87,7 @@ layout {
     }
 
     border {
-        off 
+        off
         width 4
         active-color "#ffc87f"
         inactive-color "#505050"
@@ -167,12 +174,13 @@ window-rule {
 
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    match app-id=r#"chrome$"# title="^Picture-in-Pictures$"
     open-floating true
-    opacity 0.85
+    opacity 0.75
     background-effect {
       blur true
-      xray true
-    } 
+      xray false
+    }
 }
 
 /-window-rule {
@@ -184,10 +192,10 @@ window-rule {
 window-rule {
     match app-id="zed"
     match app-id="vscode"
-    opacity 0.6
+    opacity 0.8
     background-effect {
       blur true
-      xray true
+      xray false
     }
 }
 
@@ -199,10 +207,10 @@ window-rule {
     match app-id="Bottles"
     match app-id="kitty"
     match app-id="steam"
-    opacity 0.6
+    opacity 0.65
     background-effect {
       blur true
-      xray true
+      xray false
     }
 }
 
@@ -223,7 +231,7 @@ window-rule {
     default-window-height { proportion 0.6; }
     background-effect{
       blur true
-      xray true
+      xray false
     }
 }
 
@@ -477,5 +485,3 @@ binds {
     // moving the mouse or pressing any other key.
     Mod+Shift+P { power-off-monitors; }
 }
-
-
