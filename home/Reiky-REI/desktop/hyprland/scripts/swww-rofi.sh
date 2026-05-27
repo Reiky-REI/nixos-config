@@ -64,7 +64,7 @@ case "$SELECTED" in
     types=(fade grow outer center wipe wave simple left top right bottom any)
     transition=${types[$RANDOM % ${#types[@]}]}
     swww img "$SELECTED" \
-      --resize fill \
+      --resize crop \
       --transition-type "$transition" \
       --transition-duration 2 \
       --transition-fps 144 \
