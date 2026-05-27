@@ -28,3 +28,4 @@ related: []
 
 1. **`stdenv.mkDerivation` 无法处理目录**: `src` 为目录时 unpackPhase 报错 "do not know how to unpack source archive"，改用 `pkgs.runCommand` 直接复制文件
 2. **Flake 源路径限制**: 在 flake 内引用仓库外的绝对路径 (`/home/.../Pictures/icons/MikuCat`) 不可用，需要将文件复制到仓库内 (`pkgs/cursors/MikuCat/`) 并 `git add` 后才能被 flake 引用
+3. **`build` 只构建不激活**: `nixos-rebuild build` 仅创建 store 产物，不切换系统。配置变更后需要 `nixos-rebuild switch` 或重启才能生效。home-manager 部分可通过 `home-manager switch` 单独激活（无 NVIDIA 风险）
