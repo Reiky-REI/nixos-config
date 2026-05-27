@@ -34,7 +34,7 @@ input {
     }
 
     mouse {
-        // off
+        off
         // natural-scroll
         // accel-speed 0.2
         // accel-profile "flat"
@@ -42,7 +42,7 @@ input {
     }
 
     trackpoint {
-        // off
+        off
         // natural-scroll
         // accel-speed 0.2
         // accel-profile "flat"
@@ -72,16 +72,18 @@ layout {
     default-column-width { proportion 0.5; }
     focus-ring {
         off
-        // width 4
-        // active-color "#fec5f5"
-        // inactive-color "#363a4f"
-    }
-
-    border {
-        // off
         width 4
         active-color "#fec5f5"
         inactive-color "#363a4f"
+        // active-color "#7fc8ff"
+        // inactive-color "#505050"
+    }
+
+    border {
+        off 
+        width 4
+        active-color "#ffc87f"
+        inactive-color "#505050"
         urgent-color "#9b0000"
     }
 
@@ -108,7 +110,7 @@ hotkey-overlay {
 screenshot-path "~/screenshot/Screenshot from %Y-%m-%d %H-%M-%S.png"
 
 // animations {
-//     // off
+//     off
 //     // slowdown 3.0
 //
 // }
@@ -169,7 +171,7 @@ window-rule {
     opacity 0.85
     background-effect {
       blur true
-      xray false
+      xray true
     } 
 }
 
@@ -180,19 +182,27 @@ window-rule {
 }
 
 window-rule {
+    match app-id="zed"
+    match app-id="vscode"
+    opacity 0.6
+    background-effect {
+      blur true
+      xray true
+    }
+}
+
+window-rule {
     match app-id="Alacritty"
     match app-id="neovide"
     match app-id="Logseq"
     match app-id="DolPhine"
     match app-id="Bottles"
     match app-id="kitty"
-    match app-id="zed"
-    match app-id="vscode"
     match app-id="steam"
     opacity 0.6
     background-effect {
       blur true
-      xray false
+      xray true
     }
 }
 
@@ -213,7 +223,7 @@ window-rule {
     default-window-height { proportion 0.6; }
     background-effect{
       blur true
-      xray false
+      xray true
     }
 }
 
