@@ -9,9 +9,9 @@ mapfile -t IMAGES < <(find -L "$STATIC_DIR" -type f \( -iname '*.jpg' -o -iname 
 
 VIDEOS=()
 for dir in "${VIDEO_DIRS[@]}"; do
-  while IFS= read -r -d '' f; do
-    VIDEOS+=("$f")
-  done < <(find "$dir" -maxdepth 1 -type f \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.webm' -o -iname '*.mov' \) 2>/dev/null | sort -z)
+  while IFS= read -r f; do
+    [ -n "$f" ] && VIDEOS+=("$f")
+  done < <(find "$dir" -maxdepth 1 -type f \( -iname '*.mp4' -o -iname '*.mkv' -o -iname '*.webm' -o -iname '*.mov' \) 2>/dev/null)
 done
 
 [ ${#IMAGES[@]} -eq 0 ] && [ ${#VIDEOS[@]} -eq 0 ] && { rofi -e "没有找到壁纸文件"; exit 1; }
