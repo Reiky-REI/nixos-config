@@ -3,7 +3,6 @@
     ./scripts
     ./waybar/waybar.nix
     ./wlogout/wlogout.nix
-    ./hyprlock/hyprlock.nix
   ];
 
   home.packages = with pkgs; [
