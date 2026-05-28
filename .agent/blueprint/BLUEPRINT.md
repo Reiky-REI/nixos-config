@@ -51,6 +51,7 @@
 17. [实施路线图](#17-实施路线图)
 18. [参考架构与先前艺术](#18-参考架构与先前艺术)
 19. [术语表](#19-术语表)
+20. [已知问题与待验证假设](#20-已知问题与待验证假设)
 
 ---
 
@@ -413,6 +414,31 @@ Reiky-REI (人类)
 - 权限: 只读 + notify-send + sudo systemctl stop ai-*
 - 不可被任何其他 agent 停止、修改、绕过
 - 哨兵日志: sentinel.jsonl (HMAC 链)
+
+### Scratchpad 生命周期（v2.1 补充）
+
+git worktree 作为 Agent 的 Scratchpad（临时推理空间）：
+
+```
+1. 创建 phase:  git worktree add /home/<agent>/nixos -b ai/<task>
+    → Agent 获得独立工作目录，不与用户冲突
+
+2. 工作 phase:  在独立目录中改文件、运行 build、验证
+    → 多个 Agent 可各自拥有自己的 worktree
+
+3. 归档 phase:  git commit + merge 回主分支
+    → 有价值的中间产物写入 retros/ 或 known-issues.md
+    → 无价值的草稿直接丢弃
+
+4. 清除 phase:  git worktree remove /home/<agent>/nixos
+    → 清理后释放磁盘空间
+    → systemd timer 或手动触发
+
+权限边界:
+  - Agent 的 Scratchpad 局限于自己的 worktree 内
+  - 不设限访问用户的 /etc/nixos/ 主工作目录
+  - 任务结束后 AI 无法保留持久状态（除非写入 knowledge/）
+```
 
 ---
 
@@ -1013,7 +1039,57 @@ AI 系统服务:
 
 ---
 
-## 附录 A: 关键外部参考链接
+## 20. 已知问题与待验证假设
+
+> 本章记录蓝图中尚未验证、存在争议或明显过度设计的部分。  
+> 不是为了否定设计，而是为后续 AI 和人类提供参考：哪些已验证，哪些仍是假设。  
+> 此章节会随实践推进持续更新（每次修正补充新发现的问题）。
+
+### 缺失设计
+
+| 问题 | 说明 | 严重程度 |
+|------|------|---------|
+| **上下文投递设计** | 蓝图设计了安全、角色、自进化、经验管道，但没有设计"Agent 每次工作时信息如何流向它"——从哪里加载什么、按什么顺序、任务完成后怎么写回。参考 "Everything is Context" 论文的 Constructor → Updater → Evaluator 管道。 | 高 |
+| **三层记忆映射** | 蓝图第 10 节经验管道有 4 级积累，但没有显式映射到论文的 History/Memory/Scratchpad 三层模型。git commit history 是 History，.agents/knowledge/ 是 Memory，git worktree 是 Scratchpad——但蓝图没有这样命名和设计。 | 中 |
+| **Scratchpad 生命周期** | git worktree 被当作"并行工作目录"（第 7 节已补），但没有完整的生命周期设计——何时归档、何时清除、磁盘空间回收策略。 | 中 |
+| **Sentinel 部署策略** | 哨兵与 ai-agent 的启动顺序、失败回退、网络断开时的行为未定义。 | 低 |
+
+### 过度设计
+
+| 问题 | 说明 | 严重程度 |
+|------|------|---------|
+| **5 用户 × 4 组** | 多用户隔离在单用户开发机上可能不必要。OpenCode agent 体系（`opencode agent create` + permission rules）可替代大部分角色分离需求。v2.1 已补充 `ai-code` 单用户替代方案。 | 中 |
+| **Sentinel HMAC 审计链** | 单用户场景下，OpenCode 的 permission rules + git diff 审计 + `known-issues.md` 经验积累就已覆盖 90% 的安全需求。独立 uid + HMAC 链 + 9 维异常检测的工程成本较高，收益在单用户场景下有限。 | 低 |
+| **iptables uid 强制代理** | 强制 `uid=1001` 只能走 `lo` 接口再通过 cli-proxy-api 出站——这对于通过 Clash 走代理的单用户机器过于复杂。直接在 Agent 的 shell 环境中设 `http_proxy` 即可。 | 低 |
+| **CONSTITUTION.md 独立文件** | 宪法内容可以直接放在 BLUEPRINT.md 或 AGENTS.md 中，不需要单独文件。 | 低 |
+
+### 未验证的工具
+
+| 工具 | 蓝图中的用途 | 实际可用性 |
+|------|------------|-----------|
+| **gno** (FTS5+RAG+MCP) | 本地知识引擎，用于 FTS5 索引、知识检索 | 未验证是否在 nixpkgs 中，且是否维护活跃 |
+| **organize-tool** | 文件规则整理引擎 | 需要手写 derivation，可能不必要（已有更成熟的方案） |
+| **vulnix** | CVE 扫描 | 已知可用，但有性能问题（扫描 36GB store 耗时较长） |
+| **localgpt / Honcho** | 本地 AI 推理、记忆层 | 未验证是否维护活跃，可能已被更新的工具替代 |
+
+### 未验证的理论
+
+| 假设 | 说明 | 验证方式 |
+|------|------|---------|
+| PEA 三权分立的安全增益 | arXiv:2604.23646 在多 Agent 服务器上有效，但单用户开发机上的实际增益未量化 | 对比有/无 sentinel 的故障场景 |
+| 博弈论制衡的有效性 | 5 角色间的交叉验证能否在实际场景中发现越界行为 | 构造越界场景测试告警率 |
+| 自进化四层边界的可执行性 | 自构建/自扩展/自适应/不可触碰的四层划分在实际 AI 工作流中能否被执行 | 试运行一个自进化周期 |
+
+### 当规模增长时需要考虑
+
+| 场景 | 当前方案 | 推荐演进 |
+|------|---------|---------|
+| 复盘 100+ 篇 | grep + frontmatter 搜索 | SQLite + FTS5 结构化索引 |
+| 需要语义检索 | 无 | 向量数据库（chroma/pinecone 等） |
+| 需要外部信息整合 | 手动 | GitHub API 自动抓取 + RSS |
+| Agent 上下文窗口压力 | 手动选择知识文件 | RAG 工具自动检索相关上下文 |
+
+> 此节会随实践持续更新。每次在验证过程中发现新问题时，追加到对应分类下。
 
 ```
 # 参考实现
