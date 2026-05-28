@@ -1,5 +1,23 @@
 # Knowledge Index
 
+## Agent 上下文加载指南
+
+Agent 每次启动时，按以下顺序加载知识：
+
+1. **读 INDEX.md**（本文件）→ 确定需要读哪些文件
+2. **读 architecture.md** → 理解系统结构和模块边界
+3. **读 conventions.md** → 确认编码规范和工作流
+4. **按需读 known-issues.md** → 排查当前任务相关的问题
+5. **按需读 retros/ 或 decisions/** → 检索历史复盘和决策记录
+
+任务完成后：
+- 有新发现 → 写复盘到 `retros/`
+- 有新踩坑 → 追加到 `known-issues.md`
+- 有新约定 → 更新 `conventions.md`
+- 代码变更 → `git commit`
+
+> 未来当知识查询效率遇到瓶颈时，可评估引入 SQLite（结构化查询）、向量数据库（语义检索）或 RAG 工具（上下文增强）。
+
 ## 知识文件
 | 文件 | 标签 | 读它的时机 |
 |------|------|-----------|

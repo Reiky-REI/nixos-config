@@ -34,3 +34,41 @@ config.nix (用户标识定义)
 ## 系统层 vs Home 层边界
 - **系统层 (NixOS modules)**: daemon, kernel, hardware, 系统能力, 图形会话基础设施
 - **Home 层 (home-manager)**: 用户应用, shell, editor, WM config, 终端工具, GUI apps, 用户偏好
+
+---
+
+## 信息流向（Agent 上下文投递）
+
+Agent 每次工作时，信息从哪来、任务结束写回哪：
+
+### 加载路径（开工前）
+
+```
+INDEX.md → 决定读哪些文件
+  ↓
+architecture.md → 理解模块归属和边界
+conventions.md  → 确认编码规范和 git 流程
+known-issues.md → 避免已知踩坑
+  ↓
+retros/.retros-index.md → 检索相关历史复盘
+```
+
+### 写回路径（完成后）
+
+```
+任务结果 → git commit（不可变历史记录）
+  ↓
+复盘写入 → retros/YYYY-MM-DD-topic.md（结构化经验）
+新踩坑   → known-issues.md 追加
+新约定   → conventions.md 更新
+```
+
+### 三层记忆映射
+
+参考 "Everything is Context" 论文的三层模型与本项目对应：
+
+| 层 | 定义 | 本项目对应 | 生命周期 |
+|----|------|-----------|---------|
+| History | 不可变原始日志 | git commit history | 永久，不可修改 |
+| Memory | 结构化知识 | `.agents/knowledge/` 下全部文件 | 长期，按需更新 |
+| Scratchpad | 推理草稿 | git branch + 工作目录 | 临时，任务结束归档或清除 |

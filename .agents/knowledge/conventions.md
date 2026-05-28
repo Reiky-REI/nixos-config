@@ -49,16 +49,31 @@
 date: YYYY-MM-DD
 module: 改动的文件路径
 tags: [标签1, 标签2]
+layer: common          # 架构层级：common/hardware/desktop/networking/services/home
+severity: low          # 影响程度：low/medium/high/critical
 related:
   - ../retros/关联复盘.md (关联原因)
   - ../../known-issues.md (相关章节)
+experience:
+  - "可复用的经验或教训"
 ---
 ```
 
 - `module`: 主要改动路径，如 `modules/common/default.nix`
 - `tags`: 便于搜索，如 `性能`, `build`, `niri`, `noctalia`, `nix-config`
+- `layer`: 所属架构层级，便于按层筛选复盘
+- `severity`: 影响程度，快速识别高风险变更
 - `related`: 手动关联相关复盘、已知问题、决策记录。AI 写复盘时顺手加
+- `experience`: 可复用的经验或教训，长期积累后可聚合成技能
 - 轻量级变更（一行改动/git typo）不写复盘
+
+## AI 工作流约定
+- 开工前先读 INDEX.md → 按上下文加载指南逐步加载知识
+- 遇到报错先查 known-issues.md
+- 非平凡变更必须写复盘，复盘和代码在同一 commit
+- 复盘使用上述 frontmatter 格式填写所有字段
+- 提交用 bot 身份（见上方 git 工作流）
+- 完成任务后检查是否有新坑需追加到 known-issues.md
 
 ## 多 AI 协作规范
 - 两个 AI 都遵守 `.agents/` 下的全部约定
