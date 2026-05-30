@@ -216,7 +216,7 @@ window-rule {
     match app-id="Bottles"
     match app-id="kitty"
     match app-id="steam"
-    opacity 0.65
+    opacity 0.75
     background-effect {
       blur true
       xray false
