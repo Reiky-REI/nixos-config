@@ -3,8 +3,7 @@
   pkgs,
   lib,
   ...
-}:
-let
+}: let
   # MikuCat 光标主题打包
   micucat-cursor = pkgs.runCommand "MikuCat" {} ''
     mkdir -p $out/share/icons/MikuCat

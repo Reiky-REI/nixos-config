@@ -1,9 +1,14 @@
 {
+  config,
   lib,
   pkgs,
   username,
   ...
 }: {
+  imports = [
+    ./hardware-profile.nix
+  ];
+
   # users setting
   nix.settings.trusted-users = ["root" username];
   nixpkgs.config.allowUnfree = true;
@@ -17,7 +22,13 @@
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
   ];
-  nix.settings.max-jobs = 8;
+  nix.settings.max-jobs = lib.mkDefault (
+    if config.hardware.isHighPerf
+    then 8
+    else if config.hardware.isMediumPerf
+    then 4
+    else 2
+  );
   nix.settings.cores = 2;
   nix.settings.min-free = 5368709120;
   nix.settings.max-free = 10737418240;

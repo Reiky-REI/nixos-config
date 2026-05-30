@@ -4,7 +4,6 @@
     youtube-music
     spotify
     splayer
-    cider
   ];
 
   programs.mpv.enable = true;

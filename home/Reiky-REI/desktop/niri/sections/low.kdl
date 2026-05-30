@@ -1,0 +1,74 @@
+// low.kdl — 低性能档位配置
+// 配合 base.kdl 使用，关闭所有视觉效果以节省 GPU/CPU 资源
+// 与 high.kdl 的区别：
+//   - 无 blur
+//   - 无 shadow
+//   - 无半透明效果（opacity 1.0）
+//   - 光标尺寸缩小
+//   - 缩放比 1.0（原生分辨率）
+//   - 仅保留必要自启动项
+//   - 窗口规则只保留功能性配置，去除装饰性效果
+
+cursor {
+    xcursor-theme "MikuCat"
+    xcursor-size 24
+}
+
+spawn-at-startup "noctalia-shell"
+spawn-at-startup "fcitx5"
+spawn-at-startup "nm-applet"
+
+output "HDMI-A-3" {
+    mode "1920x1080@120.030"
+    scale 1.0
+    transform "normal"
+    position x=1280 y=0
+}
+
+layout {
+    gaps 5
+    center-focused-column "never"
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+    default-column-width { proportion 0.5; }
+    focus-ring {
+        off
+        width 4
+        active-color "#fec5f5"
+        inactive-color "#363a4f"
+    }
+
+    border {
+        off
+        width 4
+        active-color "#ffc87f"
+        inactive-color "#505050"
+        urgent-color "#9b0000"
+    }
+
+    struts {
+    }
+}
+
+animations {
+    // 保留极小动画确保 UI 不僵硬
+    screenshot-ui-open {
+        duration-ms 100
+        curve "ease-out-quad"
+    }
+}
+
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    default-column-width {}
+}
+
+window-rule {
+    match app-id="floating_terminal"
+    open-floating true
+    default-column-width { proportion 0.6; }
+    default-window-height { proportion 0.6; }
+}

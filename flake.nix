@@ -120,13 +120,14 @@
           {
             environment.systemPackages = [agenix.packages.${system}.default];
           }
-          {
+          ({config, ...}: {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
               inherit inputs pkgs-unstable;
               username = user.username;
               fullName = user.fullName;
+              inherit (config.hardware) profile isLowPerf isHighPerf isMediumPerf;
             };
             home-manager.users.${user.username} = {
               imports = [
@@ -140,7 +141,7 @@
                 CookNixvim.packages.${system}.default
               ];
             };
-          }
+          })
         ];
       };
     };
