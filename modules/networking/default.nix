@@ -13,6 +13,16 @@
     5900
   ];
 
+  # systemd-resolved: 本地 DNS 缓存 + 多上游 failover
+  # 当路由器 DNS (192.168.1.1) 不可用时自动 fallback 到公共 DNS
+  services.resolved = {
+    enable = true;
+    fallbackDns = [
+      "1.1.1.1"
+      "8.8.8.8"
+    ];
+  };
+
   networking.proxy = {
     default = "http://127.0.0.1:7897";
     httpProxy = "http://127.0.0.1:7897";
