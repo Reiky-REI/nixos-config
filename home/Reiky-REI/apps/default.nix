@@ -5,5 +5,6 @@
     ./media.nix
     ./office.nix
     ./fastfetch.nix
+    ./openclaw.nix
   ];
 }
