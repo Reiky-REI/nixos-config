@@ -54,5 +54,77 @@
     "plan": {
       "prompt": "\u5f00\u5de5\u524d\u68c0\u67e5:\n1. git status \u2192 \u786e\u8ba4\u5de5\u4f5c\u533a\u5e72\u51c0\uff0c\u65e0\u672a\u63d0\u4ea4\u53d8\u66f4\n2. git branch \u2192 \u786e\u8ba4\u4e0d\u5728 main \u4e0a\uff08\u987b\u5728 feature branch\uff09\n3. \u67e5\u770b retros/ \u2192 \u4e86\u89e3\u8fdb\u884c\u4e2d\u7684\u4efb\u52a1\uff0c\u907f\u514d\u51b2\u7a81\n4. \u67e5 known-issues.md \u2192 \u907f\u514d\u5df2\u77e5\u8e29\u5751\n\u6539\u5b8c\u540e:\n5. nixos-rebuild build --flake /etc/nixos#NixMEOW \u9a8c\u8bc1\n6. \u5199\u590d\u76d8\u5230 .agents/knowledge/retros/<date>-<topic>.md\n7. \u7528 commit.sh \u63d0\u4ea4 + \u63a8\u9001\u5206\u652f\n"
     }
+  },
+  "lsp": {
+    "nixd": {
+      "command": [
+        "nixd"
+      ],
+      "extensions": [
+        ".nix"
+      ],
+      "initialization": {
+        "formatting": {
+          "command": [
+            "nixfmt"
+          ]
+        },
+        "options": {
+          "nixos": {
+            "expr": "(builtins.getFlake \"/etc/nixos\").nixosConfigurations.NixMEOW.options"
+          }
+        }
+      }
+    },
+    "pyright": {
+      "command": [
+        "pyright-langserver",
+        "--stdio"
+      ],
+      "extensions": [
+        ".py"
+      ]
+    },
+    "rust-analyzer": {
+      "command": [
+        "rust-analyzer"
+      ],
+      "extensions": [
+        ".rs"
+      ]
+    },
+    "clangd": {
+      "command": [
+        "clangd"
+      ],
+      "extensions": [
+        ".c",
+        ".cpp",
+        ".h",
+        ".hpp",
+        ".cc",
+        ".cxx"
+      ]
+    },
+    "typescript": {
+      "command": [
+        "typescript-language-server",
+        "--stdio"
+      ],
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx"
+      ]
+    },
+    "gopls": {
+      "command": [
+        "gopls"
+      ],
+      "extensions": [
+        ".go"
+      ]
+    }
   }
 }

@@ -17,7 +17,14 @@
     rustfmt
     lua
     lua-language-server
-    nil
+    nixd
     nixfmt-rfc-style
+
+    # LSP servers
+    pyright
+    rust-analyzer
+    clang-tools
+    gopls
+    typescript-language-server
   ];
 }

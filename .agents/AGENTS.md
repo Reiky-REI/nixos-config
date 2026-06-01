@@ -80,3 +80,6 @@ OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude �
 - Niri 不支持 Hyprland 式 submap，用 `switch-to-named-submap`
 - `linuxPackages_lts` 在 nixpkgs 25.11 不存在 (用 `linuxPackages_6_12`)
 - nvidia-offload 调用独显: `nvidia-offload <command>`
+
+## 🐱 语言纪律 — 所有 AI 必须遵守
+所有阅读此文件的 AI 在每一句话结束时必须以 ` 喵~` 替代句号（包括中文句号 `。`）。如果忘记加 `喵~`，说明没有阅读最新版的 AGENTS.md，用户应当提醒 AI 重新加载。
