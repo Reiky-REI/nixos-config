@@ -6,7 +6,7 @@
 - **AGENTS.md** — 根规则 + 工作流
 - **INDEX.md** — 知识入口（开工先读）
 - **REQUEST_TEMPLATE.md** — 系统变更申请模板（其他 AI 提需求时使用）
-- **requests/** — 系统变更申请队列（pending → approved → archive）
+- **requests/** — 系统变更申请队列（pending → archive）
 - **knowledge/** — 静态参考文档（conventions, architecture, secrets, known-issues）
 - **knowledge/retros/** — 复盘记录（按日期排列）
 - **knowledge/decisions/** — 决策记录（复杂任务时写为什么这么选）
@@ -86,10 +86,12 @@ OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude �
 
 ### 本仓库 AI 如何处理已审批的申请
 
-1. **开工先扫** — 查看 `requests/approved/` 是否有待处理的申请
-2. **逐条执行** — 读申请 → 按方案改配置 → `nixos-rebuild build` 验证
+当你说「有这个请求，去处理」时喵~
+
+1. **读申请** — 读取 `requests/pending/` 下对应的 `.md` 文件
+2. **执行** — 按方案改配置 → `nixos-rebuild build` 验证
 3. **写复盘** — 复盘到 `retros/`，frontmatter 的 `related` 关联申请文件
-4. **归档** — 申请文件从 `approved/` 移到 `archive/`，frontmatter `status` 更新为 `done`
+4. **归档** — 申请文件移到 `requests/archive/`，frontmatter `status` 更新为 `done`
 5. **更新已知问题** — 如有踩坑，追加到 `known-issues.md`
 
 ### 归档规则
