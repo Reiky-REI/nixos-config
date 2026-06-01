@@ -116,4 +116,34 @@ catppuccin release-25.11 中以下子模块不可用，已全部注释：
 - **配置**：`max-jobs = 8` + `min-free = 5G` / `max-free = 10G` + GC 改为 daily / ≥3d
 - **工作流**：日常验证用 `just rebuild`（7-8s），`just check` 只在提交前跑
 
+## 全量通道升级前置条件
+
+> 2026-06-01 升级 25.11→26.05 尝试因磁盘不足失败，详见 `retros/2026-06-01-nixos-26.05-upgrade-failed.md`
+
+### 磁盘要求
+- 升级前空闲 ≥ **40G**（25G 实测不够）
+- `/build` 临时空间至少 10G（pnpm/yarn/Rust 编译中间文件）
+- 目标：分区 ≥ 50G 空闲以承载新旧两套 nixpkgs 共存
+
+### 内存要求
+- 物理内存 ≥ 16G（当前 14G 在 Rust 编译时触发 swap）
+- swap ≥ 8G
+
+### 时间预算（完全冷构建）
+- 有镜像缓存：~2.5 小时
+- 无镜像缓存（回退 cache.nixos.org）：~3-4 小时
+
+### 升级策略（逐级，不可一步到位）
+```
+第 1 步: 仅升级 flake.nix 的三个 url（不碰内核/包/firmware）
+         build → switch → GC（清掉旧 nixpkgs）
+第 2 步: 内核升级 linuxPackages → linuxPackages_latest
+         build → reboot → GC
+第 3 步: 逐个添加需要编译的包（splayer/neovide 最后）
+第 4 步: NVIDIA PRIME 恢复（预下载 .run 文件）
+```
+
+### 需编译的包清单
+详见 `retros/2026-06-01-nixos-26.05-upgrade-failed.md` 的「无预编译二进制包清单」章节
+
 <!-- 代理/网络配置见 skills/networking/SKILL.md -->
