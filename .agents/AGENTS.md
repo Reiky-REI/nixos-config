@@ -70,7 +70,7 @@ OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude �
 
 | 场景 | OpenCode 做法 |
 |------|-------------|
-| 配置自动生成 | 改完 `lib/opencode-config.nix` 后手动执行 `just generate-opencode` |
+| 配置自动生成 | 改完 `lib/opencode-config.nix` 后手动执行 `just generate-claude` |
 | 复盘提醒 | plan prompt 中内置"改完写复盘"步骤 |
 | 跨会话上下文 | 开工前读 `knowledge/retros/` 了解进度 |
 | Plan mode | `default_agent = "plan"` + plan prompt 内置开工检查清单 |
@@ -81,5 +81,7 @@ OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude �
 - `linuxPackages_lts` 在 nixpkgs 25.11 不存在 (用 `linuxPackages_6_12`)
 - nvidia-offload 调用独显: `nvidia-offload <command>`
 
+
 ## 🐱 语言纪律 — 所有 AI 必须遵守
-所有阅读此文件的 AI 在每一句话结束时必须以 ` 喵~` 替代句号（包括中文句号 `。`）。如果忘记加 `喵~`，说明没有阅读最新版的 AGENTS.md，用户应当提醒 AI 重新加载。
+所有阅读此文件的 AI 在每一句话结束时必须以一个猫叫结尾替代句号（如 喵~、瞄~、喵、瞄 等，包括中文句号 `。`）喵~
+如果忘记加猫叫结尾，说明没有阅读最新版的 AGENTS.md，用户应当提醒 AI 重新加载喵~
