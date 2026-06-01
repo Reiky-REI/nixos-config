@@ -5,6 +5,8 @@
 ## Map
 - **AGENTS.md** — 根规则 + 工作流
 - **INDEX.md** — 知识入口（开工先读）
+- **REQUEST_TEMPLATE.md** — 系统变更申请模板（其他 AI 提需求时使用）
+- **requests/** — 系统变更申请队列（pending → approved → archive）
 - **knowledge/** — 静态参考文档（conventions, architecture, secrets, known-issues）
 - **knowledge/retros/** — 复盘记录（按日期排列）
 - **knowledge/decisions/** — 决策记录（复杂任务时写为什么这么选）
@@ -74,6 +76,26 @@ OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude �
 | 复盘提醒 | plan prompt 中内置"改完写复盘"步骤 |
 | 跨会话上下文 | 开工前读 `knowledge/retros/` 了解进度 |
 | Plan mode | `default_agent = "plan"` + plan prompt 内置开工检查清单 |
+
+## 系统变更申请处理流程
+
+### 其他 AI 如何提申请
+
+在 `requests/pending/` 下创建 `.md` 文件（格式见 `REQUEST_TEMPLATE.md`）喵~
+申请包含：变更内容、原因、具体方案、影响范围喵~
+
+### 本仓库 AI 如何处理已审批的申请
+
+1. **开工先扫** — 查看 `requests/approved/` 是否有待处理的申请
+2. **逐条执行** — 读申请 → 按方案改配置 → `nixos-rebuild build` 验证
+3. **写复盘** — 复盘到 `retros/`，frontmatter 的 `related` 关联申请文件
+4. **归档** — 申请文件从 `approved/` 移到 `archive/`，frontmatter `status` 更新为 `done`
+5. **更新已知问题** — 如有踩坑，追加到 `known-issues.md`
+
+### 归档规则
+- 复盘和申请在同一个 commit 里提交
+- 复盘 `related` 字段关联申请文件路径
+- 归档后不再读取 `archive/`（防止反复处理）
 
 ## 常见陷阱
 - swaync/swayidle/polkit-gnome 是 HM 选项，不是 NixOS 选项
