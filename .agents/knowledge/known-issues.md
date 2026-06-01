@@ -148,3 +148,14 @@ nix build --dry-run /etc/nixos#nixosConfigurations.NixMEOW.config.system.build.t
 详见 `retros/2026-06-01-nixos-26.05-upgrade-failed.md` 的「无预编译二进制包清单」章节
 
 <!-- 代理/网络配置见 skills/networking/SKILL.md -->
+
+## WPS Office HiDPI (Wayland)
+
+### 问题
+WPS Office 在 Wayland + 高 DPI 屏幕上 UI/文档/演讲模式都太小，`QT_SCALE_FACTOR` 只放大 UI 不放大文档内容。
+
+### 解决方案
+见 `retros/2026-06-01-wps-hidpi.md`，核心要点：
+- 用 `home.file` 写 `~/.local/bin/` 包装脚本 + `~/.local/share/applications/` 桌面文件
+- 不要用 `xdg.desktopEntries`（不生成本地文件）或 `writeShellScriptBin`（与同名包冲突）
+- WPS 内部有三个独立缩放系统：Qt UI / 文档内容 / 演讲备注，需分别设置
