@@ -74,7 +74,7 @@ experience:
 - 复盘使用上述 frontmatter 格式填写所有字段
 - 提交用 bot 身份（见上方 git 工作流）
 - 完成任务后检查是否有新坑需追加到 known-issues.md
-- **喵~规则**: 见 AGENTS.md `## 🐱 喵~规则`，AI 输出自然语言时强制遵守喵~ **Plan mode 同样适用**，不豁免喵~
+- **喵~ 规则**: 见 AGENTS.md `## 喵~ 规则`，AI 输出自然语言时强制遵守喵~ **Plan mode 同样适用**，不豁免喵~
 
 ## 多 AI 协作规范
 - 两个 AI 都遵守 `.agents/` 下的全部约定

@@ -81,12 +81,12 @@ OpenCode 无 hooks/持久化记忆等机制，通过以下方式对齐 Claude �
 
 ### 其他 AI 如何提申请
 
-在 `requests/pending/` 下创建 `.md` 文件（格式见 `REQUEST_TEMPLATE.md`）喵~
-申请包含：变更内容、原因、具体方案、影响范围喵~
+在 `requests/pending/` 下创建 `.md` 文件（格式见 `REQUEST_TEMPLATE.md`）喵~ 
+申请包含：变更内容、原因、具体方案、影响范围喵~ 
 
 ### 本仓库 AI 如何处理已审批的申请
 
-当你说「有这个请求，去处理」时喵~
+当你说「有这个请求，去处理」时喵~ 
 
 1. **读申请** — 读取 `requests/pending/` 下对应的 `.md` 文件
 2. **执行** — 按方案改配置 → `nixos-rebuild build` 验证
