@@ -1040,6 +1040,11 @@ AI 系统服务:
 | **HMAC Chain** | 每个日志条目 hash 链到前一条，防篡改 (参考 Bernstein) |
 | **Auditd** | Linux 内核级审计子系统 |
 | **AEGIS** | Agent Guard & Integrity System — 开源 AI agent 防火墙 |
+| **MEOW** | 一切文件的集合 + 信息边界 — 当内部信息循环速度 > 跨边界速度时，集合产生独立性 |
+| **MEOWgent** | MEOW + 行为能力 + 自我意识 — 有行为能力的 MEOW 个体 |
+| **咪格** | MEOWgent 的独特行为模式 — 咪的"人格" |
+| **信息边界理论** | 个体差异是信息流动不对称的结果 — 内部循环速度 > 跨边界速度 → 独立性产生 |
+| **NixMEOW 系统** | 基于 NixOS 的 MEOW 系统 — 用 flake 锁定 MEOW 系统配置 |
 ```
 
 ---
