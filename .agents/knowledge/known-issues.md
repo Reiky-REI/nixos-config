@@ -120,18 +120,19 @@ catppuccin release-25.11 中以下子模块不可用，已全部注释：
 
 > 2026-06-01 升级 25.11→26.05 尝试因磁盘不足失败，详见 `retros/2026-06-01-nixos-26.05-upgrade-failed.md`
 
+### 升级前必查：二进制缓存查询方法
+```bash
+# 检查有多少包需要本地编译
+nix build --dry-run /etc/nixos#nixosConfigurations.NixMEOW.config.system.build.toplevel 2>&1 \
+  | grep -oP 'these \K[0-9]+(?= derivations will be built)'
+# 输出 0 → 全部有缓存；> 0 → 数字越大编译越多
+# 详见 retro 中「前置检查清单」章节
+```
+
 ### 磁盘要求
 - 升级前空闲 ≥ **40G**（25G 实测不够）
-- `/build` 临时空间至少 10G（pnpm/yarn/Rust 编译中间文件）
-- 目标：分区 ≥ 50G 空闲以承载新旧两套 nixpkgs 共存
-
-### 内存要求
-- 物理内存 ≥ 16G（当前 14G 在 Rust 编译时触发 swap）
-- swap ≥ 8G
-
-### 时间预算（完全冷构建）
-- 有镜像缓存：~2.5 小时
-- 无镜像缓存（回退 cache.nixos.org）：~3-4 小时
+- 使用速查表：`dry-run 结果 → 编译包数 × 1-2G ≈ 最低额外空间`
+- 详细估算公式见 `retros/*upgrade-failed.md` 的前置检查清单
 
 ### 升级策略（逐级，不可一步到位）
 ```
