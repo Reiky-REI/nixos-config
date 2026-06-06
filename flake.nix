@@ -47,10 +47,6 @@
       url = "github:YaLTeR/niri";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-
-    openclaw = {
-      url = "github:openclaw/nix-openclaw";
-    };
   };
 
   outputs = {
@@ -62,7 +58,6 @@
     agenix,
     catppuccin,
     noctalia,
-    openclaw,
     ...
   } @ inputs: let
     system = "x86_64-linux";
@@ -117,7 +112,6 @@
               (final: prev: {
                 niri = pkgs-unstable.niri;
               })
-              openclaw.overlays.default
               # waydroid .net 脚本 overlay（定义在 modules/virtualization/default.nix）
             ];
           })
