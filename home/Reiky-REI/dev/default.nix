@@ -6,15 +6,16 @@
   home.packages = with pkgs; [
     typst
     nodejs
-    python3
 
-    # minl.ai 依赖
-    python3Packages.pip
-    python3Packages.anthropic    # API 调用 (支持 mimo-v2.5)
-    python3Packages.pyqt6        # 浮窗 UI
-    python3Packages.pynput       # 快捷键监听
-    python3Packages.sounddevice  # 语音输入
-    python3Packages.numpy        # 数值计算
+    # Python with minl.ai 依赖 (使用 withPackages 确保依赖完整)
+    (python3.withPackages (ps: with ps; [
+      pip
+      anthropic    # API 调用 (支持 mimo-v2.5)
+      pyqt6        # 浮窗 UI
+      pynput       # 快捷键监听
+      sounddevice  # 语音输入
+      numpy        # 数值计算
+    ]))
 
     go
     xmake
