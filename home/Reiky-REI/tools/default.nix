@@ -4,5 +4,6 @@
     ./search.nix
     ./viewers.nix
     ./monitors.nix
+    ./opencode.nix
   ];
 }
