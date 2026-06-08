@@ -15,6 +15,7 @@
       pynput       # 快捷键监听
       sounddevice  # 语音输入
       numpy        # 数值计算
+      rich         # 终端 Markdown 渲染
     ]))
 
     go
