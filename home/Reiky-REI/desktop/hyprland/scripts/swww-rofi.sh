@@ -5,6 +5,16 @@ STATIC_DIR="$HOME/Pictures/Wallpapers/static"
 VIDEO_DIRS=("$HOME/Pictures/Wallpapers/videos")
 ROFI_THEME="${ROFI_THEME:-$HOME/.config/rofi/themes/wallpaper_2_line.rasi}"
 
+get_all_outputs() {
+  if command -v niri >/dev/null 2>&1; then
+    niri msg outputs 2>/dev/null | grep -oP 'Output "\K[^"]+' || echo "eDP-1"
+  elif command -v swaymsg >/dev/null 2>&1; then
+    swaymsg -t get_outputs 2>/dev/null | jq -r '.[].name' 2>/dev/null || echo "eDP-1"
+  else
+    echo "eDP-1"
+  fi
+}
+
 mapfile -t IMAGES < <(find -L "$STATIC_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort)
 
 VIDEOS=()
@@ -50,7 +60,9 @@ fi
 case "$SELECTED" in
   *.mp4|*.mkv|*.webm|*.mov)
     pkill mpvpaper 2>/dev/null || true
-    setsid mpvpaper eDP-1 "$SELECTED" --hwdec=vaapi-copy -o "--loop-file=inf --no-audio --panscan=1.0" >/dev/null 2>&1 &
+    while IFS= read -r output; do
+      setsid mpvpaper "$output" "$SELECTED" --hwdec=vaapi-copy -o "--loop-file=inf --no-audio --panscan=1.0" >/dev/null 2>&1 &
+    done < <(get_all_outputs)
     if command -v notify-send >/dev/null 2>&1; then
       notify-send "视频壁纸已启动" "$(basename "$SELECTED")"
     fi
