@@ -54,10 +54,20 @@
         # 关键设置：关闭程序内预编辑，强制使用 Fcitx5 浮窗(能解决 neovide 中无法预编辑的问题)
         "PreeditEnabledByDefault" = "False";
       };
-      "Hotkey/TriggerKeys" = {"0" = "Super+space";};
-      "Hotkey/EnumerateForwardForInputWindow" = {
-        "0" = "Shift_L";
-        "1" = "Shift_R";
+      "Hotkey/TriggerKeys" = {
+        # Super+space 触发中英切换 (niri 不占用此键)
+        "0" = "Super+space";
+        # Ctrl+Space 也触发 (经典习惯)
+        "1" = "Control+space";
+      };
+      # Shift 单按切换中英 (修正原 EnumerateForwardForInputWindow 无效键名)
+      "Hotkey/AltTriggerKeys" = {
+        "0" = "Shift+Shift_L";
+        "1" = "Shift+Shift_R";
+      };
+      # 同时保留 EnumerateForwardKeys 向前轮换 (Ctrl+Shift 切换拼音/键盘等)
+      "Hotkey/EnumerateForwardKeys" = {
+        "0" = "Control+Shift";
       };
     };
     addons.classicui.globalSection.Theme = "catppuccin-mocha-mauve";
