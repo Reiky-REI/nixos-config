@@ -57,6 +57,11 @@ related:
 | `AGENTS.md` (仓库根) | Codex 入口索引, 桥接 .agents/ 体系 |
 | `opencode.json` | 权限升级: switch/boot/push 改 allow, 新增 shutdown/poweroff allow |
 
+### fcitx5 快捷键修复 (同批次)
+- 根因: nix 配置 `Hotkey/EnumerateForwardForInputWindow` 是**无效键名**, fcitx5 不识别 → Shift 单按切换中英从未生效, 只能点托盘图标
+- 修正: `AltTriggerKeys` (Shift 单按) + `TriggerKeys` (Super+space / Ctrl+Space) + `EnumerateForwardKeys` (Ctrl+Shift)
+- 经验: fcitx5 的 `config` 文件键名以实际生成为准, 对照 `~/.config/fcitx5/config` 验证
+
 ## 验证
 
 - `nixos-rebuild build --flake /etc/nixos#NixMEOW` 通过
