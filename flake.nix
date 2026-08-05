@@ -111,6 +111,11 @@
             nixpkgs.overlays = [
               (final: prev: {
                 niri = pkgs-unstable.niri;
+                # 键盘背光补丁版驱动 (COLORFIRE MEOW R16 固件误报背光类型)
+                linuxPackages = prev.linuxPackages.extend (kfinal: kprev: {
+                  tuxedo-drivers = kfinal.callPackage ./pkgs/tuxedo-drivers-patched {};
+                  tuxedo-keyboard = kfinal.callPackage ./pkgs/tuxedo-drivers-patched {};
+                });
               })
               # waydroid .net 脚本 overlay（定义在 modules/virtualization/default.nix）
             ];
