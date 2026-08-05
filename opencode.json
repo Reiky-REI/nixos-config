@@ -29,15 +29,17 @@
   "permission": {
     "bash": {
       "*": "allow",
-      "nixos-rebuild switch": "ask",
-      "nixos-rebuild boot": "ask",
-      "git push": "ask",
-      "rm -rf *": "ask",
+      "nixos-rebuild switch": "allow",
+      "nixos-rebuild boot": "allow",
+      "git push": "allow",
       "git push --force": "deny",
       "rm -rf /": "deny",
+      "rm -rf *": "deny",
       "dd if=/dev/zero of=/dev/sda": "deny",
       "curl * | sh": "deny",
-      "sudo rm -rf *": "deny"
+      "sudo rm -rf *": "deny",
+      "shutdown": "allow",
+      "poweroff": "allow"
     }
   },
   "skills": {

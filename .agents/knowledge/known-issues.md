@@ -1,3 +1,55 @@
+# Known Issues
+
+## MT7922 WiFi 长时间运行掉线 (mt7921e ASPM)
+
+### 问题
+长时间开机不关机后, WiFi 网卡掉线 (日志: `driver own failed`、`chip reset failed`、`Message timeout`)。
+
+### 根因
+- 网卡: MediaTek MT7922 (mt7921e 驱动), AMD 平台 ASPM 电源管理兼容性 bug
+- 修复: `boot.extraModprobeConfig` 加 `options mt7921e disable_aspm=Y`
+- ⚠️ 修复后重启才能生效 (`/sys/module/mt7921e/parameters/disable_aspm` 应显示 `Y`)
+
+### 相关
+蓝牙侧同样需要 `options btusb enable_autosuspend=0 reset=1` (已配置)
+
+---
+
+## 关机慢 / 黑屏关不死 / 风扇满速
+
+### 问题
+长时间运行后关机, 屏幕黑但关不死, 风扇满速, 耗时数分钟。
+
+### 根因 (双元凶)
+1. **nvme1 (SOLIDIGM 1TB, Windows NTFS 盘) 关机时 I/O 超时** × 7 次 × 30s
+   - Windows 快速启动残留 (hiberfil.sys) + unsafe_shutdowns 64 次
+   - 缓解: `DefaultTimeoutStopSec=30s`
+2. **NVIDIA GSP 固件异常** (`Xid 120/154`) → GPU Reset Required → 黑屏+风扇满速
+   - 暂观察, 未动配置
+
+---
+
+## 键盘背光 (COLORFIRE MEOW R16 = Clevo/Tongfang 模具)
+
+### 问题
+内置键盘背光只有蓝光, 无法调色; Linux 无标准 kbd_backlight 设备。
+
+### 方案 (已验证编译)
+- 该模具固件误报背光类型 0x26 → tuxedo_keyboard 不注册 LED
+- 补丁版驱动: `pkgs/tuxedo-drivers-patched/` + `options tuxedo_keyboard force_clevo_kb_backlight_type=6`
+- 加载后暴露 `/sys/class/leds/rgb:kbdlight` (亮度 + RGB 三通道)
+- 控制工具: `kbdlight` (off/on/0-100/#rrggbb)
+- overlay 要用 `linuxPackages.extend` 替换 (不是 nixpkgs 顶层 tuxedo-drivers!)
+
+---
+
+## NixOS 25.11 systemd 配置废弃
+
+- `systemd.extraConfig` 报 "no longer has any effect; please remove it"
+- 用 `systemd.settings.Manager.DefaultTimeoutStopSec` 替代
+
+---
+
 ## WPS Office HiDPI (Wayland)
 
 ### 问题

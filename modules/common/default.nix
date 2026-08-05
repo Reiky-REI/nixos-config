@@ -86,6 +86,10 @@
   # allow none nix packages
   programs.nix-ld.enable = true;
 
+  # 关机/重启加速: 缩短僵尸服务等待时间, 避免长时间卡在黑屏
+  # 背景: nvme1 (Windows 盘) 关机时 I/O 超时 + NVIDIA GSP 异常曾导致关机耗时 4 分钟
+  systemd.settings.Manager.DefaultTimeoutStopSec = "30s";
+
   programs.zsh.enable = true;
 
   security.sudo.wheelNeedsPassword = false;
