@@ -30,6 +30,12 @@ in {
     mkdir -p "${config.home.homeDirectory}/screenshot"
   '';
 
+  # 移除本地旧 fcitx5 config, 防止覆盖 NixOS 生成的 /etc/xdg/fcitx5/config
+  # (fcitx5 优先级 ~/.config > /etc/xdg, 本地旧文件会导致快捷键等 NixOS 设置失效)
+  home.activation.cleanFcitx5Config = lib.hm.dag.entryAfter ["writeBoundary"] ''
+    rm -f "${config.home.homeDirectory}/.config/fcitx5/config"
+  '';
+
   services.polkit-gnome.enable = true;
   services.swaync.enable = true;
   services.swayidle.enable = true;
