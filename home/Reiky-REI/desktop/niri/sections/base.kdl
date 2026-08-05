@@ -193,5 +193,6 @@ binds {
     Mod+Shift+E { quit; }
     Ctrl+Alt+Delete { quit; }
 
-    Mod+Shift+P { power-off-monitors; }
+    // 熄屏: 先关键盘背光 (防止睡觉时键盘太亮), 再关显示器
+    Mod+Shift+P { spawn "~/.local/bin/kbdlight-niri-off.sh"; }
 }
