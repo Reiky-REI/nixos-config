@@ -25,12 +25,12 @@
 
   services.timesyncd.enable = true;
 
-  systemd.sleep.extraConfig = ''
-    AllowSuspend=yes
-    AllowHibernation=no
-    AllowHybridSleep=yes
-    AllowSuspendThenHibernate=yes
-  '';
+  systemd.sleep.settings.Sleep = {
+    AllowSuspend = "yes";
+    AllowHibernation = "no";
+    AllowHybridSleep = "yes";
+    AllowSuspendThenHibernate = "yes";
+  };
 
   environment.sessionVariables.XDG_DATA_DIRS = lib.mkAfter [
     "/var/lib/flatpak/exports/share"
