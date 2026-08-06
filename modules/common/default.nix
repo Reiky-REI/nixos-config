@@ -12,6 +12,8 @@
   # users setting
   nix.settings.trusted-users = ["root" username];
   nixpkgs.config.allowUnfree = true;
+  # 临时允许 EOL electron-39 (vscode 等传递依赖), 26.05 升级后自动解决
+  nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10"];
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
   nix.settings.substituters = [

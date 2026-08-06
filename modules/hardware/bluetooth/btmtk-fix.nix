@@ -8,6 +8,10 @@
   kernelVersion = kernel.modDirVersion;
   kernelBuild = "${kernel.dev}/lib/modules/${kernelVersion}/build";
 
+  # 内核 >= 6.12.93 已包含 WMT 事件校验修复 (btmtk_usb_hci_wmt_sync 补丁已 upstream)
+  # 此时 btmtk 模块直接用内核自带的即可, 无需重建
+  fixNeeded = lib.versionOlder kernelVersion "6.12.93";
+
   patched-btmtk = pkgs.stdenv.mkDerivation {
     name = "btmtk-patched-${kernelVersion}";
 
@@ -54,5 +58,6 @@
     '';
   };
 in {
-  boot.extraModulePackages = [patched-btmtk];
+  # 内核 >= 6.12.93 已含修复, 用内核自带 btmtk; 否则用补丁版
+  boot.extraModulePackages = lib.mkIf fixNeeded [patched-btmtk];
 }

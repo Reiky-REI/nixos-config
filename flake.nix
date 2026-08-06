@@ -111,6 +111,10 @@
             nixpkgs.overlays = [
               (final: prev: {
                 niri = pkgs-unstable.niri;
+                # QQ 3.2.27 deb 被腾讯下架 (上游 nixpkgs bug), 复用本地已安装的旧版
+                qq = prev.runCommand "qq-3.2.27" {} ''
+                  ln -s /nix/store/4fwl2khg6iwm34kjxq855zyncc43fcx7-qq-3.2.27-2026-04-01 $out
+                '';
                 # 键盘背光补丁版驱动 (COLORFIRE MEOW R16 固件误报背光类型)
                 linuxPackages = prev.linuxPackages.extend (kfinal: kprev: {
                   tuxedo-drivers = kfinal.callPackage ./pkgs/tuxedo-drivers-patched {};
