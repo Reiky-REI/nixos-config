@@ -41,6 +41,22 @@
 - 控制工具: `kbdlight` (off/on/0-100/#rrggbb)
 - overlay 要用 `linuxPackages.extend` 替换 (不是 nixpkgs 顶层 tuxedo-drivers!)
 
+### ⚠️ 核心坑 1: DMI 兼容性检查 (2026-08-14 踩)
+- tuxedo 驱动 `tuxedo_is_compatible()` 只匹配 DMI 厂商 "TUXEDO" 喵~ 
+- 白牌 Clevo/Tongfang 模具 (COLORFIRE 等) 会 `-ENODEV` (journal: "Failed to insert module 'tuxedo_keyboard': No such device") 喵~ 
+- 必须打补丁放行: `compat-check.patch` 在 `tuxedo_dmi_string_match` 加 `DMI_MATCH(DMI_SYS_VENDOR, "COLORFIRE")` 喵~ 
+- 验证: 新模块 strings 应含 COLORFIRE 喵~ 
+
+### ⚠️ 核心坑 2: kbdlight.nix 从未被 import (2026-08-14 踩)
+- opencode 8/5 创建 `home/Reiky-REI/tools/kbdlight.nix` 但 `tools/default.nix` imports **漏了 `./kbdlight.nix`** 喵~ 
+- 后果: kbdlight 命令/kbdlight-sync 服务/kbdlight-niri-off.sh 全部未生成 喵~ Mod+Shift+P 黑屏失效 喵~ 
+- 教训: 写文件 ≠ 接线, 新增 home 模块必须检查 imports 喵~ 
+- 验证: `nix eval .#nixosConfigurations.NixMEOW.config.home-manager.users.Reiky-REI.home.file` 应含 kbdlight 脚本 喵~ 
+
+### ⚠️ 核心坑 3: ly 亮度键 acpid handler 不能用 seat0 判断 (2026-08-14 踩)
+- `loginctl list-sessions | grep seat0` 在 ly 登录界面 (TTY) 也会匹配 喵~ (logind 给 tty1 挂 seat0)
+- 正确判断: 遍历会话查 `Type=wayland/x11` + `Active=yes` 才跳过 喵~
+
 ---
 
 ## NixOS 25.11 systemd 配置废弃
