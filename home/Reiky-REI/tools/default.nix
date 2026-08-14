@@ -5,5 +5,6 @@
     ./viewers.nix
     ./monitors.nix
     ./opencode.nix
+    ./kbdlight.nix
   ];
 }

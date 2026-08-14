@@ -28,10 +28,12 @@ stdenv.mkDerivation (finalAttrs: {
     hash = "sha256-9XtogovzAWaMkJI5CxszY5qO3q6NOACZ7pnejyobJlY=";
   };
 
-  # 原 nixpkgs 补丁 (不复制 usr 到 /) + 键盘背光类型强制补丁
+  # 原 nixpkgs 补丁 (不复制 usr 到 /) + 键盘背光类型强制补丁 + COLORFIRE 兼容性放行
+  # compat-check.patch: tuxedo_is_compatible() 只认 DMI "TUXEDO", 不补丁则模块加载 -ENODEV
   patches = [
     ./no-cp-usr.patch
     ./kbdlight.patch
+    ./compat-check.patch
   ];
 
   postInstall = ''
