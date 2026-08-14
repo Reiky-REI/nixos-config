@@ -1,7 +1,12 @@
 {lib, ...}: {
   imports = [
     ./media
+    ./dsh-fence.nix
   ];
+
+  # DSH 外层围栏:加固的 systemd 服务接管 dsh web。
+  # 下次 nixos-rebuild switch 前,先停掉手动启动的 dsh 进程(端口 3080)。
+  services.dsh-fence.enable = true;
 
   services.udisks2.enable = true;
 
