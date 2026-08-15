@@ -2,6 +2,7 @@
   imports = [
     ./media
     ./dsh-fence.nix
+    # ./llama-cpp.nix  # 临时禁用:先让系统 build 通过并 switch,GC 释放空间后再启用
   ];
 
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。

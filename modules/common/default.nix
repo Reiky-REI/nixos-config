@@ -26,12 +26,12 @@
   ];
   nix.settings.max-jobs = lib.mkDefault (
     if config.hardware.isHighPerf
-    then 8
+    then 16
     else if config.hardware.isMediumPerf
-    then 4
-    else 2
+    then 8
+    else 4
   );
-  nix.settings.cores = 2;
+  nix.settings.cores = 16;
   nix.settings.min-free = 5368709120;
   nix.settings.max-free = 10737418240;
 
