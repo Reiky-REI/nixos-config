@@ -63,6 +63,16 @@ clash-verge (mihomo) 退出后, 系统全局 proxy env (`networking.proxy` → `
 - 拉起 mihomo: `nohup /nix/store/...-clash-verge-rev-2.4.7/bin/verge-mihomo -d ~/.local/share/io.github.clash-verge-rev.clash-verge-rev -f clash-verge.yaml` 喵~
 - clash-verge 会自托管核心 (监听 `*:7897`) 喵~ `cache.db` 属主可能被 root 化, 需 chown 喵~
 
+### 双开/控制器坑 (2026-08-16 实锤, 已加固 headless unit)
+- headless unit 与 Clash Verge GUI 双开 → 抢 unix socket (`-ext-ctl-unix`) → `address already in use` 喵~
+- 合并配置 `clash-verge.yaml` 里 `external-controller: ''` 被清空 (verge.yaml `enable_external_controller: false`) → 核心无 TCP 控制器喵~
+- 解法 (已在 `home/Reiky-REI/tools/mihomo.nix` 落地):
+  - unit 用 `-ext-ctl 127.0.0.1:9097` 强制 TCP 控制器, 弃用 unix socket 喵~
+  - `ExecStartPre` 清理遗留 socket + 建 runtime 目录喵~
+  - `StartLimitIntervalSec = 0` 放宽 crash-loop 限制 (双开抢端口时持续重试) 喵~
+  - verge.yaml 补 `external-controller: 127.0.0.1:9097` + `enable_external_controller: true` 喵~
+- 生效需 switch 后: 先 pkill 掉 GUI 核心, 再让 unit 接管 `*:7897` + `127.0.0.1:9097` 喵~
+
 ---
 
 ## MT7922 WiFi 长时间运行掉线 (mt7921e ASPM)

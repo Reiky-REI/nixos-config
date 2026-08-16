@@ -6,5 +6,6 @@
     ./monitors.nix
     ./opencode.nix
     ./kbdlight.nix
+    ./mihomo.nix
   ];
 }
