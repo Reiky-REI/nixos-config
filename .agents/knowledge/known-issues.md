@@ -233,3 +233,44 @@ Clash Verge 启动时崩溃：`Failed to initialize gtk backend`。即使设置�
 ### 待解决
 - 需要找到 headless 运行方案（如 clash-meta 或 mihomo）
 - 或等待上游修复 GTK 依赖问题
+## swww 已更名 awww, niri startup 需同步 (2026-08-16)
+
+### 问题
+nixpkgs 中 `swww` 包改名为 `awww`, 二进制从 `swww`/`swww-daemon` 改为 `awww`/`awww-daemon`。niri 配置仍 spawn `swww-daemon`, PATH 里没有该二进制, 壁纸不启动。
+
+### 规避
+- 新配置应写 `spawn-at-startup "awww-daemon"`。
+- 旧脚本里的 `swww img` / `swww-daemon` 也要同步替换成 `awww img` / `awww-daemon`。
+
+---
+
+## niri 26.04 layer-shell 壁纸层闪到最前 (2026-08-16, 未解决)
+
+### 问题
+运行壁纸守护(swww/awww/mpvpaper)时, 壁纸层会间歇闪到所有窗口最前面, 60Hz 也复现。无 kernel/DRM 错误日志。
+
+### 临时规避
+- 停用壁纸守护, 桌面纯黑。
+- 已写入 `requests/pending/2026-08-16-niri-amd-flicker.md` 跟踪。
+
+---
+
+## eDP-1 高刷白闪 (2026-08-16, 未解决)
+
+### 问题
+2560x1600@144/240 间歇白闪; 60Hz 偶发一次(21:35:50)。无 kernel/DRM 日志。
+
+### 临时规避
+- niri 配置锁 `output "eDP-1" { mode "2560x1600@60.000"; scale 1.5; }`。
+- 待查 amdgpu/niri 后恢复高刷。
+
+---
+
+## AstrBot 开机自启 (2026-08-16)
+
+### 问题
+AstrBot 6185 之前手动启动, 重启后不自动运行。
+
+### 修复
+- 新增 `modules/services/astrabot.nix` 系统服务, `services.astrabot.enable = true`。
+- DSH web 已由 dsh-fence 托管, 无需重复。

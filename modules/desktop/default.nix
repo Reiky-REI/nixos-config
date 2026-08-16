@@ -22,6 +22,8 @@
     xwayland-satellite
     # 屏幕背光控制 (niri / ly TTY 亮度键都需要)
     brightnessctl
+    # niri startup: nm-applet 需要在 PATH 中(此前未安装)
+    networkmanagerapplet
   ];
 
   # backlight 设备权限: video 组可写

@@ -7,7 +7,7 @@ cursor {
 }
 
 spawn-at-startup "noctalia-shell"
-spawn-at-startup "swww-daemon"
+// spawn-at-startup "awww-daemon" # 临时禁用: niri 26.04 layer-shell 壁纸层闪到最前 (2026-08-16)
 spawn-at-startup "fcitx5"
 spawn-at-startup "nm-applet"
 spawn-at-startup "waydroid" "session" "start"
@@ -26,6 +26,11 @@ output "HDMI-A-3" {
     transform "normal"
     position x=1280 y=0
 }
+output "eDP-1" {
+    mode "2560x1600@60.000"
+    scale 1.5
+}
+
 
 layout {
     gaps 5
