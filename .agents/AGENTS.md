@@ -54,10 +54,11 @@ AI 根据任务规模自行判断走哪级：
 每次动手前，**先查另一个 AI 有没有动过相关东西**：
 1. `git status` + `git branch -a` — 有没有对方新建/残留的分支或未提交改动
 2. `git log --oneline -10` — 对方最近提交了什么，是否影响本次任务
-3. 扫 `requests/pending/` — 有没有对方留下的待办申请（尤其**要先处理申请再开工**）
-4. 看 `knowledge/retros/` 最新 3-5 条 — 对方最近在做什么
-5. 查 `known-issues.md` — 对方新增的坑，避免重复踩
-6. 动**共享文件**（`hosts/`、`modules/`、`home/`、`config.nix`、`flake.nix`、`.agents/`）前，先确认对方没有正在改同一文件
+3. **读 `.agents/dialogue.md`** — 对方在留言板留下的问题/交接，先答复再开工（回答后追加新段落，不覆盖对方原文）
+4. 扫 `requests/pending/` — 有没有对方留下的待办申请（尤其**要先处理申请再开工**）
+5. 看 `knowledge/retros/` 最新 3-5 条 — 对方最近在做什么
+6. 查 `known-issues.md` — 对方新增的坑，避免重复踩
+7. 动**共享文件**（`hosts/`、`modules/`、`home/`、`config.nix`、`flake.nix`、`.agents/`）前，先确认对方没有正在改同一文件
 
 ### 冲突预防
 - 如果发现非自己创建的分支，先看看 `knowledge/retros/` 里有没有对应说明再做
