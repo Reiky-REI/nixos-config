@@ -1,5 +1,59 @@
 # Known Issues
 
+## 26.05 内核 6.18.42 + 固件 20260605: mt7921e 与小米 AP 关联回归 (2026-08-16)
+
+### 问题
+26.05 默认内核组合下 WiFi 连不上: 内核层能 associate 但链路掉, NM 反复 `association took too long` + 误判 `asking for new secrets` 喵~ `XIAOMI-周` 2.4G/5G 轮流失败约 8 分钟喵~
+
+### 根因
+- 内核 6.18.42 + WiFi 固件 20260605 组合与小米 AP 关联不稳 (8/5 的 ASPM 修复无关, gen 161/162 都有 `disable_aspm=Y` 且生效) 喵~
+- 直连/api 测试: 换回 25.11 (内核 6.12.90) 立即恢复喵~
+
+### 规避
+- 钉内核: 26.05 无 `linuxPackages_lts`, 用 `boot.kernelPackages = pkgs.linuxPackages_6_12` 或升 `linuxPackages_7_1` 喵~
+- 等上游修复 mt7921e 关联回归后换回默认喵~
+
+### 验证
+- `journalctl -b -1 -u NetworkManager` — 关联失败现场喵~
+- `journalctl -b -1 -k | grep -iE 'mt7921|aspm|firmware'` — ASPM 生效 + 固件 Build Time 喵~
+
+---
+
+## switch 失败后必查 /boot/loader/loader.conf 默认代 (2026-08-16)
+
+### 问题
+`nixos-rebuild switch` 中途失败 (如 dsh-fence 抢端口 status=4) 会留下**半切换状态**喵: /run/current-system 已换新代, 但 loader default 也指向新代喵~ 重启直接进新代 (可能带回归) 喵~
+
+### 规避
+- 任何 switch 失败后: `sudo grep default /boot/loader/loader.conf` 喵~
+- 回滚到旧代: `sudo /nix/var/nix/profiles/system-161-link/bin/switch-to-configuration switch` + `sudo nix-env -p /nix/var/nix/profiles/system --switch-generation 161` 喵~ (switch-to-configuration **不更新 profile 指针**) 喵~
+- 回滚三验: current-system / profile / loader default 喵~
+
+---
+
+## dsh-fence 端口 3080 冲突 (2026-08-16 实锤)
+
+### 问题
+commit 158de0c 的警告成真喵: switch 时手动 dsh web 进程占用 3080 → dsh-fence 服务 EADDRINUSE → switch status=4/NOPERMISSION 半切换喵~
+
+### 规避
+- switch 前确认 3080 无手动进程: `ss -tlnp | grep 3080` 喵~
+- dsh-fence 由 systemd 接管后, 不要再手动 `dsh web` 喵~
+
+---
+
+## 全局代理 mihomo 死亡 → opencode/nix/git 全断 (2026-08-16)
+
+### 问题
+clash-verge (mihomo) 退出后, 系统全局 proxy env (`networking.proxy` → `http://127.0.0.1:7897`) 仍生效喵, 所有经代理流量 (opencode API/nix/git) 全挂且无报错喵~
+
+### 规避
+- 排查先查代理活着没: `ss -tlnp | grep 7897` / `curl -m5 -o /dev/null -w '%{http_code}' http://127.0.0.1:7897` 喵~
+- 拉起 mihomo: `nohup /nix/store/...-clash-verge-rev-2.4.7/bin/verge-mihomo -d ~/.local/share/io.github.clash-verge-rev.clash-verge-rev -f clash-verge.yaml` 喵~
+- clash-verge 会自托管核心 (监听 `*:7897`) 喵~ `cache.db` 属主可能被 root 化, 需 chown 喵~
+
+---
+
 ## MT7922 WiFi 长时间运行掉线 (mt7921e ASPM)
 
 ### 问题
