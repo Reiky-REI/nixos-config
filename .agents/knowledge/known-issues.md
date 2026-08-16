@@ -42,6 +42,17 @@ commit 158de0c 的警告成真喵: switch 时手动 dsh web 进程占用 3080 �
 
 ---
 
+## systemd 服务默认 PATH 缺 /run/current-system/sw/bin → spawn bash ENOENT (2026-08-16)
+
+### 问题
+NixOS systemd 服务的默认 PATH 只有 coreutils/findutils/gnugrep/gnused/systemd 的 store bin喵, 不含 `/run/current-system/sw/bin` 喵~ 托管在 systemd 服务里的 agent/工具 (如 DSH dsh-fence) 用 `spawn("bash", ...)` 之类裸命令名会直接 ENOENT, 且文件类工具正常喵~ (不 spawn 进程所以不受影响) 喵~
+
+### 规避
+- 服务要跑用户级命令 → 用 `systemd.services.<name>.path = [ "/run/current-system/sw" ]` 喵~ (listOf [package str], 自动拼上默认基础包) 喵~
+- 排查: 看 `/proc/<pid>/environ` 的 PATH 是否缺 `/run/current-system/sw/bin` 喵~
+
+---
+
 ## 全局代理 mihomo 死亡 → opencode/nix/git 全断 (2026-08-16)
 
 ### 问题
@@ -180,3 +191,28 @@ U盘复制大量文件后，执行 `sync` 或 `umount` 命令会卡住（内核�
 2. **分批复制**：用 rsync 分批，避免一次性写入太多
 3. **卡住用懒卸载**：`sudo umount -l /mnt/usb` 强制断开
 4. **检查 Rust 缓存**：毕设项目有 1.9G target 目录，复制前可先清理
+
+---
+
+## Clash Verge GTK 初始化失败 (Wayland)
+
+### 问题
+Clash Verge 启动时崩溃：`Failed to initialize gtk backend`。即使设置了 `serviceMode = true`，仍然尝试启动 GUI 组件。
+
+### 根因
+- Clash Verge 包 (`clash-verge-rev`) 启动时强制初始化 GTK 后端
+- 在 Wayland 无头/服务模式下，GTK 初始化失败导致崩溃
+- 与 `serviceMode = true` 配置无关，是包本身的问题
+
+### 临时解决方案
+- **手动启动**：`clash-verge &`（需要在有显示的环境下）
+- **已禁用 autoStart**：`clash.nix` 中 `autoStart = false`
+
+### 相关配置
+- 文件：`modules/networking/clash.nix`
+- 代理地址：`127.0.0.1:7897`
+- 配置：`tunMode = true, serviceMode = true`
+
+### 待解决
+- 需要找到 headless 运行方案（如 clash-meta 或 mihomo）
+- 或等待上游修复 GTK 依赖问题

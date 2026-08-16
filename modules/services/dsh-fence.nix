@@ -45,6 +45,12 @@ in {
       after = ["network.target"];
       wantedBy = ["multi-user.target"];
 
+      # systemd 服务默认 PATH 只含 coreutils/findutils/grep/sed/systemd,
+      # 不含 /run/current-system/sw/bin -> DSH 的 bash 工具 spawn bash 直接 ENOENT。
+      # 把系统包路径挂进服务 PATH,让 DSH 按用户会话语义执行命令
+      # (bash/nixos-rebuild/git/systemctl/just 等)。围栏其余加固不受影响。
+      path = ["/run/current-system/sw"];
+
       serviceConfig = {
         User = username;
         Group = "users";
