@@ -274,3 +274,12 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 ### 修复
 - 新增 `modules/services/astrabot.nix` 系统服务, `services.astrabot.enable = true`。
 - DSH web 已由 dsh-fence 托管, 无需重复。
+
+## 白闪元凶线索: Waydroid surfaceflinger 崩溃循环 (2026-08-16)
+
+### 现象
+白闪时间点(21:35:50, 21:55)与 waydroid 容器内 Android `surfaceflinger` 反复崩溃重启高度重合; `waydroid session stop` 后崩溃噪声消失。
+
+### 临时规避
+- niri 启动项临时注释 `waydroid session start`, 停用 Waydroid 自启, 等 Waydroid 图形栈修复。
+- 需要使用时手动 `waydroid session start`。
