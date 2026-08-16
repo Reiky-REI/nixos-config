@@ -64,3 +64,26 @@ ss -tlnp | grep -E '7897|9097'            # *:7897 + 127.0.0.1:9097
 curl -m5 --noproxy '*' http://127.0.0.1:9097/version   # 有 secret 会 Unauthorized, 但端口通
 curl -m8 --proxy http://127.0.0.1:7897 -o /dev/null -w '%{http_code}\n' https://www.gstatic.com/generate_204
 ```
+
+## 追加: switch 落地 + 两个新坑 (2026-08-16)
+
+首次 switch 失败: home-manager 解析生成的 unit 报
+`expected entry key name but got '/' at line 10`。根因是 ExecStartPre 写成多行块字符串,
+home-manager 序列化时丢了续行缩进, `rm` 行顶到行首被当成新键。
+修复: 改用列表 `ExecStartPre = [ "mkdir..." "rm..." ]` → 生成两条独立 `ExecStartPre=` 行。
+
+第二次 switch 成功 (gen 165)。但 unit 持续 crash-loop: `rm: Permission denied`。
+根因: `/run/user/1002/clash-verge-rev/` 目录 + socket 是 root 进程 (clash-verge-service) 在 01:58 留下的
+`root:root` 残留, user unit 无法 rm/建 socket。一次性清理 (chown 目录 + rm socket) 后,
+pkill 掉 GUI 核心 (双开), unit 干净接管 `*:7897` + `127.0.0.1:9097`。
+
+**验收 (全部实测通过):**
+- `systemctl --user is-active mihomo` = active, MainPID 持有 7897+9097;
+- 代理 `curl --proxy 127.0.0.1:7897 gstatic/generate_204` = 204;
+- TCP 控制器 `curl -H "Authorization: Bearer set-your-secret" 127.0.0.1:9097/version` = `{"version":"1.19.24"}`;
+- root clash-verge-service 已 kill。
+
+**顺带**: dsh-fence 的 PATH 修复 (commit 0a61757) 在第一次 (半失败的) switch 里就随系统单元激活生效
+(home-manager 失败不影响系统单元), DSH bash 工具已可用 —
+实测用 DSH 进程同款 PATH `spawn("bash")` 输出 `DSH-BASH-OK`, `which bash` = `/run/current-system/sw/bin/bash`。
+

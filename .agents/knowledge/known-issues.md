@@ -73,6 +73,13 @@ clash-verge (mihomo) 退出后, 系统全局 proxy env (`networking.proxy` → `
   - verge.yaml 补 `external-controller: 127.0.0.1:9097` + `enable_external_controller: true` 喵~
 - 生效需 switch 后: 先 pkill 掉 GUI 核心, 再让 unit 接管 `*:7897` + `127.0.0.1:9097` 喵~
 
+### 追加坑 (2026-08-16 实锤, switch 时踩到)
+- **home-manager 多行块 ExecStartPre 会丢续行缩进**喵: 写成
+  `ExecStartPre = ''\n  cmd1\n  cmd2\n''` 序列化后两行都顶到行首, systemd 把 `cmd2` 当成新键 → `expected entry key name but got '/'` → 激活失败喵~
+  正确写法是列表: `ExecStartPre = [ "cmd1" "cmd2" ]` → 生成多条独立 `ExecStartPre=` 行喵~
+- **root 残留的 runtime 目录/ socket**喵: `/run/user/1002/clash-verge-rev/` 曾被 root 进程 (clash-verge-service) 创建为 `root:root`, user unit 的 ExecStartPre `rm`/创建 socket 全部 `Permission denied` → 无限 crash-loop喵~ 一次性清理: `sudo rm -f /run/user/1002/clash-verge-rev/verge-mihomo.sock && sudo chown <user>:users /run/user/1002/clash-verge-rev` (在 /run, 重启即重置, 无需改配置) 喵~
+- **pkill -f 会误杀自己的 shell**喵: 命令行里含关键字的 bash 进程会被 `pkill -f` 匹配杀掉导致命令挂死/超时喵~ 用括号技巧 `pkill -f '[v]erge'` 避免自匹配喵~
+
 ---
 
 ## MT7922 WiFi 长时间运行掉线 (mt7921e ASPM)

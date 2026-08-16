@@ -22,10 +22,13 @@
       StartLimitIntervalSec = 0;
     };
     Service = {
-      ExecStartPre = ''
-        ${pkgs.coreutils}/bin/mkdir -p '%t/clash-verge-rev'
-        ${pkgs.coreutils}/bin/rm -f '%t/clash-verge-rev/verge-mihomo.sock'
-      '';
+      # 注意: 必须用列表生成多条独立 ExecStartPre= 行, 不能写多行块字符串 —
+      # home-manager 序列化时会丢掉续行缩进, 生成的行会顶到行首被 systemd
+      # 当成新键解析 (expected entry key name but got '/')。
+      ExecStartPre = [
+        "${pkgs.coreutils}/bin/mkdir -p '%t/clash-verge-rev'"
+        "${pkgs.coreutils}/bin/rm -f '%t/clash-verge-rev/verge-mihomo.sock'"
+      ];
       ExecStart = ''
         ${pkgs.clash-verge-rev}/bin/verge-mihomo \
           -d %h/.local/share/io.github.clash-verge-rev.clash-verge-rev \
