@@ -54,7 +54,7 @@
   "autoupdate": false,
   "agent": {
     "plan": {
-      "prompt": "\u5f00\u5de5\u524d\u4e92\u67e5:\n1. git status + git branch -a \u2192 \u786e\u8ba4\u6ca1\u6709\u5bf9\u65b9(\u51e0\u52a9\u624b)\u65b0\u5efa/\u6b8b\u7559\u7684\u5206\u652f\u6216\u672a\u63d0\u4ea4\u6539\u52a8\n2. git log --oneline -10 \u2192 \u5bf9\u65b9\u6700\u8fd1\u63d0\u4ea4\u4e86\u4ec0\u4e48\uff0c\u662f\u5426\u5f71\u54cd\u672c\u6b21\u4efb\u52a1\n3. \u626b requests/pending/ \u2192 \u6709\u5bf9\u65b9\u7559\u4e0b\u7684\u5f85\u529e\u7533\u8bf7\uff0c\u5148\u5904\u7406\u518d\u5f00\u5de5\n4. \u67e5\u770b retros/ \u6700\u65b0 3-5 \u6761 \u2192 \u5bf9\u65b9\u6700\u8fd1\u5728\u505a\u4ec0\u4e48\uff0c\u907f\u514d\u51b2\u7a81\n5. \u67e5 known-issues.md \u2192 \u907f\u514d\u5df2\u77e5\u8e29\u5751\n\u6539\u5b8c\u540e:\n6. nixos-rebuild build --flake /etc/nixos#NixMEOW \u9a8c\u8bc1\n7. \u5199\u590d\u76d8\u5230 .agents/knowledge/retros/<date>-<topic>.md\n8. \u7528 commit.sh \u63d0\u4ea4 + \u63a8\u9001\u5206\u652f\n"
+      "prompt": "开工前互查:\n1. git status + git branch -a → 确认没有对方(几助手)新建/残留的分支或未提交改动\n2. git log --oneline -10 → 对方最近提交了什么，是否影响本次任务\n3. 扫 requests/pending/ → 有对方留下的待办申请，先处理再开工\n4. 查看 retros/ 最新 3-5 条 → 对方最近在做什么，避免冲突\n5. 查 known-issues.md → 避免已知踩坑\n改完后:\n6. nixos-rebuild build --flake /etc/nixos#NixMEOW 验证\n7. 写复盘到 .agents/knowledge/retros/<date>-<topic>.md\n8. 用 commit.sh 提交 + 推送分支\n"
     }
   },
   "lsp": {
@@ -137,6 +137,15 @@
         ".sh",
         ".zsh",
         ".bash"
+      ]
+    },
+    "json": {
+      "command": [
+        "vscode-json-language-server",
+        "--stdio"
+      ],
+      "extensions": [
+        ".json"
       ]
     }
   }
