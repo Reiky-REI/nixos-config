@@ -302,17 +302,32 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 ### 相关
 - NVIDIA GSP 固件异常 (Xid 120/154) 关机黑屏问题同族
 
-## QSH/壁纸层闪烁 → niri 回退旧 nixpkgs-unstable rev (2026-08-17, 已 build 待 switch 验收)
 
-### 问题
-nixpkgs-unstable 2026-08-07 (commit d8080c8) 更新后, niri 包(版本号仍 26.04 但代码 commit 已变)出现 QSH wallpaper/nightLight 壁纸层闪到最前 + 间歇白闪喵~ 8-06 gen 161 (nixpkgs-unstable rev `f83fc3c...`) 完全不闪喵~
+## QSH/壁纸层闪烁 → 内核 7.1.6 amdgpu 已知伪影回归 (2026-08-18, 7.1.5 pin 已就绪待 switch)
 
-### 方案 (build 已通过, 待 switch 后实测)
-- flake.nix 新增独立输入 `nixpkgs-unstable-old` pin 到 `f83fc3c307e74bc5fd5adb7eb6b8b13ffd2a36e1` 喵~
-- overlay 中 `niri = nixpkgs-unstable-old.legacyPackages.${system}.niri`; 其余包仍用新 nixpkgs-unstable 喵~
-- 回滚: 删输入 + overlay 改回 `niri = pkgs-unstable.niri;` + `nix flake lock` 刷新 喵~
+### 现象
+- 普通窗口(Chrome/alacritty, 非全屏)内容间歇消失露出壁纸层, 有节奏连续闪且静止也闪; QSH 组件不闪; 全屏不闪 喵~
+- 同族事件: 睡醒(挂起恢复)后黑屏无响应需强制重启; 关闭会话瞬间 niri 报 `Page flip commit failed ... (Permission denied)` 喵~
 
-### 验证
-- `nixos-rebuild build --flake /etc/nixos#NixMEOW` 通过喵~
-- 待 switch 后恢复 QSH wallpaper/nightLight 且用户实测不闪 喵~
-- 若旧 niri 仍闪 → 再查内核 7.1.6/amdgpu/mesa (pending: requests/pending/2026-08-16-niri-amd-flicker.md)
+### 排查记录 (假设证伪链)
+1. ~~QSH 壁纸/nightLight 触发~~ → 只关 nightLight 仍高频闪 (2026-08-18 实测), 证伪 喵~
+2. ~~niri 回退旧 nixpkgs-unstable rev (f83fc3c, cg87spyg)~~ → **证伪**: gen 174 起多世代实测均同样闪 喵~
+3. PSR/VRR 排除: eDP-1 面板不支持 PSR (PSR support 0); niri vrr disabled 喵~
+4. **根因: 内核 7.1.6 amdgpu 伪影回归** — 社区同批报告 (Fedora discussion 198522 / openSUSE forums 195365 / lemmy 51201878), 特指 niri 下窗口操作/播放产生伪影, 与本机症状一致 喵~
+
+### 方案 (2026-08-18, build 待过, switch 待授权)
+- flake 新增输入 `nixpkgs-715` pin 到 `c5784590f98b42b4548d932005e365b4584c6be7` (2026-07-30, kernels-org.json = 7.1.5) 喵~
+- `kernelPackages715 = (pkgs-715.linuxPackages_7_1).extend (tuxedo-drivers 补丁)`; 模块 `boot.kernelPackages = lib.mkForce kernelPackages715` 覆盖 hardware.nix 喵~
+- 切内核必须重启才生效 (retro 2026-05-26-rebuild-crash) 喵~
+- 回滚: 删 nixpkgs-715 输入 + 删 kernelPackages715 模块 → 回 hardware.nix 默认 7.1.6 喵~
+- 备选 6.12 LTS: 26.05 pin 内 = 6.12.101/103 (≥6.12.93, btmtk 上游修复, 8/6 不闪同族) 喵~
+
+### 验收清单 (switch+重启后)
+- [ ] 非全屏窗口不再透壁纸 喵~
+- [ ] WiFi (mt7921e/XIAOMI-周) 关联稳定 喵~
+- [ ] 蓝牙 MT7922 不掉 喵~
+- [ ] 键盘背光正常 (tuxedo 补丁驱动) 喵~
+- [ ] 挂起唤醒不黑屏 喵~
+
+### 保留项
+- niri 回退 pin (nixpkgs-unstable-old) 暂保留作对照, 内核确认后再撤 喵~

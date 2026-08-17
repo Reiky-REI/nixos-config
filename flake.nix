@@ -16,6 +16,9 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
+    # 内核 7.1.5 pin (2026-07-30 rev c578459): 7.1.6 amdgpu 在 niri 有已知伪影回归
+    # (窗口表面间歇丢合成/壁纸透上来, 见 known-issues), 仅用于 boot.kernelPackages
+    nixpkgs-715.url = "github:NixOS/nixpkgs/c5784590f98b42b4548d932005e365b4584c6be7";
 
     # 旧 nixpkgs-unstable rev (2026-08-06, d8080c8 之前): 该 rev 下 niri 实测无 QSH/壁纸层闪烁,
     # 仅用于 overlay 把 niri 包回退到旧版, 其他包继续用新 nixpkgs-unstable (详见 known-issues)
@@ -59,6 +62,7 @@
     nixpkgs,
     nixpkgs-unstable,
     nixpkgs-unstable-old,
+    nixpkgs-715,
     home-manager,
     CookNixvim,
     agenix,
@@ -72,6 +76,17 @@
       inherit system;
       config.allowUnfree = true;
     };
+    # 7.1.5 内核专用打包集 (仅 kernelPackages 使用)
+    pkgs-715 = import nixpkgs-715 {
+      inherit system;
+      config.allowUnfree = true;
+    };
+
+    # 7.1.5 kernelPackages + 键盘背光补丁驱动 (复刻下方 overlay 的 tuxedo 扩展)
+    kernelPackages715 = (pkgs-715.linuxPackages_7_1).extend (kfinal: kprev: {
+      tuxedo-drivers = kfinal.callPackage ./pkgs/tuxedo-drivers-patched {};
+      tuxedo-keyboard = kfinal.callPackage ./pkgs/tuxedo-drivers-patched {};
+    });
     user = import ./config.nix;
     opencodeConfig = import ./lib/opencode-config.nix {flakeRoot = self;};
     claudeConfig = import ./lib/claude-config.nix {
@@ -131,6 +146,11 @@
               })
               # waydroid .net 脚本 overlay（定义在 modules/virtualization/default.nix）
             ];
+          })
+
+          ({lib, ...}: {
+            # 内核 7.1.5 (nixpkgs-715 pin): 覆盖 hardware.nix 的 linuxPackages_7_1
+            boot.kernelPackages = lib.mkForce kernelPackages715;
           })
 
           home-manager.nixosModules.home-manager
