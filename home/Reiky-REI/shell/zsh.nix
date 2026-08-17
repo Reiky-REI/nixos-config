@@ -26,6 +26,7 @@
       ff = "fastfetch";
       nlg = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
       ncg = "sudo nix-collect-garbage -d"; # 清理无用包
+      dsh-tui = "/home/Reiky-REI/WorkSpace/bin/dsh-tui";
     };
     #    使用P10K打开下面以下注释
     initContent = ''
@@ -52,6 +53,9 @@
       export ANTHROPIC_BASE_URL=http://127.0.0.1:15721
       export ANTHROPIC_AUTH_TOKEN=proxy-placeholder
       export CLAUDE_CODE_EFFORT_LEVEL=max
+
+      # === DSH-TUI 启动器入口 ===
+      export PATH="$HOME/WorkSpace/bin:$PATH"
 
       # === 代理设置 ===
       export http_proxy=http://127.0.0.1:7897
