@@ -3,7 +3,7 @@
     ./media
     ./dsh-fence.nix
     ./astrabot.nix
-    # ./llama-cpp.nix  # 临时禁用:先让系统 build 通过并 switch,GC 释放空间后再启用
+    ./llama-cpp.nix
   ];
 
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。
@@ -11,6 +11,8 @@
   services.dsh-fence.enable = true;
 
   services.astrabot.enable = true;
+
+  services.llama-cpp.enable = true;
 
   services.udisks2.enable = true;
 
