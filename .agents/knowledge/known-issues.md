@@ -331,3 +331,20 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 
 ### 保留项
 - niri 回退 pin (nixpkgs-unstable-old) 暂保留作对照, 内核确认后再撤 喵~
+
+## 经验沉淀 (2026-08-18 内核 7.1.6 → 7.1.5 战役)
+
+### 战果 (验收记录)
+- 7.1.5 内核下学习验收: 窗口完全不闪 (完整配置: 壁纸+nightLight+QSH+awww层) ✓✓ (两轮)
+- WiFi (下北泽の最高がくふ/XIAOMI-周) / 蓝牙 MT7922 / 键盘背光 (tuxedo 补丁驱动) 全部正常 ✓
+- nvidia-kernel-modules 595.71.05 已为 7.1.5 重编译并加载 ✓ (llama-server dGPU 正常)
+- 挂起唤醒黑屏: 待用户实测 (7.1.5 预期已修, niri #4031 EACCES 同族)
+
+### 教训 (入坑体验)
+1. **nixpkgs 2026 内核版本在 `pkgs/os-specific/linux/kernel/kernels-org.json`** — 版本字面量不在 .nix 里; 查版本线用 `nix eval <tree>#legacyPackages.x86_64-linux.linuxPackages_7_1.kernel.version`
+2. **GitHub REST API 未认证 60/hr 限流**: 改用提交历史 HTML 页 `github.com/NixOS/nixpkgs/commits/<branch>/<path>` 不限流, 内嵌 react JSON 含 oid+message, 直接锁定 bump commit 喵~
+3. **`/nix/var/nix/gcroots/profiles` 可能指向 calamares 安装器残留 (`/tmp/calamares-*`)** → 该 root 失效 → GC 会把 profile 引用的世代闭包整锅端 (本机 2026-08-18 被坑, gen174 回滚后路丢失). 检查: `ls -la /nix/var/nix/gcroots/`; 修复: `ln -s /nix/var/nix/profiles /nix/var/nix/gcroots/profiles` 喵~
+4. **`pkill -f` 匹配自身 argv**、**`{16,17}*` 通配误删 175 引导项** — 一律精确 pid/精确路径 (已写入 AGENTS.md 纪律 7) 喵~
+5. **只读 HOME 下 nix 会因 fetcher-cache 写失败**: `export XDG_CACHE_HOME=<可写目录>` (同 opencode-lsp 的 .xdg 手法) 喵~
+6. **btmtk-fix.nix 有版本自判定** (`fixNeeded = versionOlder <6.12.93`), 换内核线不用动蓝牙逻辑 喵~
+7. **回滚保险设计**: `--delete-generations old` 只留 1 代; 要留 2 代得用 `--delete-generations +2` 之类精确数字; 且 GC 前先确认 gcroot 健康 喵~
