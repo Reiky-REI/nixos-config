@@ -40,6 +40,7 @@
     gopls
     typescript-language-server
     bash-language-server
+    shellcheck
     vscode-langservers-extracted
   ];
 }
