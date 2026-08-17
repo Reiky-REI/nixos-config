@@ -18,6 +18,8 @@ in {
     #   - Qwen3-8B-Q4_K_M.gguf          聊天主模型,8080,OpenAI 兼容
     #   - Qwen3-Embedding-0.6B-Q8_0.gguf embedding,8081,--embeddings
     # User=Reiky-REI 直接读 home 模型。
+    # 显存注意: RTX 4070 Max-Q 只有 8G, 8B 全 GPU + 8192 ctx 会 OOM,
+    #   故 chat 用 4096 ctx; embedding 0.6B 走 CPU(--gpu-layers 0)不占显存。
 
     systemd.services.llama-cpp-chat = {
       description = "llama.cpp chat server (Qwen3-8B, OpenAI-compatible :8080)";
@@ -34,7 +36,7 @@ in {
           ${llamaPkg}/bin/llama-server \
             --host 127.0.0.1 --port 8080 \
             -m ${modelsDir}/Qwen3-8B-Q4_K_M.gguf \
-            --ctx-size 8192 \
+            --ctx-size 4096 \
             --gpu-layers 999 \
             --jinja
         '';
@@ -61,8 +63,8 @@ in {
             -m ${modelsDir}/Qwen3-Embedding-0.6B-Q8_0.gguf \
             --embeddings \
             --pooling last \
-            --ctx-size 8192 \
-            --gpu-layers 999
+            --ctx-size 4096 \
+            --gpu-layers 0
         '';
         Restart = "on-failure";
         RestartSec = "10s";

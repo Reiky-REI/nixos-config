@@ -75,7 +75,17 @@
       "Bash(sudo chown Reiky-REI:users /etc/nixos/.agents/knowledge/conventions.md /etc/nixos/.agents/knowledge/known-issues.md)",
       "Bash(sudo chown Reiky-REI:users /etc/nixos/.agents/knowledge/INDEX.md)",
       "Bash(sudo chown *)",
-      "Bash(sudo rm *)"
+      "Bash(sudo rm *)",
+      "Bash(ping -c 2 8.8.8.8)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" --proxy http://127.0.0.1:7897 http://www.google.com)",
+      "Bash(clash-verge --version)",
+      "Bash(systemctl --user status clash-verge)",
+      "Bash(clash-verge help *)",
+      "Bash(systemctl list-units *)",
+      "Bash(systemctl status *)",
+      "Bash(nix-instantiate --eval -E '\\(builtins.getFlake \"/etc/nixos\"\\).nixosConfigurations.NixMEOW.options.systemd.user.services.type.getSubOptions {}')",
+      "Bash(zellij list-sessions *)",
+      "Bash(zellij action *)"
     ]
   }
 }

@@ -283,3 +283,21 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 ### 临时规避
 - niri 启动项临时注释 `waydroid session start`, 停用 Waydroid 自启, 等 Waydroid 图形栈修复。
 - 需要使用时手动 `waydroid session start`。
+
+## 睡眠(Suspend)唤醒后黑屏, 只能强制重启 (2026-08-17 实锤)
+
+### 问题
+系统 10:03 进入 Suspend 后, 屏幕黑屏无法唤醒, 只能长按电源强制重启。重启后一切正常 (niri/ly/背光/eDP 全部恢复)。
+
+### 现场
+- 上 boot: journalctl -b -1 | grep -iE 'Sleep|Suspend' → The system will suspend now! + Starting System Suspend... 后无唤醒日志
+- 当前 boot: journalctl -b -0 -k | grep -iE 'gpu|Xid' 无 Xid/GPU 错误
+- 睡眠前 niri 日志: locking session (09:44)
+
+### 规避
+- 长按电源强制重启 (唯一有效)
+- 若频繁复现: 考虑 systemd.sleep.settings.Sleep.AllowSuspend = no 禁睡眠
+- 屏幕黑不代表系统死, DSH/AstrBot 服务可能仍活着 (本事件 DSH 会话重启后被持久化恢复)
+
+### 相关
+- NVIDIA GSP 固件异常 (Xid 120/154) 关机黑屏问题同族

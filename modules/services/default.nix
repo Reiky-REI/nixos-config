@@ -4,6 +4,7 @@
     ./dsh-fence.nix
     ./astrabot.nix
     ./llama-cpp.nix
+    ./opencode-root.nix
   ];
 
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。
@@ -13,6 +14,8 @@
   services.astrabot.enable = true;
 
   services.llama-cpp.enable = true;
+
+  services.opencode-root.enable = true;
 
   services.udisks2.enable = true;
 
