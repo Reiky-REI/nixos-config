@@ -5,6 +5,7 @@
     ./astrabot.nix
     ./llama-cpp.nix
     ./opencode-root.nix
+    ./mcp-agents-bridge.nix
   ];
 
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。
@@ -16,6 +17,8 @@
   services.llama-cpp.enable = true;
 
   services.opencode-root.enable = true;
+
+  services.mcp-agents-bridge.enable = true;
 
   services.udisks2.enable = true;
 
