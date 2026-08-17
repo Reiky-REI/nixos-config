@@ -39,5 +39,7 @@
     clang-tools
     gopls
     typescript-language-server
+    bash-language-server
+    vscode-langservers-extracted
   ];
 }
