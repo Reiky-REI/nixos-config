@@ -17,6 +17,10 @@
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-26.05";
     nixpkgs-unstable.url = "github:nixos/nixpkgs/nixos-unstable";
 
+    # 旧 nixpkgs-unstable rev (2026-08-06, d8080c8 之前): 该 rev 下 niri 实测无 QSH/壁纸层闪烁,
+    # 仅用于 overlay 把 niri 包回退到旧版, 其他包继续用新 nixpkgs-unstable (详见 known-issues)
+    nixpkgs-unstable-old.url = "github:NixOS/nixpkgs/f83fc3c307e74bc5fd5adb7eb6b8b13ffd2a36e1";
+
     agenix = {
       url = "github:ryantm/agenix";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -54,6 +58,7 @@
     self,
     nixpkgs,
     nixpkgs-unstable,
+    nixpkgs-unstable-old,
     home-manager,
     CookNixvim,
     agenix,
@@ -111,7 +116,9 @@
           }: {
             nixpkgs.overlays = [
               (final: prev: {
-                niri = pkgs-unstable.niri;
+                # 回退 niri 到旧 nixpkgs-unstable rev (f83fc3c): 新 rev 的 niri 26.04 有
+                # QSH/壁纸层闪烁回归, 见 known-issues "niri 26.04 layer-shell 壁纸层闪到最前"
+                niri = nixpkgs-unstable-old.legacyPackages.${system}.niri;
                 # QQ 3.2.27 deb 被腾讯下架 (上游 nixpkgs bug), 复用本地已安装的旧版
                 qq = prev.runCommand "qq-3.2.27" {} ''
                   ln -s /nix/store/4fwl2khg6iwm34kjxq855zyncc43fcx7-qq-3.2.27-2026-04-01 $out

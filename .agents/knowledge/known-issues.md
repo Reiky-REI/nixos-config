@@ -301,3 +301,18 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 
 ### 相关
 - NVIDIA GSP 固件异常 (Xid 120/154) 关机黑屏问题同族
+
+## QSH/壁纸层闪烁 → niri 回退旧 nixpkgs-unstable rev (2026-08-17, 已 build 待 switch 验收)
+
+### 问题
+nixpkgs-unstable 2026-08-07 (commit d8080c8) 更新后, niri 包(版本号仍 26.04 但代码 commit 已变)出现 QSH wallpaper/nightLight 壁纸层闪到最前 + 间歇白闪喵~ 8-06 gen 161 (nixpkgs-unstable rev `f83fc3c...`) 完全不闪喵~
+
+### 方案 (build 已通过, 待 switch 后实测)
+- flake.nix 新增独立输入 `nixpkgs-unstable-old` pin 到 `f83fc3c307e74bc5fd5adb7eb6b8b13ffd2a36e1` 喵~
+- overlay 中 `niri = nixpkgs-unstable-old.legacyPackages.${system}.niri`; 其余包仍用新 nixpkgs-unstable 喵~
+- 回滚: 删输入 + overlay 改回 `niri = pkgs-unstable.niri;` + `nix flake lock` 刷新 喵~
+
+### 验证
+- `nixos-rebuild build --flake /etc/nixos#NixMEOW` 通过喵~
+- 待 switch 后恢复 QSH wallpaper/nightLight 且用户实测不闪 喵~
+- 若旧 niri 仍闪 → 再查内核 7.1.6/amdgpu/mesa (pending: requests/pending/2026-08-16-niri-amd-flicker.md)
