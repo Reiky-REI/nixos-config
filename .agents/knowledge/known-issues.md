@@ -355,3 +355,10 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 - 影响: 需用户重启/合盖实测/授权 switch 的步骤无法自主推进, 会卡在"等构建/等重启"喵~
 - 已采用对策: ① build 前台循环等到完成再加长尾(见上一条); ② 大长任务拆"构建后台 + 每 10 分钟轮询"但受制于回合边界 ③ 把"待办尾"写进 pending+todolist+known-issues, 保证任意下次唤醒能接上 喵~
 - 教训: 凡涉及"重启机器再继续"的流程, 一开始就要跟用户讲清"这一步需要你物理操作后我再收尾", 别默默干等 喵~
+
+## amdgpu 7.x 唤醒竞态 — s2idle 唤醒后 flip_done timed out 屏假死 (2026-08-18)
+- 现象: s2idle 挂睡/唤醒本身成功 (PM: suspend exit 干净), 但唤醒后 ~7s amdgpu 报 `flip_done timed out` x3 + `amdgpu_dm_atomic_commit_tail` WARNING, 屏假死/boot 消息, 需强制重启 喵~
+- 根因: 唤醒后 DRM fbdev 仿真层 (drm_fb_helper_damage_work → drm_fbdev_ttm_helper_fb_dirty) 发起的 atomic commit 与刚恢复的 display 引擎竞态; 与 niri/awww 无关 (唤醒时无活动表面) 喵~
+- 同族: niri #2139 (唤醒黑屏) / NixOS #223690 / Framework 13 AMD s2idle 需冷重启; AMD SoC s0ix 固件 + amdgpu 7.x 双重已知问题, 无官方 fix 喵~
+- 暂定规避: systemd-sleep 唤醒后钩子重开 eDP connector (岔开 fbdev dirty 时机) — 未落地, 待实测 喵~
+- 已排除: 7.1.5 闪烁/壁纸问题与唤醒竞态是两码事, 本条目仅针对唤醒 喵~
