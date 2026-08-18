@@ -348,3 +348,4 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 5. **只读 HOME 下 nix 会因 fetcher-cache 写失败**: `export XDG_CACHE_HOME=<可写目录>` (同 opencode-lsp 的 .xdg 手法) 喵~
 6. **btmtk-fix.nix 有版本自判定** (`fixNeeded = versionOlder <6.12.93`), 换内核线不用动蓝牙逻辑 喵~
 7. **回滚保险设计**: `--delete-generations old` 只留 1 代; 要留 2 代得用 `--delete-generations +2` 之类精确数字; 且 GC 前先确认 gcroot 健康 喵~
+- **niri KDL 配置注释必须用 `//`(不是 `#`)** — `#` 会被当成标识符解析报错, 连带整块 spawn-at-startup 失效 (2026-08-18 实例: 输入法/QSH/awww 全没 autostart) 喵~
