@@ -69,18 +69,13 @@ case "$SELECTED" in
     ;;
   *)
     pkill mpvpaper 2>/dev/null || true
-    if ! pgrep -x "swww-daemon" >/dev/null 2>&1; then
-      swww-daemon >/dev/null 2>&1 &
+    if ! pgrep -x "awww-daemon" >/dev/null 2>&1; then
+      awww-daemon >/dev/null 2>&1 &
       sleep 0.25
     fi
     types=(fade grow outer center wipe wave simple left top right bottom any)
     transition=${types[$RANDOM % ${#types[@]}]}
-    swww img "$SELECTED" \
-      --resize crop \
-      --transition-type "$transition" \
-      --transition-duration 2 \
-      --transition-fps 144 \
-      --transition-bezier 0.22,1,0.36,1
+    awww img "$SELECTED"
     if command -v notify-send >/dev/null 2>&1; then
       notify-send "壁纸已切换" "$(basename "$SELECTED") - 效果: $transition" -i "$SELECTED"
     fi
