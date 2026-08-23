@@ -40,7 +40,7 @@ list_messages() {
   for f in "${files[@]:-}"; do
     [ -f "$f" ] || continue
     local meta
-    meta="$(sed -n '1,/^---$/p' "$f" | tail -n +2 | head -n -1)"
+    meta="$(sed -n '/^---$/,/^---$/p' "$f")"
     local id from to date status title
     id="$(printf '%s' "$meta" | read_field id)"
     from="$(printf '%s' "$meta" | read_field from)"
