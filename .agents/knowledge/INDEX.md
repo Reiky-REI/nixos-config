@@ -36,9 +36,10 @@ Agent 每次启动时，按以下顺序加载知识：
 | `requests/archive/` | 已处理申请归档 | 复盘完成后 |
 
 ## 决策索引
-| 文件 | 标签 | 状态 |
+| 文件 | 标签 | 日期 |
 |------|------|------|
-| [nixos-26.05-upgrade-plan.md](decisions/nixos-26.05-upgrade-plan.md) | upgrade, waydroid, gbinder, niri | ⏳ 等待 26.05 正式版 |
+| [niri-focus-ring-transparent-overlay.md](decisions/niri-focus-ring-transparent-overlay.md) | niri, focus-ring, transparent, opacity, overlay, electron | 2026-05-27 |
+| [nixos-26.05-upgrade-plan.md](decisions/nixos-26.05-upgrade-plan.md) | upgrade, nixos-26.05, waydroid, gbinder, niri | 2026-05-27 |
 
 ## Skill 索引
 > 统一入口: `SKILLS.md` — 按场景查找，包含全部技能元信息
@@ -48,7 +49,8 @@ Agent 每次启动时，按以下顺序加载知识：
 | [nixos-manager](../SKILLS.md#配置管理) | NixOS 配置安全管理 — 修改/验证/提交/应用工作流 | opencode, claude |
 | [rebuild](../SKILLS.md#配置管理) | NixOS rebuild 操作指引 — 构建/switch/后台编译/加速 | opencode, claude |
 | [secrets](../SKILLS.md#配置管理) | agenix 密钥管理 — 编辑/新增/查看/重加密 | opencode, claude |
+| [dsh](../SKILLS.md#服务管理) | DSH 服务管理 — 启停/排障/Tailscale 远程/端口冲突 | opencode, claude |
 | [networking](../SKILLS.md#网络--环境) | 代理/GitHub token/镜像源/SSH 配置 | opencode, claude |
 
 ## 复盘索引
-完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 26 篇）
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 57 篇）
