@@ -1,6 +1,6 @@
 # NixMEOW Agent Guide
 
-本仓库由 **OpenCode** 和 **Claude Code** 共同维护。以下约定两个 AI 都必须遵守。
+本仓库由 **OpenCode**、**Claude Code** 和 **Codex** 共同维护。以下约定所有 AI 都必须遵守。
 
 ## Map
 - **AGENTS.md** — 根规则 + 工作流
@@ -10,9 +10,10 @@
 - **knowledge/** — 静态参考文档（conventions, architecture, secrets, known-issues）
 - **knowledge/retros/** — 复盘记录（按日期排列）
 - **knowledge/decisions/** — 决策记录（复杂任务时写为什么这么选）
-- **knowledge/maps/** — 依赖链 / 模块关系图（遇到复杂依赖时补充）
+- **knowledge/maps/** — 依赖链 / 模块关系图（按需创建, 当前为空）
 - **skills/** — 操作技能（按 skill 加载，不用全读）
 - **config/** — 工具脚本
+- **dialogue/** — 跨 AI 结构化消息板（由 config/dialogue.sh 管理; 旧 dialogue.md 已废弃为指针）
 - **flake.nix** — 入口
 - **hosts/** — 主机配置
 - **modules/** — 系统模块
@@ -56,7 +57,7 @@ AI 根据任务规模自行判断走哪级：
 每次动手前，**先查另一个 AI 有没有动过相关东西**：
 1. `git status` + `git branch -a` — 有没有对方新建/残留的分支或未提交改动
 2. `git log --oneline -10` — 对方最近提交了什么，是否影响本次任务
-3. **读 `.agents/dialogue.md`** — 对方在留言板留下的问题/交接，先答复再开工（回答后追加新段落，不覆盖对方原文）
+3. **查消息板** — `.agents/config/dialogue.sh list --status pending` 看对方留言，先答复再开工；发消息用 `dialogue.sh post`，勿再往旧 dialogue.md 追加
 4. 扫 `requests/pending/` — 有没有对方留下的待办申请（尤其**要先处理申请再开工**）
 5. 看 `knowledge/retros/` 最新 3-5 条 — 对方最近在做什么
 6. 查 `known-issues.md` — 对方新增的坑，避免重复踩
@@ -70,6 +71,7 @@ AI 根据任务规模自行判断走哪级：
 ### 关于彼此
 - OpenCode: AI coding assistant, 主配 `.agents/` 体系
 - Claude Code: AI coding assistant (我), git 身份 `claude-code[bot]`
+- Codex: AI coding agent, 经根 AGENTS.md 入口接入, 同样遵守本文件约定
 - 两者工具能力不同，但代码约定一致。详见下方「OpenCode 对齐方式」
 
 ### Claude Code 特有机制

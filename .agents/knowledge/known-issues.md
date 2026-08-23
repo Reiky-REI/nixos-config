@@ -362,3 +362,9 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 - 同族: niri #2139 (唤醒黑屏) / NixOS #223690 / Framework 13 AMD s2idle 需冷重启; AMD SoC s0ix 固件 + amdgpu 7.x 双重已知问题, 无官方 fix 喵~
 - 暂定规避: systemd-sleep 唤醒后钩子重开 eDP connector (岔开 fbdev dirty 时机) — 未落地, 待实测 喵~
 - 已排除: 7.1.5 闪烁/壁纸问题与唤醒竞态是两码事, 本条目仅针对唤醒 喵~
+
+## .agents 复盘文件 root 属主 — 其他 AI 不可读 (2026-08-20)
+- 现象: knowledge/retros/2026-08-17-full-dsh-astrbot-blocks-acd.md 属主 root 权限 600, 非 root 会话读不到喵~
+- 根因: 复盘在 sudo 流程内写入, 属主继承自 root喵~
+- 规避: 写复盘避免经 sudo 执行; 修复: sudo chown Reiky-REI:users 文件 && sudo chmod 644 文件喵~
+- 防回归: gen-index.sh 把不可读文件列在索引尾部 ⚠️ 清单, 出现即按上行命令处理喵~
