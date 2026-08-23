@@ -368,3 +368,9 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 - 根因: 复盘在 sudo 流程内写入, 属主继承自 root喵~
 - 规避: 写复盘避免经 sudo 执行; 修复: sudo chown Reiky-REI:users 文件 && sudo chmod 644 文件喵~
 - 防回归: gen-index.sh 把不可读文件列在索引尾部 ⚠️ 清单, 出现即按上行命令处理喵~
+
+## root 身份运行 git 导致 .git/objects 大量 root 属主对象 (2026-08-23)
+- 现象: 提交报「权限不足, 无法在仓库对象库 .git/objects 中添加对象」, find .git -not -user Reiky-REI 多达 208 个喵~
+- 根因: 历史上某次以 root 执行 git 操作, 松散对象与其 fanout 子目录属主变 root喵~
+- 修复: chown -R Reiky-REI:users /etc/nixos/.git 喵~
+- 规避: git 操作一律普通用户执行; AI 会话严禁在 root 窗口跑 commit/apply喵~
