@@ -11,6 +11,12 @@
 | [rebuild](skills/rebuild/SKILL.md) | nixos-rebuild 操作 (build/switch/后台编译/加速) | opencode, claude |
 | [secrets](skills/secrets/SKILL.md) | agenix 密钥管理 (编辑/新增/重加密) | opencode, claude |
 
+## 服务管理
+
+| 技能 | 场景 | 适用 |
+|------|------|------|
+| [dsh](skills/dsh/SKILL.md) | DSH 服务管理 — 启停/排障/Tailscale 远程/端口冲突 | opencode, claude |
+
 ## 网络 & 环境
 
 | 技能 | 场景 | 适用 |
