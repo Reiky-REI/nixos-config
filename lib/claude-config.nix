@@ -22,6 +22,7 @@ in {
     # 权限白名单（等效 OpenCode permission.allow）
     permissions = {
       allow = [
+        "mcp__kb__*"
         "Bash(git *)"
         "Bash(nixos-rebuild build *)"
         "Bash(nix eval *)"

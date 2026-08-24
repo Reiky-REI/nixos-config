@@ -1,1 +1,1 @@
-{"enableAllProjectMcpServers":true,"permissions":{"allow":["Bash(git *)","Bash(nixos-rebuild build *)","Bash(nix eval *)","Bash(ls *)","Bash(find *)","Bash(grep *)","Bash(cat *)","Bash(mkdir *)","Bash(touch *)","Bash(cp *)","Bash(mv *)"]}}
+{"enableAllProjectMcpServers":true,"permissions":{"allow":["mcp__kb__*","Bash(git *)","Bash(nixos-rebuild build *)","Bash(nix eval *)","Bash(ls *)","Bash(find *)","Bash(grep *)","Bash(cat *)","Bash(mkdir *)","Bash(touch *)","Bash(cp *)","Bash(mv *)"]}}
