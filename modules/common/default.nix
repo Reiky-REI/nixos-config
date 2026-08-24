@@ -96,6 +96,15 @@
 
   security.sudo.wheelNeedsPassword = false;
 
+  # polkit: wheel 组用户免密执行 systemd-run / pkexec 等提权操作
+  security.polkit.extraConfig = ''
+    polkit.addRule(function(action, subject) {
+      if (subject.isInGroup("wheel")) {
+        return polkit.Result.YES;
+      }
+    });
+  '';
+
   environment.systemPackages = with pkgs; [
     vim
     git
