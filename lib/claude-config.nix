@@ -12,6 +12,9 @@
 in {
   # ===== settings.json 内容（项目级，提交到仓库）=====
   settings = {
+    # MCP: 自动信任项目 .mcp.json 中的服务器(kb-mcp), 免首次信任弹窗, headless 必需
+    enableAllProjectMcpServers = true;
+
     # 开工引导（等效 OpenCode 的 agent.plan.prompt）
     # 写入 CLAUDE.md 而非 settings.json，因为 CLAUDE.md 始终在 context 中
     # 见 claudeMdSections.startupWorkflow

@@ -16,6 +16,7 @@
 7. **读持久化记忆** → 读 `MEMORY.md`，加载上次会话记录的 user/project/feedback
 
 按需加载（此时可根据已读的 INDEX.md 判断是否需要）：
+- **查历史事故/既有决策/踩坑时** → MCP 工具 `kb_search`（语义检索, 强制场景见 .agents/AGENTS.md「知识库语义检索 MCP」章节）
 - 遇到报错时查 known-issues.md
 - 管理密钥时读 `secrets.md`
 - 需要操作流程时读 `SKILLS.md` → 对应技能文件

@@ -23,6 +23,7 @@ Codex 开工前**必须**先读取以下文档, 按顺序加载, 全部读完再
 - **绝不直接在 main 上改** — 每个任务开一个 feature branch
 - **改完先 build** — `nixos-rebuild build --flake /etc/nixos#NixMEOW` 验证
 - **写复盘** — 非平凡变更完成写复盘到 `.agents/knowledge/retros/`
+- **排障先问知识库** — 用 MCP 工具 `kb_search` 语义检索 retros/decisions/known-issues, 场景与用法见 `.agents/AGENTS.md`
 - **喵~ 规则** — 输出自然语言时用"喵~ "替代标点
 - **NixOS 选项坑** — swaync/swayidle/polkit-gnome 是 HM 选项; Niri 用 `switch-to-named-submap`; nvidia-offload 调用独显
 
