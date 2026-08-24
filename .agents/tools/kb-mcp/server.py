@@ -3,22 +3,54 @@
 """kb-mcp -- NixMEOW 知识库语义检索 MCP server (stdio, 纯标准库)
 后端: llama.cpp Qwen3-Embedding-0.6B (:8081/v1/embeddings)
       + Qwen3-Reranker-0.6B   (:8082/v1/rerank)
-语料: /etc/nixos/.agents 下 retros/decisions/known-issues/conventions/
-      architecture + AGENTS.md + SKILLS.md (frontmatter 感知分块)
+语料: 多根上下文感知 -- KB_ROOT env > cwd 向上最近有效 .agents > 回落
+      /etc/nixos 系统库; 收录顶层 AGENTS/SKILLS/MEMORY/CLAUDE.md +
+      knowledge/** 与 memory/** 全部 md (frontmatter 感知分块)
 管线: 混合召回(向量余弦 top40 + BM25 top20) -> reranker 精排 -> top-k
 缓存: tools/kb-mcp/index/index.json (源文件 mtime 签名自动失效重建)
 """
 import json, sys, os, re, math, time, base64, array, urllib.request, urllib.error
 
-ROOT      = os.environ.get("KB_ROOT", "/etc/nixos")
+def _resolve_root():
+    # KB 根解析: KB_ROOT env > cwd 向上最近有效 .agents > 回落 /etc/nixos
+    env = os.environ.get("KB_ROOT")
+    if env:
+        return env.rstrip("/")
+    d = os.getcwd()
+    while True:
+        ag = os.path.join(d, ".agents")
+        if (os.path.isdir(ag)
+                and (os.path.isfile(os.path.join(ag, "AGENTS.md"))
+                     or os.path.isdir(os.path.join(ag, "knowledge")))):
+            return d
+        parent = os.path.dirname(d)
+        if parent == d:
+            return "/etc/nixos"
+        d = parent
+
+ROOT      = _resolve_root()
 AG        = os.path.join(ROOT, ".agents")
-CACHE_DIR = os.path.join(AG, "tools", "kb-mcp", "index")
+CACHE_DIR = os.environ.get("KB_CACHE_DIR") or os.path.join(AG, "tools", "kb-mcp", "index")
 CACHE     = os.path.join(CACHE_DIR, "index.json")
 EMBED_URL = os.environ.get("KB_EMBED_URL",  "http://127.0.0.1:8081/v1/embeddings")
 RERANK_URL= os.environ.get("KB_RERANK_URL", "http://127.0.0.1:8082/v1/rerank")
-SOURCES   = ["knowledge/retros", "knowledge/decisions",
-             "knowledge/known-issues.md", "knowledge/conventions.md",
-             "knowledge/architecture.md", "AGENTS.md", "SKILLS.md"]
+def _collect_sources():
+    # 通用语料发现: 顶层章程文件 + knowledge/** 与 memory/** 全部 .md(跳过隐藏)
+    out = []
+    for pat in ["AGENTS.md", "SKILLS.md", "MEMORY.md", "CLAUDE.md",
+                "knowledge", "memory"]:
+        p = os.path.join(AG, pat)
+        if os.path.isdir(p):
+            for dirpath, dirnames, filenames in os.walk(p):
+                dirnames[:] = sorted(x for x in dirnames if not x.startswith("."))
+                for fn in sorted(filenames):
+                    if fn.endswith(".md") and not fn.startswith("."):
+                        out.append(os.path.relpath(os.path.join(dirpath, fn), AG))
+        elif os.path.isfile(p):
+            out.append(pat)
+    return sorted(set(out))
+
+SOURCES = _collect_sources()
 MAX_SNIPPET = 240
 STATE = {"chunks": [], "vecs": None, "dim": 0, "bm25": None}
 
@@ -296,12 +328,13 @@ def kb_stats(args):
     built = "?"
     try: built = json.load(open(CACHE)).get("built_at", "?")
     except Exception: pass
-    return ("corpus=%d chunks | dim=%d | index_built=%s\nembed %s | rerank %s"
-            % (len(STATE["chunks"]), STATE["dim"], built, health(EMBED_URL), health(RERANK_URL)))
+    return ("root=%s | corpus=%d chunks | dim=%d | index_built=%s\nembed %s | rerank %s"
+            % (ROOT, len(STATE["chunks"]), STATE["dim"], built,
+               health(EMBED_URL), health(RERANK_URL)))
 
 TOOLS = [
     {"name": "kb_search",
-     "description": "语义检索本机 NixOS 知识库(retros/decisions/known-issues/AGENTS/SKILLS)。混合向量+BM25 召回,Qwen3-Reranker 精排。查历史事故、既有决策、踩坑记录时优先用它而非盲猜。",
+     "description": "语义检索当前上下文知识库(cwd 向上最近 .agents 的经验体系,无则回落系统库): retros/decisions/known-issues/conventions/memory 等。混合向量+BM25 召回,Qwen3-Reranker 精排。查历史事故、既有决策、踩坑、用户偏好时优先用它而非盲猜。",
      "inputSchema": {"type": "object", "properties": {
          "query": {"type": "string", "description": "自然语言问题"},
          "k": {"type": "integer", "description": "返回条数,默认6"},

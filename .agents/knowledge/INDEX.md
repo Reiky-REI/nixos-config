@@ -53,4 +53,4 @@ Agent 每次启动时，按以下顺序加载知识：
 | [networking](../SKILLS.md#网络--环境) | 代理/GitHub token/镜像源/SSH 配置 | opencode, claude |
 
 ## 复盘索引
-完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 59 篇）
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 60 篇）
