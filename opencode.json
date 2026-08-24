@@ -148,5 +148,15 @@
         ".json"
       ]
     }
+  },
+  "mcp": {
+    "kb": {
+      "type": "local",
+      "command": [
+        "/etc/profiles/per-user/Reiky-REI/bin/python3",
+        "/etc/nixos/.agents/tools/kb-mcp/server.py"
+      ],
+      "enabled": true
+    }
   }
 }

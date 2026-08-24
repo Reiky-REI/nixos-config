@@ -374,3 +374,6 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 - 根因: 历史上某次以 root 执行 git 操作, 松散对象与其 fanout 子目录属主变 root喵~
 - 修复: chown -R Reiky-REI:users /etc/nixos/.git 喵~
 - 规避: git 操作一律普通用户执行; AI 会话严禁在 root 窗口跑 commit/apply喵~
+
+- **llama.cpp rerank "input too large / physical batch size 512"** (2026-08-24): rerank 编码受 `--ubatch-size` 限制而不是 `-b/--batch-size`; 只调 batch-size 无效, 必须把 ubatch 提到 ≥ 单文档 token 数(本机 2048), 否则 /v1/rerank 对长文档一律 HTTP 500
+- **systemd user .path 单元 start-limit 熔断** (2026-08-24): PathExistsGlob 场景任务快速进出队列会高频触发 unit, 默认阈值(5次/10s)直接 unit-start-limit-hit 停机且不再恢复; 需给 .path 和 .service 都放宽 StartLimitIntervalSec/Burst 并 reset-failed

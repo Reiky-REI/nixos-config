@@ -12,6 +12,7 @@
 - **knowledge/decisions/** — 决策记录（复杂任务时写为什么这么选）
 - **knowledge/maps/** — 依赖链 / 模块关系图（按需创建, 当前为空）
 - **skills/** — 操作技能（按 skill 加载，不用全读）
+- **tools/** — 自研 agent 工具（当前: tools/kb-mcp 知识库语义检索 MCP server）
 - **config/** — 工具脚本
 - **dialogue/** — 跨 AI 结构化消息板（由 config/dialogue.sh 管理; 旧 dialogue.md 已废弃为指针）
 - **flake.nix** — 入口
@@ -34,6 +35,41 @@ AI 工作纪律：
 5. **坑出现 2 次 → 提炼到 known-issues.md**
 6. **遇到问题先上网搜同类报告** — 收集完现场情况(日志/版本/症状/触发条件)后, 立即 web 搜索社区是否有同类报错/已知回归/修复版本, 往往直接命中根因或规避方案 (案例: 2026-08-18 内核 7.1.6 amdgpu 伪影回归, 本地排查两轮未果, 搜到 Fedora/lemmy/openSUSE 同批报告直接定案)
 7. **杀进程/删文件用精确目标** — 不用宽泛通配(pkill -f 会匹配自身 argv, {16,17}* 会误伤), 一律按精确 pid / 精确路径操作
+
+## 知识库语义检索 MCP（kb-mcp）— 强制使用喵!
+
+所有 AI 客户端已统一挂载 MCP server `kb-mcp`（stdio, 零依赖, 服务端脚本 `.agents/tools/kb-mcp/server.py`, 后端为本机 Qwen3-Embedding :8081 + Qwen3-Reranker :8082, 由 `modules/services/llama-cpp.nix` 提供）喵~ 
+
+### 必须用 kb_search 的场景喵
+1. **排障第一步**: 描述症状先问知识库, 再动手 —— retros/decisions/known-issues 全量语义索引, 历史同类事故直接命中根因喵~ 
+2. 动 `modules/` `hosts/` `flake.nix` 前: 查相关模块有无既有决策与踩坑喵~ 
+3. 写复盘/决策前: 查既有条目, 避免重复和自相矛盾喵~ 
+4. 用户问历史（之前怎么处理的/为什么这么设计）时喵~ 
+
+### 与 grep 的分工喵
+已知精确字符串（报错原文/函数名/路径）→ grep 更快；模糊语义问题（为什么/怎么办/有没有先例/类似问题）→ 一律 kb_search喵~ 
+
+### 工具清单喵
+- `kb_search {query, k?, module?, tag?}` — 混合召回 + rerank 精排, 返回带文件#标题/meta/摘要的条目喵~ 
+- `kb_ingest {}` / `kb_stats {}` — 一般不用手动调喵~ 
+若当前会话没有该工具 = 客户端未加载新配置 → 按 `.agents/tools/kb-mcp/README.md` 注册并重启会话喵~ 
+
+## 断电续命协议（agent-resume）— 长任务必须接入喵!
+
+无人值守基础设施已常驻: systemd user 单元 `agent-resume.path`(队列一有任务秒触发) + `agent-resume.timer`(每2分钟兜底) + `loginctl enable-linger`（user manager 不依赖登录会话）喵~ 任何 AI 进程被杀、会话中断后, 队列仍由 systemd 自动消费喵~ 
+
+### 入队方法喵
+```bash
+D=~/.local/state/agent-resume
+printf 'id=<唯一id>\ndesc=<一句话说明>\nmax_retries=3\nnotify_board=1\npayload=%s\n' \
+  "$(base64 -w0 <<<'<要执行的 shell 命令>')" > "$D/queue/<id>.task"
+```
+行为: 成功 → 移入 done/ 并自动发消息板通报；失败 → 退避 20s×n 重试至 max_retries 后移入 failed/ 并发失败通报喵~ 日志在 `$D/log/`, 最新结果 `$D/state.json`喵~ 
+
+### 使用纪律喵
+- 预计超过 5 分钟或不允许中断的任务（rebuild/switch、批量改造、跨 AI 派活）一律走队列, 不裸跑 systemd-run喵~ 
+- 会话临终前把未完成步骤写成 task 入队 —— 这是唯一的免人工干预续命通道喵~ 
+- 需要拉起其他 AI 时也走队列（payload 里执行对应启动命令）喵~ 
 
 ## 三级工作流
 

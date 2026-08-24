@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "kb": {
+      "command": "/etc/profiles/per-user/Reiky-REI/bin/python3",
+      "args": [
+        "/etc/nixos/.agents/tools/kb-mcp/server.py"
+      ]
+    }
+  }
+}

@@ -4,3 +4,4 @@
 .agents/sessions/20*/
 .claude/worktrees/
 result
+.agents/tools/kb-mcp/index/
