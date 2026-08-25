@@ -30,3 +30,6 @@ server.py 升级为**上下文感知多根**: KB_ROOT env > cwd 向上最近有�
 ## 已知边界
 - codex 运行时仍缺 API 凭据(401), 配置本身验证通过, 凭据就绪即可用喵~
 - blueprint-vm/DeepSec/dsh-routing-suite 的 .agents/ 为未跟踪脚手架, 待仓库所有者顺手提交喵~
+
+## 后续升级：事件驱动索引维护（同日追加）
+两分钟轮询定时器方案被用户否决，改为 **systemd.path 事件钩子**喵~ `gen-kb-paths.sh` 枚举全部根的章程文件与 knowledge/**、memory/** 目录树，生成单个 `kb-corpus.path`（52 条监视路径），编辑落盘即触发 `kb-corpus.service` → `warm-all.sh` 全量 sweep，签名短路只重建变更根喵~ 实弹验证：touch 一个知识文件后 **1 秒内**自动触发，12 个未变根秒级跳过，变更根精确重建仅 38s 喵~
