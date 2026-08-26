@@ -56,6 +56,9 @@
     noto-fonts
     noto-fonts-cjk-sans
     noto-fonts-color-emoji
+    # 静态 TTF 中文字体, 兼容 Steam 等自带旧版 fontconfig/freetype 的程序
+    # (VF ttc 老库读不了, 见 known-issues.md "nix-shell 里跑 Steam 中文显示方块")
+    wqy_microhei
 
     dejavu_fonts
 
