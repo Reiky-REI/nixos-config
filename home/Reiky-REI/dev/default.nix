@@ -31,7 +31,7 @@
     lua
     lua-language-server
     nixd
-    nixfmt-rfc-style
+    nixfmt
 
     # LSP servers
     pyright

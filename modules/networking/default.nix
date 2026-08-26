@@ -17,7 +17,7 @@
   # 当路由器 DNS (192.168.1.1) 不可用时自动 fallback 到公共 DNS
   services.resolved = {
     enable = true;
-    fallbackDns = [
+    settings.Resolve.FallbackDNS = [
       "1.1.1.1"
       "8.8.8.8"
     ];
@@ -27,7 +27,7 @@
     default = "http://127.0.0.1:7897";
     httpProxy = "http://127.0.0.1:7897";
     httpsProxy = "http://127.0.0.1:7897";
-    noProxy = "localhost,127.0.0.1,::1,*.local";
+    noProxy = "localhost,127.0.0.1,::1,*.local,100.64.0.0/10,*.ts.net";
   };
 
   services.openssh.enable = true;
