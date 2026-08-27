@@ -219,6 +219,7 @@ window-rule {
     match app-id="DolPhine"
     match app-id="Bottles"
     match app-id="kitty"
+    match app-id="DolPhine"
     match app-id="steam"
     opacity 0.75
     background-effect {
