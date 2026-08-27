@@ -32,6 +32,7 @@ in {
   };
 
   config = lib.mkIf cfg.enable {
+    # ===== AstrBot 主服务 =====
     systemd.services.astrabot = {
       description = "AstrBot chat bot";
       after = ["network.target" "dsh-fence.service"];
@@ -50,7 +51,41 @@ in {
         StandardOutput = "append:${logFile}";
         StandardError = "append:${logFile}";
         # greenlet 需要 libstdc++, 通过 stdenv gcc lib 提供
-        Environment = "LD_LIBRARY_PATH=${libstdcppPath}";
+        Environment = [
+          "LD_LIBRARY_PATH=${libstdcppPath}"
+          "HTTP_PROXY=http://127.0.0.1:7897"
+          "HTTPS_PROXY=http://127.0.0.1:7897"
+          "ALL_PROXY=socks5://127.0.0.1:7897"
+          "NO_PROXY=localhost,127.0.0.1,::1"
+        ];
+      };
+    };
+
+    # ===== Watchdog service: 检查 AstrBot 状态并拉起 =====
+    systemd.services.astrabot-watchdog = {
+      description = "AstrBot Watchdog - 检查服务状态并拉起";
+      after = ["astrabot.service"];
+      serviceConfig = {
+        Type = "oneshot";
+        ExecStart = "${astraDir}/astrabot_watchdog.sh";
+        User = username;
+        Environment = [
+          "PATH=/run/current-system/sw/bin:/usr/bin:/bin"
+          "HTTP_PROXY=http://127.0.0.1:7897"
+          "HTTPS_PROXY=http://127.0.0.1:7897"
+        ];
+      };
+    };
+
+    # ===== Watchdog timer: 每10分钟触发一次 =====
+    systemd.timers.astrabot-watchdog = {
+      description = "AstrBot Watchdog Timer - 每10分钟触发一次";
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnBootSec = "2min";
+        OnUnitActiveSec = "10min";
+        AccuracySec = "1min";
+        Persistent = true;
       };
     };
   };

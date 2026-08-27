@@ -114,5 +114,6 @@
     curl
     wget
     cachix
+    gh
   ];
 }

@@ -11,6 +11,7 @@
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。
   # 下次 nixos-rebuild switch 前,先停掉手动启动的 dsh 进程(端口 3080)。
   services.dsh-fence.enable = true;
+  services.dsh-fence.trustedHosts = ["nixmeow.miku-garibaldi.ts.net"];
 
   services.astrabot.enable = true;
 
@@ -43,10 +44,10 @@
   services.timesyncd.enable = true;
 
   systemd.sleep.settings.Sleep = {
-    AllowSuspend = "yes";
+    AllowSuspend = "no";
     AllowHibernation = "no";
-    AllowHybridSleep = "yes";
-    AllowSuspendThenHibernate = "yes";
+    AllowHybridSleep = "no";
+    AllowSuspendThenHibernate = "no";
   };
 
   environment.sessionVariables.XDG_DATA_DIRS = lib.mkAfter [

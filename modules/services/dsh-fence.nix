@@ -37,12 +37,18 @@ in {
       default = fallbackWorkspace;
       description = "Writable workspace root handed to agent sessions.";
     };
+    trustedHosts = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [];
+      description = "Extra host authorities the /api browser-trust fence accepts (e.g. Tailscale domain).";
+    };
   };
 
   config = lib.mkIf cfg.enable {
     systemd.services.dsh-fence = {
       description = "DeepSeek Harness web app (nixos-guard outer fence)";
-      after = ["network.target"];
+      after = ["network.target" "tailscale.service"];
+      requires = ["tailscale.service"];
       wantedBy = ["multi-user.target"];
 
       # systemd 服务默认 PATH 只含 coreutils/findutils/grep/sed/systemd,
@@ -55,7 +61,7 @@ in {
         User = username;
         Group = "users";
         WorkingDirectory = cfg.workspace;
-        ExecStart = "${pkgs.nodejs_22}/bin/node --expose-internals ${cfg.binPath} web";
+        ExecStart = "${pkgs.nodejs_22}/bin/node --expose-internals ${cfg.binPath} web ${lib.concatStringsSep " " (map (h: "--trusted-host ${h}") cfg.trustedHosts)}";
         Restart = "on-failure";
         RestartSec = "5s";
         UMask = "0077";
