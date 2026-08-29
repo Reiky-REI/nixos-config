@@ -1,6 +1,7 @@
 {
   imports = [
     ./essentials.nix
+    ./archive.nix
     ./search.nix
     ./viewers.nix
     ./monitors.nix
