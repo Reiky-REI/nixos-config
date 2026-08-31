@@ -556,3 +556,23 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 - `sudo: must be owned by uid 0 and have the setuid bit set` — AI 会话沙箱与 systemd user 单元都被剥 setuid 喵~
 - 正解: **系统级 systemd-run** (`systemd-run --unit=<name> --collect ...`) 以 root 跑, polkit 对活跃本地会话放行 (8-30 复盘先例一致) 喵~
 - 附: `cmd | tail; echo $?` 取的是 tail 的退出码, 永远别用管道尾判断命令成败喵~
+
+---
+
+## 8-29 手搓 git 对象后遗症: push 被远端 fsck 拒收 (2026-09-01, 已修复)
+
+### 问题
+`git push` 被远端拒收: `fullPathname / treeNotSorted → fsck error`; 本地有 0 字节空对象 + 4 个 hash-path mismatch blob + 畸形 root tree 喵~
+
+### 根因
+8-29 沙箱绕道提交 (Python 直拼 tree + alternates 指向 /tmp) 产出了 8 个含畸形结构/损坏对象引用的提交, 静默潜伏到 push 才爆喵~
+
+### 修复
+纯 git 管线重建提交链 (commit-tree 保留元数据, update-index+write-tree 重建树), repack 收编 alternates 对象后移除 alternates, fsck exit=0, push 成功 (origin/main=ab7fec2) 喵~
+- 细节见 `retros/2026-09-01-git-corrupt-history-repair.md` 喵~
+
+### 教训
+- 手搓树必须走 update-index/write-tree (自动排序+嵌套); Python 直拼必产畸形喵~
+- `hash-object -w` 存在即跳过: 修复前先删损坏对象文件喵~
+- **alternates 指向 tmpfs = 定时炸弹**, repack 收编后立刻移除喵~
+- 现在沙箱内可用系统级 systemd-run 正常执行 git (含 sudo), 不需要再手搓喵~

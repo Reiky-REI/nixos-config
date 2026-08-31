@@ -12,6 +12,8 @@
     enableZshIntegration = true;
     settings = {
       add_newline = false;
+      # 2026-09-01: 家目录文件巨多 (node_modules/WorkSpace), 默认 30ms 扫描超时报 WARN, 提到 150ms 喵~
+      scan_timeout = 150;
     };
   };
   home.shell.enableZshIntegration = true;
