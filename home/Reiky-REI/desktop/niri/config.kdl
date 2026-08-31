@@ -183,6 +183,9 @@ layer-rule {
     background-effect {
         blur true
         xray false // 👈 关键：关闭 X 光，允许向下看穿到音频频谱
+        
+        // 允许任何哪怕是完全不透明的底层像素（窗口和小组件）100% 穿透进来渲染
+        ignore-alpha 0.5 
     }
 }
 
