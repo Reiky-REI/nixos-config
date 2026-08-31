@@ -176,29 +176,32 @@ animations {
     }
 }
 
+// 1. 全局解禁 Noctalia 的背景和面板层，将它们拉入 Backdrop 环境中混合
 layer-rule {
-    // 精确匹配你的 Noctalia 任务栏背景面
     match namespace="^noctalia-background-.*$"
+    
+    // 👈 核心关键：允许 Niri 将此层与底层的窗口及桌面组件进行深度 Backdrop 混合
+    place-within-backdrop true 
     
     background-effect {
         blur true
-        xray false  // 允许向下看穿
+        xray false
     }
-    
-    // 👈 核心关键：强制让 Niri 忽略图层的透明度裁剪
-    // 允许任何哪怕是完全不透明或半透明的底层像素（你的频谱）100% 穿透进来渲染
-    ignore-alpha 0.5 
 }
 
+// 2. 确保音频频谱小组件（Widgets）能够被 Niri 的重绘引擎捕捉到
 layer-rule {
-    // 精确匹配你的音频频谱小组件所在的桌面组件层
     match namespace="^noctalia-desktop-widgets-.*$"
     
-    // 强制将其也标定为非 xray，确保它在混成器的重绘队列中不被剔除
     background-effect {
         blur false
         xray false
     }
+}
+
+// 3. 必须：强制 Niri 工作区背景完全透明（防止默认的黑色/灰色背景阻挡频谱组件）
+layout {
+    background-color "transparent"
 }
 
 window-rule {
