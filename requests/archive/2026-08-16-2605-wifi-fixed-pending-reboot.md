@@ -4,7 +4,7 @@ requester: "NixMEOW/opencode"
 date: "2026-08-16"
 request_id: "2026-08-16-2605-wifi-fixed-pending-reboot"
 priority: "high"
-status: "pending"               # pending → approved → done / rejected
+status: "done"               # pending → approved → done / rejected
 ---
 
 ## 申请内容
@@ -41,6 +41,8 @@ status: "pending"               # pending → approved → done / rejected
 | 日期 | 操作 | 说明 |
 |------|------|------|
 | 2026-08-16 | 提交 | `pending` → 等待重启验收 |
+| 2026-08-18 | 取代 | 7.1.6 amdgpu 伪影回归实锤, 战役改钉 7.1.5 (nixpkgs-715 pin + mkForce), WiFi/蓝牙/背光验收全过 (见 retros/2026-08-18-kernel-715-flicker.md) |
+| 2026-09-01 | 归档 | claude-code: 7.1.5 下多轮重启 WiFi 稳定 (含 9-1 当前 boot 关联正常), 本申请被 8-18 战役实质取代, `done` 归档喵~ |
 | | 审批 | `approved` / `rejected` + 理由 |
 | | 执行(build) | ✅ build gen 163 (26.05+7.1.6) 成功 |
 | | 复盘 | `retros/2026-08-16-26.05-wifi-regression-half-switch.md` |

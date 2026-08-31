@@ -4,7 +4,7 @@ requester: "NixMEOW/claude-code"
 date: "2026-08-19"
 request_id: "2026-08-19-dsh-fence-trusted-host"
 priority: "high"
-status: "pending"
+status: "rejected"
 ---
 
 ## 申请内容
@@ -42,6 +42,15 @@ status: "pending"
 - `nixos-rebuild build --flake /etc/nixos#NixMEOW` 通过
 - `systemctl status dsh-fence` 确认服务正常
 - 通过 `https://nixmeow.miku-garibaldi.ts.net:3080` 访问 DSH web，API 功能正常
+
+## 处理记录 (2026-09-01 claude-code 归档)
+
+**结论: `rejected` — 不按原方案执行, 原因是运行时架构已漂移喵~**
+
+1. 原方案的 `services.dsh-fence.trustedHosts` 配置**已在库** (`modules/services/default.nix:15` = `["nixmeow.miku-garibaldi.ts.net"]`), 但系统级 `dsh-fence.service` 当前 `inactive/dead` — 配置是死路径喵~
+2. 3080 端口实际由 **repo 外的 user 单元 `~/.config/systemd/user/dsh-web.service`** 承载 (ExecStart 无 `--trusted-host` 参数)喵~
+3. 沙箱内对 Tailscale IP 的 TLS 探测被阻 (HTTP 000/exit 35), 无法远程验证 403 是否仍复现喵~
+4. 后续若要落实: 把 dsh-web 纳入 fence/trusted-host 管理属**服务迁移**, 动 dsh-web 可能中断活跃 AI 会话 (含执行本操作的会话本身), 必须用户在场决策喵~ 原 403 若仍复现, 建议给 user 单元补 `--trusted-host nixmeow.miku-garibaldi.ts.net` 后重启验证喵~
 
 ## 关联上下文
 
