@@ -176,21 +176,27 @@ animations {
     }
 }
 
-
-// 1. 让任务栏背景能够向下看穿普通窗口和小组件
 layer-rule {
+    // 精确匹配你的 Noctalia 任务栏背景面
     match namespace="^noctalia-background-.*$"
+    
     background-effect {
         blur true
-        xray false  // 关闭X光，允许向下看
+        xray false  // 允许向下看穿
     }
+    
+    // 👈 核心关键：强制让 Niri 忽略图层的透明度裁剪
+    // 允许任何哪怕是完全不透明或半透明的底层像素（你的频谱）100% 穿透进来渲染
+    ignore-alpha 0.5 
 }
 
-// 2. 确保小组件（音频频谱）不会因为某种混成规则被忽略
 layer-rule {
+    // 精确匹配你的音频频谱小组件所在的桌面组件层
     match namespace="^noctalia-desktop-widgets-.*$"
+    
+    // 强制将其也标定为非 xray，确保它在混成器的重绘队列中不被剔除
     background-effect {
-        blur false // 桌面组件自己不需要模糊背景
+        blur false
         xray false
     }
 }
