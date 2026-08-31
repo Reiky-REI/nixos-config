@@ -176,13 +176,14 @@ animations {
     }
 }
 
+
 layer-rule {
-    // 匹配 Noctalia 任务栏的命名空间
-    match namespace="^noctalia-bar-.*$" 
+    // 匹配包含 noctalia 的所有层，包括 background、content、exclusion 等
+    match namespace="^noctalia-.*$" 
     
     background-effect {
         blur true
-        xray false  // 👈 关键点：关闭X光模式，允许透出下方窗口
+        xray false  // 👈 核心：强制所有 Noctalia 渲染层都能透出普通窗口
     }
 }
 
