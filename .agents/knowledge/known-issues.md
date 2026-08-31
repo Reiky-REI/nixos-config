@@ -301,6 +301,7 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 
 ### 相关
 - NVIDIA GSP 固件异常 (Xid 120/154) 关机黑屏问题同族
+- **2026-09-01 更新**: 7.1.5 内核下依旧复现喵~ 一天三连 (8-31 ~16:00 / 19:53 / 9-1 01:34) 已定案: noctalia idle 自动挂起 + 唤醒必坏, 修复见 retros/2026-09-01-noctalia-idle-suspend-blackscreen.md 喵~
 
 
 ## QSH/壁纸层闪烁 → 内核 7.1.6 amdgpu 已知伪影回归 (2026-08-18, 7.1.5 pin 已就绪待 switch)
@@ -525,3 +526,33 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 - AI 模型已重新部署：Qwen3-VL-Embedding-2B (2048维) + Qwen3-VL-Reranker-2B，替代原 0.6b 版 (维度 1024→2048，各根知识库索引已全量重建)
 - 壁纸需要从其他来源恢复
 - 文档需要从其他备份恢复
+
+---
+
+## noctalia idle 自动挂起 × S3 唤醒必坏 → 黑屏强重启 (2026-09-01, 已修复)
+
+### 问题
+一天三连黑屏强重启 (8-31 ~16:00 / 8-31 19:53 / 9-1 01:34): journal 尾部 `PM: suspend entry (deep)` 无 exit = 挂起后唤醒失败喵~
+
+### 根因
+- noctalia-shell `settings.json` `idle.suspendTimeout=1800`: 闲置 30 分钟自动 `systemctl suspend` 喵~
+- amdgpu deep 挂起唤醒必坏 (8-17 known-issue, 7.1.5 实测未修复) → 每次挂起 = 黑屏强刷喵~
+
+### 修复 (已落地)
+- settings.json: `suspendTimeout→0` + 会话菜单 suspend 按钮 disabled (息屏 600s 保留, DPMS 安全) 喵~
+- `modules/services/default.nix`: `systemd.sleep.settings.Sleep.AllowSuspend = "no"` 系统级封死 S3 喵~
+- Super+L 改纯 hyprlock 锁屏; swayidle 空配置崩溃循环 → disable 喵~
+- 恢复 suspend 条件: 上游 amdgpu 唤醒修复 + 挂起-唤醒往返实测通过喵~
+
+---
+
+## agent-resume 队列假 OK + sudo setuid 全域不可用 (2026-09-01)
+
+### 坑 1: 队列 runner 假 OK
+- runner 的 task log 只收 systemd-run 客户端输出, unit stdout 进 journal 收不到; payload 里 `| tail` 把退出码吃成 0 → 构建失败也报 OK 喵~
+- 规避: 关键任务 payload 内部文件重定向到固定路径 + 显式 `echo EXIT=$?`; runner 本体待修喵~
+
+### 坑 2: sudo 在 AI 沙箱/user 单元均不可用
+- `sudo: must be owned by uid 0 and have the setuid bit set` — AI 会话沙箱与 systemd user 单元都被剥 setuid 喵~
+- 正解: **系统级 systemd-run** (`systemd-run --unit=<name> --collect ...`) 以 root 跑, polkit 对活跃本地会话放行 (8-30 复盘先例一致) 喵~
+- 附: `cmd | tail; echo $?` 取的是 tail 的退出码, 永远别用管道尾判断命令成败喵~

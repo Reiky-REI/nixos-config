@@ -74,4 +74,4 @@ Agent 每次启动时，按以下顺序加载知识：
 | **pkill -f 不要用** | AGENTS.md 纪律7 | 误杀自身进程 |
 
 ## 复盘索引
-完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 63 篇）
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 65 篇）

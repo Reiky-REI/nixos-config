@@ -47,9 +47,12 @@
   services.timesyncd.enable = true;
 
   systemd.sleep.settings.Sleep = {
-    # 睡眠恢复: 之前为防 Noctalia 待机挂起失败导致锁屏卡住而禁用,
-    # 现在允许 suspend, 并在 niri 用 Meta+L 触发 hyprlock(高斯模糊)+ suspend
-    AllowSuspend = "yes";
+    # 2026-09-01: 一天三连黑屏强重启 (8-31 ~16:00 无日志期/8-31 19:53/9-1 01:34), 根因均为
+    # Noctalia idle 自动挂起 (suspendTimeout=1800) + amdgpu deep 挂起唤醒必坏 (8-17 known-issue, 7.1.5 未修).
+    # 触发源已在 noctalia settings.json 禁用 (suspendTimeout→0 + 会话菜单 suspend 按钮关闭, 运行时状态不入库),
+    # 此处系统级封死 S3 故障态: 任何路径 (合盖/键bind/应用) 均无法进入挂起喵~
+    # 恢复条件: 上游 amdgpu 唤醒修复 + 实测挂起-唤醒往返通过; 休眠 (S4) 另测, 与 S3 路径不同喵~
+    AllowSuspend = "no";
     AllowHibernation = "no";
     AllowHybridSleep = "no";
     AllowSuspendThenHibernate = "no";

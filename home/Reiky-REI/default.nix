@@ -50,7 +50,9 @@ in {
 
   services.polkit-gnome.enable = true;
   services.swaync.enable = true;
-  services.swayidle.enable = true;
+  # 2026-09-01: idle 管理已由 noctalia-shell 内置 (settings.json idle.*), swayidle 未配任何 event
+  # → 空配置秒退 → start-limit-hit 崩溃循环, 纯日志噪声, 禁用喵~ (如需启用必须配 timeout 事件)
+  services.swayidle.enable = false;
 
   # catppuccin.swaync = {
   #   enable = true;
