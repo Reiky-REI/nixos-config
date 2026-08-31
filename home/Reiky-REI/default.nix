@@ -9,6 +9,18 @@
     mkdir -p $out/share/icons/MikuCat
     cp -r ${../../pkgs/cursors/MikuCat}/* $out/share/icons/MikuCat/
   '';
+
+  # 动态导入 ~/.config/home-manager/services/ 下的所有 .nix 文件
+  # 新增用户服务只需在该目录创建 .nix 文件, 无需修改此文件
+  userServicesDir = "/home/Reiky-REI/.config/home-manager/services";
+  userServices =
+    if builtins.pathExists userServicesDir
+    then let
+      entries = builtins.readDir userServicesDir;
+      nixFiles = builtins.filter (name: builtins.match ".*\\.nix" name != null) (builtins.attrNames entries);
+    in
+      map (f: "${userServicesDir}/${f}") nixFiles
+    else [];
 in {
   imports = [
     ./shell
@@ -19,7 +31,7 @@ in {
     ./tools
     ./editors
     ./dev
-  ];
+  ] ++ userServices;
 
   home.packages = with pkgs; [
     libnotify

@@ -391,3 +391,137 @@ Claude Code 沙箱环境下 `/etc/nixos` 仓库 bash 无写权限,`git add/commi
 - 通过 `.git/objects/info/alternates2` 指向外部对象目录,Git 自动搜索
 - 用 `write` 工具 (非 bash) 更新 `.git/refs/heads/<branch>` 指向新 commit
 - 无需 `git add/commit`,直接操作底层对象 + refs 绕过 index.lock
+
+---
+
+## Home Manager gc-root 残留导致已删包仍占磁盘 (2026-08-30, 实锤)
+
+### 问题
+从配置文件中删除包（如 WPS Office、OBS Studio）后，`nix-collect-garbage -d` 仍无法回收对应的 store 路径，磁盘空间不释放喵~
+
+### 根因
+`~/.local/state/nix/profiles/home-manager-N-link` 旧的 gc-root 仍指向包含已删包的旧 Home Manager generation。Nix GC 不会回收被 gcroot 引用的 store 路径喵~
+
+### 发现方法
+```bash
+# 1. 检查包是否在系统引用链中
+nix-store --query --requisites /run/current-system | grep wpsoffice  # 无输出 = 已移除
+
+# 2. 检查旧 HM path 是否仍引用
+for p in $(ls -d /nix/store/*-home-manager-path); do
+  nix-store --query --requisites "$p" | grep -q "wpsoffice" && echo "Found: $p"
+done
+
+# 3. 检查 gc-roots 中的 HM 引用
+find /nix/var/nix/gcroots -type l -exec ls -la {} \; | grep "home-manager"
+```
+
+### 修复
+```bash
+# 删除旧的 HM profile 链接（保留最新的）
+ls -la ~/.local/state/nix/profiles/  # 确认哪些是旧的
+rm -f ~/.local/state/nix/profiles/home-manager-*-link
+
+# 然后运行 GC
+sudo nix-collect-garbage -d
+```
+
+### 教训
+- 卸载 Nix 包后，**必须检查 HM gc-root** 是否还引用旧 generation
+- 这是 NixOS 用户最常踩的"删了配置还占空间"的坑
+- 已写入 `skills/disk-cleanup/SKILL.md` 喵~
+
+---
+
+## 🚨 严重过失: rsync 迁移数据丢失 (2026-08-31, 实锤)
+
+### 问题
+执行 `rsync -av --remove-source-files` 将本地数据迁移到 NAS WebDAV 时，**rsync 写入 WebDAV 静默失败**（无报错），但本地数据已被 `--remove-source-files` 删除，导致 **7.2G 数据永久丢失**。
+
+### 丢失数据
+| 目录 | 大小 | 内容 |
+|------|------|------|
+| `~/WorkSpace/models` | 6.5G | qwen3-embedding-0.6b-q8 + qwen3-reranker-0.6b-q8 |
+| `~/Pictures` | 455M | Wallpapers(397M) + icons(59M) + 头像 |
+| `~/Documents` | 282M | office 文档 |
+
+### 根因
+1. rclone mount WebDAV **写入不可靠** — 某些 WebDAV 服务器对写入支持不完整
+2. rsync 的 `--remove-source-files` **先删后确认** — 写入失败不回滚已删除的文件
+3. 迁移脚本**没有验证写入结果** — 没有检查目标目录是否有文件
+
+### 🚨 铁律: 数据迁移必须遵守
+
+```
+⚠️ 绝对禁止: rsync --remove-source-files 到远程/NAS/WebDAV ⚠️
+
+正确流程:
+1. 先 rsync 到远程（不加 --remove-source-files）
+2. 验证: ls 远程目录 | wc -l 对比本地文件数
+3. 验证: du -sh 远程目录 对比本地大小
+4. 确认一致后，再手动删除本地文件
+5. 绝不要用一条命令同时完成"复制+删除"
+```
+
+### 规避
+- **永远不要用 `rsync --remove-source-files` 到远程/NAS/WebDAV**
+- **迁移数据分两步**: 先复制验证，再手动删除
+- **WebDAV 写入不可靠** — 优先用 SMB/NFS，WebDAV 只适合读
+- **任何删除操作前先备份** — `cp -r` 到安全位置再操作
+- **AI 执行删除操作前必须确认写入成功** — 不能静默失败
+- **🚨 迁移后必须校验哈希才能删源文件**: 复制完成后, 必须逐文件比对源和目标的 SHA256 哈希值, 全部一致后才能删除源文件; 哈希不一致 = 迁移未完成, 绝对不能删
+- **🚨 任何删除前必须留证**: 不只是磁盘清理, 任何时候删除文件/目录前, 必须先生成删除清单（目录树+文件列表+SHA256哈希+描述）存档
+
+### 删除前留证模板（适用于任何删除场景）
+```bash
+# 在删除前执行，生成删除清单
+TARGET_DIR="/path/to/delete"
+MANIFEST=~/delete-manifest-$(date +%Y%m%d-%H%M%S).txt
+
+echo "=== 删除清单 $(date) ===" > "$MANIFEST"
+echo "目标目录: $TARGET_DIR" >> "$MANIFEST"
+echo "删除原因: <填写原因>" >> "$MANIFEST"
+echo "" >> "$MANIFEST"
+echo "--- 目录结构 ---" >> "$MANIFEST"
+find "$TARGET_DIR" -type d >> "$MANIFEST"
+echo "" >> "$MANIFEST"
+echo "--- 文件列表+SHA256哈希 ---" >> "$MANIFEST"
+find "$TARGET_DIR" -type f -exec sha256sum {} \; >> "$MANIFEST"
+echo "" >> "$MANIFEST"
+echo "--- 统计 ---" >> "$MANIFEST"
+echo "总大小: $(du -sh "$TARGET_DIR" | awk '{print $1}')" >> "$MANIFEST"
+echo "文件数: $(find "$TARGET_DIR" -type f | wc -l)" >> "$MANIFEST"
+
+echo "删除清单已保存: $MANIFEST"
+cat "$MANIFEST"
+```
+
+### 迁移后哈希校验脚本（删除源文件前必跑！）
+```bash
+# 比对源和目标的哈希值，全部一致才能删除源文件
+SRC_DIR="/path/to/source"
+DST_DIR="/path/to/destination"
+
+echo "=== 哈希校验 $(date) ==="
+find "$SRC_DIR" -type f -exec sha256sum {} \; | sed "s|$SRC_DIR/||" | sort > /tmp/src_hash.txt
+find "$DST_DIR" -type f -exec sha256sum {} \; | sed "s|$DST_DIR/||" | sort > /tmp/dst_hash.txt
+
+echo "源: $(wc -l < /tmp/src_hash.txt) 个文件"
+echo "目标: $(wc -l < /tmp/dst_hash.txt) 个文件"
+
+diff /tmp/src_hash.txt /tmp/dst_hash.txt > /tmp/hash_diff.txt 2>&1
+if [ -s /tmp/hash_diff.txt ]; then
+    echo "❌ 哈希不一致！以下文件有差异:"
+    cat /tmp/hash_diff.txt
+    echo "⚠️ 迁移未完成，禁止删除源文件！"
+    exit 1
+else
+    echo "✅ 所有文件哈希一致，可以安全删除源文件"
+fi
+rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
+```
+
+### 补救
+- AI 模型需要重新下载（qwen3-embedding-0.6b-q8 + qwen3-reranker-0.6b-q8）
+- 壁纸需要从其他来源恢复
+- 文档需要从其他备份恢复

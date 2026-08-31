@@ -18,6 +18,8 @@ in {
   #   2. 添加一行: "ai_api_key_<USERNAME>.age".publicKeys = [<key_name>];
   #   3. 创建加密文件: agenix -e secrets/ai_api_key_<USERNAME>.age
   "ai_api_key_REIKY_REI.age".publicKeys = [reiky_key];
+  "netease_cookie.age".publicKeys = [reiky_key];
+  "nas-smb-credentials.age".publicKeys = [reiky_key];
 }
 # 换电脑/重装系统后的操作:
 # 1. 生成新 SSH 密钥:    ssh-keygen -t ed25519 -C "your@email"

@@ -41,6 +41,15 @@ Agent 每次启动时，按以下顺序加载知识：
 | [niri-focus-ring-transparent-overlay.md](decisions/niri-focus-ring-transparent-overlay.md) | niri, focus-ring, transparent, opacity, overlay, electron | 2026-05-27 |
 | [nixos-26.05-upgrade-plan.md](decisions/nixos-26.05-upgrade-plan.md) | upgrade, nixos-26.05, waydroid, gbinder, niri | 2026-05-27 |
 
+## 🚨 铁律速查（所有 AI 必读）
+
+| 铁律 | 来源 | 后果 |
+|------|------|------|
+| **禁止 rsync --remove-source-files 到远程** | 2026-08-31 严重过失 | 数据永久丢失 7.2G |
+| **GC 前检查 gcroot 健康** | 2026-08-18 | 误删整个世代闭包 |
+| **switch 前确认 3080 无手动进程** | 2026-08-16 | dsh-fence 端口冲突导致半切换 |
+| **pkill -f 不要用** | AGENTS.md 纪律7 | 误杀自身进程 |
+
 ## Skill 索引
 > 统一入口: `SKILLS.md` — 按场景查找，包含全部技能元信息
 
@@ -51,6 +60,18 @@ Agent 每次启动时，按以下顺序加载知识：
 | [secrets](../SKILLS.md#配置管理) | agenix 密钥管理 — 编辑/新增/查看/重加密 | opencode, claude |
 | [dsh](../SKILLS.md#服务管理) | DSH 服务管理 — 启停/排障/Tailscale 远程/端口冲突 | opencode, claude |
 | [networking](../SKILLS.md#网络--环境) | 代理/GitHub token/镜像源/SSH 配置 | opencode, claude |
+| [disk-cleanup](../SKILLS.md#磁盘--维护) | 系统磁盘清理 — Nix GC/HM残留/coredump/临时文件 | opencode, claude, codex, dsh, astrabot |
+
+## 🚨 铁律速查（所有 AI 必读）
+
+| 铁律 | 来源 | 后果 |
+|------|------|------|
+| **🚨 任何删除前必须留证: 目录树+文件列表+SHA256哈希+描述** | 数据安全规范 | 无法追溯和恢复 |
+| **🚨 迁移后必须校验哈希才能删源文件** | 数据安全规范 | 迁移不完整时删除源文件导致丢失 |
+| **禁止 rsync --remove-source-files 到远程** | 2026-08-31 严重过失 | 数据永久丢失 7.2G |
+| **GC 前检查 gcroot 健康** | 2026-08-18 | 误删整个世代闭包 |
+| **switch 前确认 3080 无手动进程** | 2026-08-16 | dsh-fence 端口冲突导致半切换 |
+| **pkill -f 不要用** | AGENTS.md 纪律7 | 误杀自身进程 |
 
 ## 复盘索引
-完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 60 篇）
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 63 篇）

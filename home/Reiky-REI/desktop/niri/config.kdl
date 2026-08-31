@@ -18,7 +18,7 @@ blur {
   passes 2
   offset 3.0
   noise 0.03
-  saturation 1.0
+  saturation 1.0 Noctalia
 }
 
 environment {
@@ -173,6 +173,16 @@ animations {
 
     overview-open-close {
         spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+}
+
+layer-rule {
+    // 匹配 Noctalia 任务栏的命名空间
+    match namespace="^noctalia-bar-.*$" 
+    
+    background-effect {
+        blur true
+        xray false  // 👈 关键点：关闭X光模式，允许透出下方窗口
     }
 }
 

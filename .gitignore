@@ -5,3 +5,6 @@
 .claude/worktrees/
 result
 .agents/tools/kb-mcp/index/
+cleanup.sh
+decode_objects.py
+.pnpm-store/

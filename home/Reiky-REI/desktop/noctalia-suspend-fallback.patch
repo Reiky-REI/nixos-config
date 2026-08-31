@@ -1,0 +1,32 @@
+--- a/CompositorService.qml
++++ b/CompositorService.qml
+@@ -555,12 +555,28 @@
+     }
+   }
+ 
++  Process {
++    id: suspendProcess
++    running: false
++    command: ["sh", "-c", "systemctl suspend || loginctl suspend"]
++
++    onExited: function (exitCode, exitStatus) {
++      if (exitCode !== 0) {
++        Logger.w("Compositor", "Suspend command failed, unlocking to avoid stuck lock screen");
++        if (PanelService && PanelService.lockScreen && PanelService.lockScreen.active) {
++          PanelService.lockScreen.active = false;
++        }
++      }
++    }
++  }
++
+   function suspend() {
+     Logger.i("Compositor", "Suspend requested");
+     if (executeSessionAction("suspend"))
+       return;
+ 
+-    Quickshell.execDetached(["sh", "-c", "systemctl suspend || loginctl suspend"]);
++    suspendProcess.command = ["sh", "-c", "systemctl suspend || loginctl suspend"];
++    suspendProcess.running = true;
+   }
+ 
+   function lock() {

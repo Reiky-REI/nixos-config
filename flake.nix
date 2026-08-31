@@ -25,6 +25,8 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
+    # 注意: 锁定在 v4.7.8-git (b99b7a7), 不要 `nix flake update --update-input noctalia`
+    # 上游 main 已变成 v5 (noctalia), 与当前 QML shell 配置不兼容
     noctalia = {
       url = "github:noctalia-dev/noctalia-shell/main";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -115,6 +117,12 @@
               file = ./secrets/ai_api_key_REIKY_REI.age;
               owner = user.username;
             };
+            age.secrets.nas-smb-credentials = {
+              file = ./secrets/nas-smb-credentials.age;
+              owner = "root";
+              group = "root";
+              mode = "0600";
+            };
             age.identityPaths = ["/home/${user.username}/.ssh/id_ed25519"];
           }
 
@@ -138,6 +146,8 @@
                   tuxedo-drivers = kfinal.callPackage ./pkgs/tuxedo-drivers-patched {};
                   tuxedo-keyboard = kfinal.callPackage ./pkgs/tuxedo-drivers-patched {};
                 });
+                # 网易云音乐 CDN 防盗链绕过 API
+                netease-cdn-bypass = final.callPackage ./pkgs/netease-cdn-bypass {};
               })
               # waydroid .net 脚本 overlay（定义在 modules/virtualization/default.nix）
             ];

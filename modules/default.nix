@@ -8,5 +8,6 @@
     ./development
     ./virtualization
     ./documentation
+    ./storage
   ];
 }

@@ -17,6 +17,12 @@
 |------|------|------|
 | [dsh](skills/dsh/SKILL.md) | DSH 服务管理 — 启停/排障/Tailscale 远程/端口冲突 | opencode, claude |
 
+## 磁盘 & 维护
+
+| 技能 | 场景 | 适用 |
+|------|------|------|
+| [disk-cleanup](skills/disk-cleanup/SKILL.md) | 系统磁盘清理 — Nix GC/HM残留/coredump/临时文件 | opencode, claude, codex, dsh, astrabot |
+
 ## 网络 & 环境
 
 | 技能 | 场景 | 适用 |

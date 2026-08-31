@@ -50,7 +50,7 @@ binds {
     Mod+B hotkey-overlay-title="打开谷歌浏览器" { spawn "google-chrome-stable"; }
     Mod+Shift+B hotkey-overlay-title="打开火狐浏览器" { spawn "firefox"; }
     Mod+N hotkey-overlay-title="打开编辑器: neovim" { spawn "alacritty" "-e" "nvim"; }
-    Super+L hotkey-overlay-title="锁屏: hyprlock" { spawn "hyprlock"; }
+    Super+L hotkey-overlay-title="睡眠: hyprlock+gaussian blur" { spawn-sh "hyprlock & sleep 1; systemctl suspend || loginctl suspend"; }
     Super+Shift+V hotkey-overlay-title="剪切板: noctalia-shell-clipboard" { spawn "noctalia-shell" "ipc" "call" "launcher" "clipboard"; }
     Super+S hotkey-overlay-title="多功能启动器: noctalia-shell-launcher" { spawn "noctalia-shell" "ipc" "call" "launcher" "toggle"; }
 

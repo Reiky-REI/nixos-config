@@ -57,6 +57,7 @@ in {
           "HTTPS_PROXY=http://127.0.0.1:7897"
           "ALL_PROXY=socks5://127.0.0.1:7897"
           "NO_PROXY=localhost,127.0.0.1,::1"
+          "ASTRBOT_DASHBOARD_INITIAL_PASSWORD=AstrBot2026"
         ];
       };
     };

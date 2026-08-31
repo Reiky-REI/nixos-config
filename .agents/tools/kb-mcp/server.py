@@ -1,8 +1,8 @@
 #!/etc/profiles/per-user/Reiky-REI/bin/python3
 # -*- coding: utf-8 -*-
 """kb-mcp -- NixMEOW 知识库语义检索 MCP server (stdio, 纯标准库)
-后端: llama.cpp Qwen3-Embedding-0.6B (:8081/v1/embeddings)
-      + Qwen3-Reranker-0.6B   (:8082/v1/rerank)
+后端: llama.cpp Qwen3-VL-Embedding-2B (:8081/v1/embeddings)
+      + Qwen3-VL-Reranker-2B   (:8082/v1/rerank)
 语料: 多根上下文感知 -- KB_ROOT env > cwd 向上最近有效 .agents > 回落
       /etc/nixos 系统库; 收录顶层 AGENTS/SKILLS/MEMORY/CLAUDE.md +
       knowledge/** 与 memory/** 全部 md (frontmatter 感知分块)

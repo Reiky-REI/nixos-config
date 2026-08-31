@@ -6,6 +6,7 @@
     ./llama-cpp.nix
     ./opencode-root.nix
     ./mcp-agents-bridge.nix
+    ./netease-cdn-bypass.nix
   ];
 
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。
@@ -20,6 +21,8 @@
   services.opencode-root.enable = true;
 
   services.mcp-agents-bridge.enable = true;
+
+  services.netease-cdn-bypass.enable = true;
 
   services.udisks2.enable = true;
 
@@ -44,7 +47,9 @@
   services.timesyncd.enable = true;
 
   systemd.sleep.settings.Sleep = {
-    AllowSuspend = "no";
+    # 睡眠恢复: 之前为防 Noctalia 待机挂起失败导致锁屏卡住而禁用,
+    # 现在允许 suspend, 并在 niri 用 Meta+L 触发 hyprlock(高斯模糊)+ suspend
+    AllowSuspend = "yes";
     AllowHibernation = "no";
     AllowHybridSleep = "no";
     AllowSuspendThenHibernate = "no";
