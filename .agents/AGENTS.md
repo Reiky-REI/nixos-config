@@ -41,7 +41,7 @@ AI 工作纪律：
 
 ## 知识库语义检索 MCP（kb-mcp）— 强制使用喵!
 
-所有 AI 客户端已统一挂载 MCP server `kb-mcp`（stdio, 零依赖, 服务端脚本 `.agents/tools/kb-mcp/server.py`, 后端为本机 Qwen3-Embedding :8081 + Qwen3-Reranker :8082, 由 `modules/services/llama-cpp.nix` 提供）喵~ 
+所有 AI 客户端已统一挂载 MCP server `kb-mcp`（stdio, 零依赖, 服务端脚本 `.agents/tools/kb-mcp/server.py`, 后端为本机 Qwen3-VL-Embedding-2B :8081 + Qwen3-VL-Reranker-2B :8082, 由 `modules/services/llama-cpp.nix` 提供）喵~ 
 
 ### 必须用 kb_search 的场景喵
 1. **排障第一步**: 描述症状先问知识库, 再动手 —— retros/decisions/known-issues 全量语义索引, 历史同类事故直接命中根因喵~ 

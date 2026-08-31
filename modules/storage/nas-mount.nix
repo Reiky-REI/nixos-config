@@ -46,7 +46,7 @@ in {
     serviceConfig = {
       Type = "notify";
       ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${mount_point}";
-      ExecStart = "${pkgs.rclone}/bin/rclone mount nas-webdav: ${mount_point} --config /etc/rclone/rclone.conf --no-check-certificate --vfs-cache-mode full --vfs-cache-max-age 72h --dir-cache-time 72h --attr-timeout 72h --no-modtime --allow-other --allow-non-empty --volname nas";
+      ExecStart = "${pkgs.rclone}/bin/rclone mount nas-webdav: ${mount_point} --config /etc/rclone/rclone.conf --no-check-certificate --vfs-cache-mode full --vfs-cache-max-size 5G --vfs-cache-max-age 24h --dir-cache-time 72h --attr-timeout 72h --no-modtime --allow-other --allow-non-empty --volname nas";
       ExecStop = "/run/current-system/sw/bin/fusermount -uz ${mount_point}";
       Restart = "on-failure";
       RestartSec = "10s";

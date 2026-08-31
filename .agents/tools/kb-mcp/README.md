@@ -1,8 +1,8 @@
 # kb-mcp -- NixMEOW 知识库语义检索 MCP server
 
 纯 Python 标准库实现(零第三方依赖), 调用本机 llama.cpp 推理端点:
-- Embedding: Qwen3-Embedding-0.6B @ :8081 (/v1/embeddings, 1024维)
-- Reranker:  Qwen3-Reranker-0.6B   @ :8082 (/v1/rerank)
+- Embedding: Qwen3-VL-Embedding-2B @ :8081 (/v1/embeddings, 2048维)
+- Reranker:  Qwen3-VL-Reranker-2B    @ :8082 (/v1/rerank)
 
 ## 上下文多根模式 (2026-08-25 起)
 

@@ -441,7 +441,7 @@ sudo nix-collect-garbage -d
 ### 丢失数据
 | 目录 | 大小 | 内容 |
 |------|------|------|
-| `~/WorkSpace/models` | 6.5G | qwen3-embedding-0.6b-q8 + qwen3-reranker-0.6b-q8 |
+| `~/WorkSpace/models` | 6.5G | qwen3-embedding-0.6b-q8 + qwen3-reranker-0.6b-q8 (丢失后已于 2026-08-31 重新部署为 Qwen3-VL-Embedding-2B + Qwen3-VL-Reranker-2B) |
 | `~/Pictures` | 455M | Wallpapers(397M) + icons(59M) + 头像 |
 | `~/Documents` | 282M | office 文档 |
 
@@ -522,6 +522,6 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 ```
 
 ### 补救
-- AI 模型需要重新下载（qwen3-embedding-0.6b-q8 + qwen3-reranker-0.6b-q8）
+- AI 模型已重新部署：Qwen3-VL-Embedding-2B (2048维) + Qwen3-VL-Reranker-2B，替代原 0.6b 版 (维度 1024→2048，各根知识库索引已全量重建)
 - 壁纸需要从其他来源恢复
 - 文档需要从其他备份恢复
