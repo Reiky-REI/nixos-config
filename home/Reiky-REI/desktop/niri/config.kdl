@@ -177,13 +177,21 @@ animations {
 }
 
 
+// 1. 让任务栏背景能够向下看穿普通窗口和小组件
 layer-rule {
-    // 匹配包含 noctalia 的所有层，包括 background、content、exclusion 等
-    match namespace="^noctalia-.*$" 
-    
+    match namespace="^noctalia-background-.*$"
     background-effect {
         blur true
-        xray false  // 👈 核心：强制所有 Noctalia 渲染层都能透出普通窗口
+        xray false  // 关闭X光，允许向下看
+    }
+}
+
+// 2. 确保小组件（音频频谱）不会因为某种混成规则被忽略
+layer-rule {
+    match namespace="^noctalia-desktop-widgets-.*$"
+    background-effect {
+        blur false // 桌面组件自己不需要模糊背景
+        xray false
     }
 }
 
