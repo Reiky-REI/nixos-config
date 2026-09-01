@@ -63,3 +63,9 @@ experience:
 - 损坏 refs (refs/heads/feat, refs/heads/test_write_ref) 与已合并的 archive-extract 本地分支待清理喵。
 - 00:29:15 niri compositor 重启一次 ( Lost connection) 原因未查, 无伴随崩溃日志, 疑用户手动重启, 挂起疑云解除后暂不追喵。
 - 唤醒修复的正道: 等上游 amdgpu 修复; 或实测 S4 休眠 (路径独立, AllowHibernation 现为 no, 需另评 swap/内核参数) 喵。
+
+## 追记 (19:38): noctalia 亮度失灵修复
+凌晨由 bash 裸环境拉起的 noctalia (46311) 实际一直是唯一实例且缺会话环境 → 亮度调节失效喵。
+且 07:52 复核时 `pgrep -f quickshell` 空输出是**显示截断假象**, 被误判为"未运行", 后来批处理里的 `pgrep -f quickshell && echo ✓` 又匹配到自己 bash -c 命令行造成假阳性喵——**pgrep -f 自匹配正反两面都是坑**, 判进程生死必须 `ps -eo args | grep -v grep` 级别确认喵。
+修复: `niri msg action spawn -- noctalia-shell` (NIRI_SOCKET=$XDG_RUNTIME_DIR/niri.<display>.<pid>.sock) 以正规 systemd user scope 拉起 (app-niri-noctalia-shell.scope, PPID=user manager, 环境完整) → 击毙裸环境实例 (精确 pid) 喵。
+底层背光同步实测: brightnessctl --class=backlight set 30% 生效 (1→18735), 硬件通道无损喵。
