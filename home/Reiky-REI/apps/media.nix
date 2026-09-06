@@ -3,6 +3,7 @@
     vlc
     splayer
     krita
+    obs-studio
   ];
 
   programs.mpv.enable = true;
