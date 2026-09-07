@@ -176,34 +176,6 @@ animations {
     }
 }
 
-// 1. 全局抓取所有 noctalia 相关的图层表面，强制注入穿透重绘
-layer-rule {
-    match namespace="^noctalia-.*$"
-    
-    background-effect {
-        blur true
-        xray false // 👈 关键：关闭 X 光，允许向下看穿到音频频谱
-        
-        // 允许任何哪怕是完全不透明的底层像素（窗口和小组件）100% 穿透进来渲染
-        ignore-alpha 0.5 
-    }
-}
-
-// 2. 强制将工作区背景涂成完全透明，防止 Niri 默认在 Layer 之间垫一层看不见的暗色块
-layout {
-    background-color "#00000000"
-}
-
-window-rule {
-    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
-    match app-id=r#"chrome$"# title="^Picture-in-Pictures$"
-    open-floating true
-    opacity 0.75
-    background-effect {
-      blur true
-      xray false
-    }
-}
 
 /-window-rule {
     match app-id=r#"^org\.keepassxc\.KeePassXC$"#
@@ -234,6 +206,7 @@ window-rule {
     match app-id="kitty"
     match app-id="DolPhine"
     match app-id="steam"
+    match app-id="QQ"
     opacity 0.75
     background-effect {
       blur true
