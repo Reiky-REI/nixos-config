@@ -27,7 +27,8 @@ in {
     #   - reranker/Qwen3-VL-Reranker-2B.Q8_0.gguf rerank,  8082,--rerank
     # User=Reiky-REI 直接读 home 模型。
     # 显存注意: RTX 4070 Max-Q 只有 8G, 8B 全 GPU + 8192 ctx 会 OOM,
-    #   故 chat 用 4096 ctx; embedding/rerank 2B 走 CPU(--gpu-layers 0)不占显存。
+    #   故 chat 用 4096 ctx; embedding/rerank 2B 各 ~1.8G, 总共 ~3.6G, 放得进 8G VRAM。
+    #   2026-09-09: --gpu-layers 0 改 99, 从 CPU 推理切到 GPU, 释放 CPU 负载。
 
     systemd.services.llama-cpp-chat = lib.mkIf cfg.chat.enable {
       description = "llama.cpp chat server (Qwen3-8B, OpenAI-compatible :8080)";
@@ -74,7 +75,7 @@ in {
             --ctx-size 4096 \
             --batch-size 1024 \
             --ubatch-size 1024 \
-            --gpu-layers 0
+            --gpu-layers 99
         '';
         Restart = "on-failure";
         RestartSec = "10s";
@@ -86,7 +87,7 @@ in {
     # 模型必须用带 reranker 专用张量的工作版 GGUF(官方 convert_hf_to_gguf 转)。
     # 注意: mradermacher 等社区转换缺 cls.output.weight/pooling=RANK 元数据,
     # 会打出 e^-13 级垃圾分(见 llama.cpp#16407)。
-    # rerank 与 embedding 是互斥模式, 故独立进程 8082; 2B 走 CPU 不占显存。
+    # rerank 与 embedding 是互斥模式, 故独立进程 8082; 2B 各 ~1.8G 走 GPU。
     systemd.services.llama-cpp-reranker = {
       description = "llama.cpp reranker server (Qwen3-VL-Reranker-2B, :8082)";
       after = [ "network.target" ];
@@ -109,7 +110,7 @@ in {
             --ctx-size 4096 \
             --batch-size 2048 \
             --ubatch-size 2048 \
-            --gpu-layers 0
+            --gpu-layers 99
         '';
         Restart = "on-failure";
         RestartSec = "10s";
