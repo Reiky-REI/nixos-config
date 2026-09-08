@@ -6,6 +6,7 @@
   imports = [
     ./fcitx5
     ./ly
+    ./tablet
   ];
 
   programs.xwayland.enable = true;
