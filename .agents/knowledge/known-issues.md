@@ -606,5 +606,13 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 ### 坑 6: home.file 遇历史残留真实文件
 - 往一个已有真实文件(非 nix symlink)的 XDG 路径部署会触发 home-manager clobber 报错致 activation 失败; 加 `force = true` 让 nix 覆盖为唯一真相喵~
 
+### 坑 7: 新版 Firefox 家族官方二进制的媒体库 dlopen (Flash 误报 / SpeechSynthesis 缺失)
+- **新版 Firefox 基座(zen 1.21.16b, FF 14x)已彻底移除 GStreamer 后端** 喵~  `strings libxul.so | grep gstreamer` 零命中, 全 `libavcodec.so` 一长列(53~63) —— 改为运行时 dlopen 系统 FFmpeg 解 H.264/AAC 喵~
+- `autoPatchelfHook` 只补 ELF DT_NEEDED 硬依赖, **不管运行时 dlopen 的库** 喵~  官方二进制打包若不把 ffmpeg 注入进程环境, dlopen 失败 → `canPlayType('video/mp4; avc1')` 空 → 网课平台误报『请安装 Flash』喵~
+- 正解: 照抄 nixpkgs `firefox/wrapper.nix` 的 libs 集, makeWrapper `--prefix LD_LIBRARY_PATH` 注入 `ffmpeg_7.lib udev libgbm libnotify libxscrnsaver libpulseaudio libcanberra-gtk3 libglvnd vulkan-loader pciutils libkrb5 speechd-minimal cups` 喵~
+- **ffmpeg 是 split output, 真库在 `.lib`**(libavcodec.so.61/libavutil.so.59/libswresample.so.5), `makeLibraryPath` 需传 `ffmpeg_7.lib` 而非 `ffmpeg_7` 喵~  `udev` 由 systemd-minimal-libs 提供喵~
+- **speechd-minimal 缺失 → 弹『Speech Dispatcher required』错误页**(SpeechSynthesis API) 喵~  cups 供打印探测 喵~  官方 wrapper 默认 speechSynthesisSupport=true 即带 speechd-minimal, 别漏 喵~
+- 排查助手: use python `ctypes.CDLL` 借注入的 LD_LIBRARY_PATH 直接 dlopen 探测 libavcodec/libspeechd 是否可命中 (因为懒加载, 没播媒体时 `/proc/<pid>/maps` 看不到 avcodec) 喵~
+
 ### 多 AI 同文件协作
 - 同一 kdl 既有我的改动又叠别人未提交 hunk 时, 用 `printf 'y\nn\ny\n' | git add -p <file>` 只挑自己 hunk, 严禁整文件 `git add` 把别人工作扫进自己 commit 喵~
