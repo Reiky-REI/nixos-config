@@ -284,6 +284,9 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 - niri 启动项临时注释 `waydroid session start`, 停用 Waydroid 自启, 等 Waydroid 图形栈修复。
 - 需要使用时手动 `waydroid session start`。
 
+### 终局 (2026-09-09)
+- waydroid 持续闪退, 用户决定彻底移除: 配置(`modules/virtualization/default.nix` 重写为仅 podman/libvirtd + hosts 组 + flake 注释 + justfile recipe + high.kdl spawn)与磁盘(`/var/lib/waydroid` 6G + `~/.local/share/waydroid`)全清喵~ 删后内存释放明显(11G 用→6G 用)喵~ 需要时再按 2026-05-25 复盘重建喵~
+
 ## 睡眠(Suspend)唤醒后黑屏, 只能强制重启 (2026-08-17 实锤)
 
 ### 问题
@@ -616,3 +619,21 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 
 ### 多 AI 同文件协作
 - 同一 kdl 既有我的改动又叠别人未提交 hunk 时, 用 `printf 'y\nn\ny\n' | git add -p <file>` 只挑自己 hunk, 严禁整文件 `git add` 把别人工作扫进自己 commit 喵~
+
+## kb-mcp 搜索报 array index out of range — ingest 后 _flat 向量缓存不同步 (2026-09-09)
+
+### 现象
+知识文件有改动(新增复盘/坑/索引重生成)后的下一次 `kb_search` 报 `ERROR: array index out of range` (此前常先表现为一次超时, 因为 rebuild 的 embedding 批处理占满队列+swap)喵~
+
+### 根因
+`server.py` 的 `ingest()` 更新了 `STATE["chunks"]/["bm25"]/["dim"]` 但**没重置 `STATE["_flat"]`** (旧向量数组)喵~ 下次搜索 `STATE.get("_flat") or load_flat()` 命中旧真值, `cosine_top` 按新 chunk 数迭代旧数组 → `array[off+j]` 越界喵~ 若数组长度恰好够, 还会向量与 chunk 错位导致排序乱喵~
+
+### 修复
+- `ingest()` 和 `load_cache()` 在 `norm_rows(vec, dim)` 后同步 `STATE["_flat"] = vec` 喵~
+- 回归测试(离线 monkeypatch embed/rerank): 首搜 → 改源触发 re-ingest → 再搜, 旧代码必崩、新代码通过喵~
+- 生效方式: 杀旧 kb-mcp 进程, **新会话**自动用新代码 (opencode 不会会话中途重启 MCP, 旧会话 kb 工具会消失)喵~
+
+### 排障速查
+- `ERROR: array index out of range` → 旧进程内存态有 bug 或 _flat 未同步, 杀 kb-mcp server.py 进程重开会话即可喵~
+- `kb_stats` 三项(corpus/dim/index_built + embed/rerank ok)是第一步体检喵~
+- 超时 → 看内存(swap)与 embedding 批处理(journalctl -u llama-cpp-embedding --since), 别急着杀服务喵~

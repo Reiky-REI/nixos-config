@@ -202,6 +202,7 @@ def load_cache():
                     STATE.update(chunks=chunks, dim=dim)
                     STATE["bm25"] = BM25([toks(c["file"] + " " + c["heading"] + " " + c["text"]) for c in chunks])
                     norm_rows(vec, dim)
+                    STATE["_flat"] = vec  # 与 ingest 保持一致: 载入缓存时同步 _flat
                     return
         except Exception as e:
             log("cache load failed:", e)
@@ -226,6 +227,7 @@ def ingest():
     vec = array.array("f", [x for row in flat for x in row])
     norm_rows(vec, dim)
     STATE.update(chunks=chunks, dim=dim)
+    STATE["_flat"] = vec  # 修复: ingest 后必须同步 _flat, 否则下次搜索用旧向量数组越界
     STATE["bm25"] = BM25([toks(c["file"] + " " + c["heading"] + " " + c["text"]) for c in chunks])
     os.makedirs(CACHE_DIR, exist_ok=True)
     tmp = CACHE + ".tmp"

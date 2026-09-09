@@ -11,7 +11,6 @@ spawn-at-startup "noctalia-shell"
 spawn-at-startup "/nix/store/i335n1yrb8s8mk17x1gkl99pij3k5r02-awww-0.12.1/bin/awww-daemon"
 spawn-at-startup "fcitx5"
 spawn-at-startup "nm-applet"
-// spawn-at-startup "waydroid" "session" "start" # 临时禁用: Waydroid surfaceflinger 崩溃循环疑似白闪元凶 (2026-08-16)
 spawn-sh-at-startup "sh -c 'wayvnc 0.0.0.0'"
 
 blur {

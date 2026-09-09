@@ -157,7 +157,6 @@
                 # 网易云音乐 CDN 防盗链绕过 API
                 netease-cdn-bypass = final.callPackage ./pkgs/netease-cdn-bypass {};
               })
-              # waydroid .net 脚本 overlay（定义在 modules/virtualization/default.nix）
             ];
           })
 

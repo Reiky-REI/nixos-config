@@ -26,8 +26,3 @@ check: check-fmt lint
 rebuild:
     nixos-rebuild build --flake /etc/nixos#NixMEOW
     @echo '==> 验证通过。如需写复盘: .agents/knowledge/retros/$(date +%F)-<topic>.md'
-
-# 下载 APK 并安装到 Waydroid
-install-apk name url:
-    curl -L -o /tmp/{{name}}.apk {{url}}
-    waydroid app install /tmp/{{name}}.apk
