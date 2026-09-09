@@ -11,7 +11,8 @@ experience:
   - "nixpkgs 26.05 与 unstable 的 browsers/ 目录都没有 zen-browser, 别默认它在喵~ 先查 pkgs/by-name/ze/ 再决定"
   - "官方通用 Linux 二进制(firefox 家族)打包照抄 nixpkgs firefox-bin 骨架: autoPatchelfHook + patchelfUnstable + --no-clobber-old-sections(relrhack 不覆盖旧 section 否则启动即崩)喵~"
   - "zen 命令行启动的 Wayland app-id = 二进制名 = zen(实测 niri msg windows 确认), 高配 PiP 窗口规则用 app-id=\"zen\" 精确匹配喵~"
-  - "firefox/zen profiles.ini 的 [Install<hash>] Locked=1 会把 profile 绑死到某个二进制安装路径; 换 Nix 版(新 install-id)会掉回 Default=1 的 profile, 书签就『消失』喵~ 迁移后要规范化 profiles.ini 让带数据 profile 成 Default=1 喵~"
+  - "firefox/zen profiles.ini 的 [Install<hash>] Locked=1 会把 profile 绑死到某个二进制安装路径; 换 Nix 版是**新 install-id**, 实测它**无视 Default=1 直接新建一个空 profile**(书签就『消失』)喵~ 光设 Default=1 不够!"
+  - "正解: 把 Nix zen 的 install-id 显式注册到带书签 profile —— profiles.ini 加 `[Install<id>] Default=<书签profile> Locked=1` 且 installs.ini 同步, 再删掉 zen 自建的空 profile 喵~ 该 install-id 由 store 路径哈希得来, 版本升级会变, 需重新注册(见 README)喵~"
   - "从 Downloads 手动跑的 zen 与 Nix 版共用同一 ~/.zen profile, 书签本就在(~/.mozilla 与 ~/.zen 各 181 条), 所谓『迁移』实为 profile 选择修正喵~"
   - "flake 指向 dirty git 工作树时只认『已跟踪』文件, 新增脚本必须 git add 否则报 Path not tracked 构建失败喵~"
   - "home.file 部署到历史残留真实文件路径会触发 clobber 报错, 加 force=true 让 nix 成为唯一真相喵~"
@@ -63,16 +64,19 @@ experience:
 - 全仓确认无外部引用 hyprland/waybar/wlogout, 删整个 `desktop/hyprland/` 喵~
 - 唯一被 niri 还引用的 `swww-rofi.sh`(Mod+Shift+W)迁到 `desktop/wallpaper/` 并由 `swww.nix` 用 `home.file`+`force=true` 托管(此前它只是历史残留真实文件, 无 nix 来源)喵~ 重复的 capture.sh 与孤儿 wallpaper-video.sh/wf-recorder-status.sh 一并移除喵~
 
-### 5. 书签/profile 规范化
+### 5. 书签/profile 规范化 (踩坑后修正)
 
-- 备份 `~/.zen/{profiles.ini,installs.ini}` 并记 sha256 留证喵~
-- 重写 `profiles.ini`: 只留带书签的 `q873pg30` 且置 `Default=1`, 去掉空 profile 的 Default=1 与 Downloads 版 `[Install...] Locked=1` 绑定, 使 Nix 版 zen(新 install-id)落到书签 profile 喵~
+- 备份 `~/.zen/{profiles.ini,installs.ini}` 并记 sha256 留证; 空 profile 移入 `~/.zen/.discarded-20260909/` 不硬删喵~
+- **第一版修法失败**: 只把 q873pg30 设 `Default=1` 删空 profile, 但 Nix zen(新 install-id EAA2CD0D5F417F70)启动时**无视 Default=1, 又自建了一个空 profile**(y5m4duo6, 仅 4 条默认书签)喵~
+- **生效修法**: 把 Nix zen 的 install-id 显式注册到书签 profile —— profiles.ini 与 installs.ini 都写 `[Install EAA2CD0D5F417F70] Default=q873pg30.Default (release) Locked=1`, 重启 zen 后实测 q873pg30 被加新 `.parentlock`、places.sqlite 被占用(181 书签生效)喵~
+- 该 install-id 由 zen 的 store 路径哈希得来, 版本升级会变; 变后 zen 会再建空 profile, 需按 README 重新注册(或首启走 zen 自带『从 Firefox 导入』)喵~
 
 ## 验证喵~
 
-- `sudo nixos-rebuild build --flake /etc/nixos#NixMEOW` 成功(产出 `...-nixos-system-NixMEOW-26.05.20260806.445d861`)喵~
-- `nix path-info -r` 确认 zen-browser 在系统闭包; 源码 grep 确认无功能性 firefox 残留(仅注释)喵~
-- 未 switch(NVIDIA PRIME 风险), 由用户自行 build+reboot 后首启 zen 验证书签与快捷键喵~
+- `nixos-rebuild build` 通过; `nixos-rebuild switch` 已激活(用户授权, generation 207, `/run/current-system` = 新 toplevel)喵~
+- `zen --version` = `Mozilla Zen 1.21.16b`; 部署的 `~/.config/niri/config.kdl` 含 `spawn "zen"` + `app-id="zen"` 喵~
+- 实测启动 zen 使用 q873pg30(profile 锁 + db 占用确认), 书签迁移生效喵~
+- switch 时 astrabot.service 瞬断(启动竞态), 已自行 `active (running)` 恢复, 与本次改动无关喵~
 
 ## 遗留/后续喵~
 

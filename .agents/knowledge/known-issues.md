@@ -594,10 +594,11 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 - 命令行启动的 firefox 家族 app-id = 二进制名(prgname), zen 实测为 `zen`(非 zen-browser) 喵~
 - niri 窗口规则用 `app-id="zen"` 精确匹配; 别照抄 firefox 的 `r#"firefox$"#` 正则风格硬猜喵~
 
-### 坑 4: profiles.ini 的 [Install] Locked=1 绑死 profile
+### 坑 4: profiles.ini 的 [Install] Locked=1 绑死 profile (新 install 无视 Default=1)
 - firefox/zen `profiles.ini` 里 `[Install<hash>] Default=<profile> Locked=1` 会把某二进制安装路径钉到指定 profile 喵~
-- 从 Downloads 手动跑的 zen 与 Nix 版是**不同 install-id**; Nix 版找不到自己的 install 条目就掉回 `Default=1` 的 profile, 若 Default=1 是空 profile 则书签『消失』喵~
-- 正解: 迁移后规范化 `~/.zen/profiles.ini`, 让带数据 profile 成为唯一 `Default=1`, 删掉旧 install 锁喵~
+- **换 Nix 版是不同 install-id**, 实测它启动时**直接无视 `[General]`/`Default=1` 自建一个全新空 profile**(书签『消失』), 光设 Default=1 不生效喵~
+- 正解: 把 Nix zen 的 install-id 显式注册到带数据 profile —— `profiles.ini` 加 `[Install<id>] Default=<数据profile> Locked=1` **且** `installs.ini` 同步, 再删掉 zen 自建的空 profile 喵~
+- install-id 由 zen 的 store 路径哈希得来, **版本升级会变**, 变后需重新注册(或首启用 zen 自带『从 Firefox 导入』)喵~
 
 ### 坑 5: flake dirty 树只认已跟踪文件
 - flake 指向未提交的工作树时, **新增**文件必须 `git add` 才可见, 否则报 `Path '...' is not tracked by Git` 构建失败(改动的已跟踪文件则自动可见)喵~
