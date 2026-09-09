@@ -124,7 +124,8 @@ window-rule {
 }
 
 window-rule {
-    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    // Zen Browser 画中画窗口 (app-id 实测为 "zen", 原为 firefox)
+    match app-id="zen" title="^Picture-in-Picture$"
     match app-id=r#"chrome$"# title="^Picture-in-Pictures$"
     open-floating true
     opacity 0.75

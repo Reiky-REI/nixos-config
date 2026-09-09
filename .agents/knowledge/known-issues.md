@@ -576,3 +576,34 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 - `hash-object -w` 存在即跳过: 修复前先删损坏对象文件喵~
 - **alternates 指向 tmpfs = 定时炸弹**, repack 收编后立刻移除喵~
 - 现在沙箱内可用系统级 systemd-run 正常执行 git (含 sudo), 不需要再手搓喵~
+
+---
+
+## Zen Browser / Firefox 家族通用二进制打包与 profile 坑 (2026-09-09)
+
+### 坑 1: 别假设 nixpkgs 有 zen-browser
+- nixpkgs 26.05 与 unstable 的 `browsers/` 与 `pkgs/by-name/ze/` 都**没有** zen-browser 喵~
+- 正解: 用官方 release 的通用 Linux tar.xz 本地打包, 已建个人私源 `github:Reiky-REI/Reiky-nixpkgs` 的 `zen-browser` 包, 主仓以 overlay 消费喵~
+
+### 坑 2: firefox 系二进制 relrhack 与 patchelf
+- firefox/zen 用固定偏移手动处理重定位(relrhack), 普通 patchelf 覆盖旧 section → 启动即崩喵~
+- 正解: `nativeBuildInputs = [ autoPatchelfHook patchelfUnstable ]` + `patchelfFlags = [ "--no-clobber-old-sections" ]`, 依赖栈照抄 nixpkgs `firefox-bin`(gtk3/glib/alsa/libGL/xorg 扁平包/libva/pipewire...)喵~
+- 26.05 起 `xorg.libX11` 等弃用, 用 `libx11/libxrender/libxtst/...` 扁平名, 否则刷一堆 eval warning 喵~
+
+### 坑 3: Wayland app-id
+- 命令行启动的 firefox 家族 app-id = 二进制名(prgname), zen 实测为 `zen`(非 zen-browser) 喵~
+- niri 窗口规则用 `app-id="zen"` 精确匹配; 别照抄 firefox 的 `r#"firefox$"#` 正则风格硬猜喵~
+
+### 坑 4: profiles.ini 的 [Install] Locked=1 绑死 profile
+- firefox/zen `profiles.ini` 里 `[Install<hash>] Default=<profile> Locked=1` 会把某二进制安装路径钉到指定 profile 喵~
+- 从 Downloads 手动跑的 zen 与 Nix 版是**不同 install-id**; Nix 版找不到自己的 install 条目就掉回 `Default=1` 的 profile, 若 Default=1 是空 profile 则书签『消失』喵~
+- 正解: 迁移后规范化 `~/.zen/profiles.ini`, 让带数据 profile 成为唯一 `Default=1`, 删掉旧 install 锁喵~
+
+### 坑 5: flake dirty 树只认已跟踪文件
+- flake 指向未提交的工作树时, **新增**文件必须 `git add` 才可见, 否则报 `Path '...' is not tracked by Git` 构建失败(改动的已跟踪文件则自动可见)喵~
+
+### 坑 6: home.file 遇历史残留真实文件
+- 往一个已有真实文件(非 nix symlink)的 XDG 路径部署会触发 home-manager clobber 报错致 activation 失败; 加 `force = true` 让 nix 覆盖为唯一真相喵~
+
+### 多 AI 同文件协作
+- 同一 kdl 既有我的改动又叠别人未提交 hunk 时, 用 `printf 'y\nn\ny\n' | git add -p <file>` 只挑自己 hunk, 严禁整文件 `git add` 把别人工作扫进自己 commit 喵~

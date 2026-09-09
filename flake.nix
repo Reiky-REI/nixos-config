@@ -53,6 +53,14 @@
       url = "github:YaLTeR/niri";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # 个人 Nix 私源 (zen-browser 等 nixpkgs 未收录的包), 以 overlay 形式消费
+    # 见 https://github.com/Reiky-REI/Reiky-nixpkgs README
+    # follows 主 nixpkgs: overlay 走消费方 pkgs (final.callPackage), 不额外拉一份 nixpkgs
+    Reiky-nixpkgs = {
+      url = "github:Reiky-REI/Reiky-nixpkgs";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   outputs = {
@@ -133,6 +141,8 @@
             ...
           }: {
             nixpkgs.overlays = [
+              # 个人私源: 提供 zen-browser (nixpkgs 未收录, 官方通用二进制打包)
+              inputs.Reiky-nixpkgs.overlays.default
               (final: prev: {
                 # 回退 niri 到旧 nixpkgs-unstable rev (f83fc3c): 新 rev 的 niri 26.04 有
                 # QSH/壁纸层闪烁回归, 见 known-issues "niri 26.04 layer-shell 壁纸层闪到最前"
