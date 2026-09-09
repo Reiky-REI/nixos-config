@@ -25,6 +25,12 @@ input {
     trackpoint {
         off
     }
+
+    // 数位笔映射: 仅限 GAOMON 156 PRO 数位屏 (HDMI-A-1)
+    // 若换了显示接口, 用 `niri msg outputs` 查看实际端口名并更新此处
+    tablet {
+        map-to-output "HDMI-A-1"
+    }
 }
 
 hotkey-overlay {
