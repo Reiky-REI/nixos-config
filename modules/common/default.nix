@@ -70,10 +70,16 @@
     enableDefaultPackages = true;
     fontconfig = {
       enable = true;
+      # CJK 字族必须排在拉丁同名族**前面**: Noto Sans CJK SC 本身也覆盖拉丁,
+      # 但反过来拉丁 "Noto Sans" 无中文字形。若拉丁在前, fc-match sans-serif:lang=zh
+      # 仍返回拉丁 Noto Sans → 浏览器 chrome(标题栏/菜单)中文变豆腐块
+      # (网页正文按脚本逐字回退能找到 CJK, 唯独 UI 直接吃主字族)
       defaultFonts = {
-        serif = ["Noto Serif" "Noto Serif CJK SC"];
-        sansSerif = ["Noto Sans" "Noto Sans CJK SC"];
-        monospace = ["Fira Code"];
+        serif = ["Noto Serif CJK SC" "Noto Serif"];
+        sansSerif = ["Noto Sans CJK SC" "Noto Sans"];
+        # monospace 保持 Fira Code 在前(用户写代码的等宽默认, 含 nerd 字形),
+        # CJK 仅作回退; 终端类按字形回退能找到 CJK, 无需把 CJK 提到首位
+        monospace = ["Fira Code" "Noto Sans Mono CJK SC"];
       };
     };
   };
