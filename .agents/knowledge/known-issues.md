@@ -637,3 +637,26 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 - `ERROR: array index out of range` → 旧进程内存态有 bug 或 _flat 未同步, 杀 kb-mcp server.py 进程重开会话即可喵~
 - `kb_stats` 三项(corpus/dim/index_built + embed/rerank ok)是第一步体检喵~
 - 超时 → 看内存(swap)与 embedding 批处理(journalctl -u llama-cpp-embedding --since), 别急着杀服务喵~
+
+## Wayland 下 GTK 应用 fcitx5 候选窗灰白无主题 (2026-09-12 实锤)
+
+### 问题
+Zen/Firefox 等 Wayland 原生 GTK 应用里打字, fcitx5 候选窗能用但样式是**灰白默认框**, 没有 Catppuccin 皮肤; Alacritty 等 text-input-v3 程序正常喵~
+
+### 根因
+候选窗由**客户端自绘**而非 fcitx5 画喵~ Zen 因 `GTK_IM_MODULE=fcitx` 走 `frontend:dbus`(fcitx5-gtk im module, cap 带 ClientSideInputPanel), 该路径下候选窗由 GTK 自己画 → 无主题喵~ Alacritty 走 `frontend:wayland_v2`(text-input-v3), 由 fcitx5 classicui 在 compositor input-popup 上画 → 有主题喵~
+
+### 🚨 关键坑: 只删 GTK_IM_MODULE 修不好
+GTK3 选模块顺序: `GTK_IM_MODULE` 环境变量 → GtkSettings `gtk-im-module` → **locale 自动选择**(带 backend 过滤)喵~ 系统 `immodules.cache` 里 fcitx 模块 `default_locales=ja:ko:zh:*`, zh_CN 命中 goodness 3; wayland 模块 locales 为空(goodness 0) → **删掉环境变量后 locale 阶段仍会自动选回 fcitx**喵~ 必须显式 `GTK_IM_MODULE=wayland`(fcitx5 维护者对 Firefox 的原话答案)喵~
+
+### 修复
+只给需要的程序包 wrapper, **绝不全局设** `GTK_IM_MODULE=wayland`(会让 X11/XWayland GTK 应用加载 im-wayland.so 崩溃/丢 IME, ghostty #3628)喵~ 例: flake.nix overlay 给 zen-browser `overrideAttrs { postFixup = wrapProgram $out/bin/zen --set GTK_IM_MODULE wayland; }`喵~
+
+### 排查速查
+- 看谁在画候选窗: `dbus-send --print-reply=literal --dest=org.fcitx.Fcitx5 /controller org.fcitx.Fcitx.Controller1.DebugInfo` → `frontend:dbus`(客户端自绘, 易灰白) vs `frontend:wayland_v2`(fcitx5 主题绘制)喵~
+- 查模块 locale 优先级: `/run/current-system/sw/etc/gtk-3.0/immodules.cache` 每条的 `default_locales` 喵~
+- 验机制不用打字: 临时 profile 起实例, 对比 DebugInfo 前后新增的 IC 前端类型喵~
+
+### 相关
+- 复盘 `retros/2026-09-12-zen-wayland-ime.md` 喵~
+- 代价: niri + Firefox text-input-v3 候选窗闪烁 (niri #3099 / #4402)喵~

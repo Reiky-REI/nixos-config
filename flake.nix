@@ -144,6 +144,19 @@
               # 个人私源: 提供 zen-browser (nixpkgs 未收录, 官方通用二进制打包)
               inputs.Reiky-nixpkgs.overlays.default
               (final: prev: {
+                # Zen/GTK3 输入法候选窗: 强制走 Wayland text-input-v3 (fcitx5 waylandim),
+                # 让 fcitx5 classicui 在 compositor input-popup 上画主题候选窗(Catppuccin)。
+                # 否则 GTK 会选 fcitx5-gtk 的 dbus 模块(default_locales=ja:ko:zh:* 被 locale
+                # 自动命中), 候选窗由 GTK 客户端自绘 -> 灰白无主题。不能全局设
+                # GTK_IM_MODULE=wayland (会让 X11/XWayland GTK 应用加载 im-wayland.so 崩溃),
+                # 故只给 zen 包额外包一层。见复盘 2026-09-12-zen-wayland-ime.md
+                zen-browser = prev.zen-browser.overrideAttrs (old: {
+                  postFixup =
+                    (old.postFixup or "")
+                    + ''
+                      wrapProgram $out/bin/zen --set GTK_IM_MODULE wayland
+                    '';
+                });
                 # 回退 niri 到旧 nixpkgs-unstable rev (f83fc3c): 新 rev 的 niri 26.04 有
                 # QSH/壁纸层闪烁回归, 见 known-issues "niri 26.04 layer-shell 壁纸层闪到最前"
                 niri = pkgs-unstable.niri;
