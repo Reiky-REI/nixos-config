@@ -47,3 +47,10 @@ experience:
 switch 后 dsh-fence 立刻 `EADDRINUSE 127.0.0.1:3080` —— 有人**又手动跑了**
 `dsh web --no-open`（pid 1485130）喵~ 精确 kill 后服务才绑定成功（local/远程均 200）喵~
 结论：`dsh web` 与 `dsh-fence` 天然互斥，需要行为层拦截（待办）喵~
+
+## 行为层守卫（同日补）
+`home/Reiky-REI/tools/dsh.nix` 改为 `writeShellScriptBin "dsh"` 守卫脚本（不再直接装 `pkgs.dsh`，避免 bin/dsh 命名冲突）喵~
+- `dsh web ...` 且 `dsh-fence` active → 打印托管提示 + 替代操作，`exit 1`（不再抢占 3080）
+- 其余子命令 → `exec ${pkgs.dsh}/bin/dsh "$@"` 透传
+- 实测：`dsh web --no-open` 被拦截、`dsh --version` 正常；dsh-fence 保持 active，local/远程 200喵~
+
