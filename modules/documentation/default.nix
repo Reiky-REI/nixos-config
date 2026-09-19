@@ -2,6 +2,7 @@
   environment.systemPackages = with pkgs; [
     man-pages
     man-pages-posix
+    stdman
   ];
   documentation = {
     enable = true;
