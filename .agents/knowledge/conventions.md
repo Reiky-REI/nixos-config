@@ -81,3 +81,10 @@ experience:
 - 修改复杂配置前先读 `known-issues.md` 避免踩坑
 - 新知识及时补充到对应知识文件或 `known-issues.md`
 - 仅非平凡变更才写复盘到 `knowledge/retros/`
+
+## 打包归属 (2026-09-20 用户指令)
+- **nixpkgs 已有的包** → 直接用 nixpkgs / pkgs-unstable，不在本地重打包
+- **nixpkgs 没有的包** → 一律上传到个人私源 [`Reiky-nixpkgs`](https://github.com/Reiky-REI/Reiky-nixpkgs)（新增 `pkgs/<name>/default.nix` + 挂 overlay），主仓以 `nixpkgs.overlays = [ Reiky-nixpkgs.overlays.default ]` 消费
+- **禁止**：把包塞进主仓 `pkgs/`、或用 `npm install`/curl 安装器等非声明式方式长期驻留（临时验证除外，验证完必须回收到私源）
+- 私源新增包要在其 README 的「收录的包」表格登记一行（包名/说明/为何本地打包）
+
