@@ -17,6 +17,7 @@
   config,
   lib,
   pkgs,
+  pkgs-unstable,
   username,
   ...
 }: let
@@ -28,6 +29,17 @@ in {
       type = lib.types.port;
       default = 9502;
       description = "Listen port (127.0.0.1 only).";
+    };
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs-unstable.opencode;
+      defaultText = lib.literalExpression "pkgs-unstable.opencode";
+      description = ''
+        serve 用的 opencode 包, 默认 pin 在 v1。
+        原因: v2 的 serve 强制密码鉴权 (启动打印随机密码, HTTP 401),
+        而调用方 mcp-agents-bridge 走的是 v1 无鉴权的 API 契约;
+        升级须同步改造 bridge, 见 retros/2026-09-20-opencode-v2-adoption.md。
+      '';
     };
   };
 
@@ -46,7 +58,7 @@ in {
           "HOME=/home/${username}"
           "PATH=/run/current-system/sw/bin:/usr/bin:/bin"
         ];
-        ExecStart = "/run/current-system/sw/bin/opencode serve --port ${toString cfg.port} --hostname 127.0.0.1";
+        ExecStart = "${cfg.package}/bin/opencode serve --port ${toString cfg.port} --hostname 127.0.0.1";
         Restart = "on-failure";
         RestartSec = "5s";
       };

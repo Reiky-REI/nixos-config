@@ -677,3 +677,24 @@ GTK3 选模块顺序: `GTK_IM_MODULE` 环境变量 → GtkSettings `gtk-im-modul
 ### 相关
 - 复盘 `retros/2026-09-12-zen-wayland-ime.md` 喵~
 - 代价: niri + Firefox text-input-v3 候选窗闪烁 (niri #3099 / #4402)喵~
+
+## bun 单文件二进制禁 patchelf/strip + opencode v2 serve 强制鉴权 (2026-09-20)
+
+### 坑 1: bun compile 产物被 patchelf/strip 会"退化"
+打包 OpenCode v2（`@opencode/cli-linux-x64`，bun compile 单文件）时，若走 nixpkgs 默认
+`autoPatchelfHook` / `fixupPhase` 自动 strip，装出来的二进制会变成**裸 Bun**：
+`--version` 打印 Bun 版本（如 1.4.2）、`--help` 是 Bun 的帮助，应用负载（追加在 ELF 尾部）被破坏喵~
+
+**规避**：`dontPatchELF = true; dontStrip = true;`，直接 `install -Dm755` 原样安装喵~
+同类风险包：deno compile / bun build --compile / 其他"自解压"单文件二进制喵~
+
+### 坑 2: opencode v2 `serve` 强制密码鉴权
+v2 的 `opencode serve` 启动打印随机 `server password`，无鉴权请求一律 **401**，且 `--help`
+无任何关闭鉴权的开关（v1 是完全无鉴权的）喵~ 因此依赖 v1 server API 的调用方
+（`mcp-agents-bridge` → `POST /session`、`POST /session/{id}/shell`）不能直接跟着升级喵~
+
+**当前对策**：系统 CLI 用 v2，`services.opencode-root` 通过 `package` 选项 pin `pkgs-unstable.opencode`（v1）喵~
+
+### 排障速查
+- 单文件二进制行为异常（变成解释器本体）→ 先查是否被 patchelf/strip 动过喵~
+- 升级 opencode 后 bridge/root 通道 401 → v2 鉴权，勿盲目重试，回 pin v1 喵~
