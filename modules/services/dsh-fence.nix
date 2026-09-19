@@ -27,10 +27,11 @@
 in {
   options.services.dsh-fence = {
     enable = lib.mkEnableOption "hardened systemd service for the DeepSeek Harness (dsh) web app";
-    binPath = lib.mkOption {
-      type = lib.types.str;
-      default = "/home/${username}/node_modules/@deepseek-ai/dsh/lib/bin.js";
-      description = "Absolute path of the dsh bin.js entry.";
+    package = lib.mkOption {
+      type = lib.types.package;
+      default = pkgs.dsh;
+      defaultText = lib.literalExpression "pkgs.dsh";
+      description = "dsh 包 (来自 Reiky-nixpkgs 私源 overlay); 提供 dsh 命令与运行期依赖.";
     };
     workspace = lib.mkOption {
       type = lib.types.str;
@@ -61,7 +62,7 @@ in {
         User = username;
         Group = "users";
         WorkingDirectory = cfg.workspace;
-        ExecStart = "${pkgs.nodejs_22}/bin/node --expose-internals ${cfg.binPath} web ${lib.concatStringsSep " " (map (h: "--trusted-host ${h}") cfg.trustedHosts)}";
+        ExecStart = "${cfg.package}/bin/dsh web ${lib.concatStringsSep " " (map (h: "--trusted-host ${h}") cfg.trustedHosts)}";
         Restart = "on-failure";
         RestartSec = "5s";
         UMask = "0077";

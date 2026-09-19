@@ -6,6 +6,7 @@
     ./viewers.nix
     ./monitors.nix
     ./opencode.nix
+    ./dsh.nix
     ./kbdlight.nix
     ./mihomo.nix
   ];
