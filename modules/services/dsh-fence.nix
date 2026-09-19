@@ -47,8 +47,8 @@ in {
   config = lib.mkIf cfg.enable {
     systemd.services.dsh-fence = {
       description = "DeepSeek Harness web app (nixos-guard outer fence)";
-      after = ["network.target" "tailscale.service"];
-      requires = ["tailscale.service"];
+      after = ["network.target" "tailscaled.service"];
+      requires = ["tailscaled.service"];
       wantedBy = ["multi-user.target"];
 
       # systemd 服务默认 PATH 只含 coreutils/findutils/grep/sed/systemd,
