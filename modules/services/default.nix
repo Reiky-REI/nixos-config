@@ -14,7 +14,8 @@
   services.dsh-fence.enable = true;
   services.dsh-fence.trustedHosts = ["nixmeow.miku-garibaldi.ts.net"];
 
-  services.astrabot.enable = true;
+  # AstrBot 已弃用 (2026-09-20), 关闭服务 + watchdog
+  services.astrabot.enable = false;
 
   services.llama-cpp.enable = true;
 
