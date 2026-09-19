@@ -107,7 +107,9 @@ def chunks_of(rel, raw):
 
 def scan_sources():
     sig_items, all_chunks = [], []
-    for src in SOURCES:
+    # 每次扫描都重新发现文件: SOURCES 是模块导入期的快照, 长驻 MCP server 会
+    # 因此看不到随后新增/删除的 .md, 导致 kb_ingest 与 ensure_fresh 永远滞后。
+    for src in _collect_sources():
         p = os.path.join(AG, src)
         if os.path.isdir(p):
             for fn in sorted(os.listdir(p)):

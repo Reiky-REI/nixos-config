@@ -638,6 +638,23 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 - `kb_stats` 三项(corpus/dim/index_built + embed/rerank ok)是第一步体检喵~
 - 超时 → 看内存(swap)与 embedding 批处理(journalctl -u llama-cpp-embedding --since), 别急着杀服务喵~
 
+## kb-mcp 新增复盘搜不到 — SOURCES 模块级快照过期 (2026-09-20)
+
+### 现象
+新写完并提交复盘后跑 `kb_ingest`, 返回"已重建索引: N chunks"但 **N 与之前完全一致**, `kb_search` 也搜不到新内容喵~ (与上一条同属"缓存不同步"家族, 但病因不同)喵~
+
+### 根因
+`server.py` 模块级 `SOURCES = _collect_sources()` 在进程启动时求值一次, `scan_sources()` 遍历这个快照喵~ 长驻 MCP server 进程启动后新增/删除的 .md 永远不参与扫描, 重建的仍是旧语料喵~
+
+### 修复
+`scan_sources()` 改为每次调用 `_collect_sources()` 重新发现文件 (2026-09-20)喵~
+
+### 排障速查
+- `kb_ingest` 后 **chunk 数不变** = 扫描源集合没变 → 先查 SOURCES 快照/进程新旧, 不要怀疑 embedding喵~
+- 测索引类修复必须绕开长驻 server: `python3 -c` + `importlib` 在独立进程里调 `scan_sources()`/`ingest()`喵~
+- 磁盘文件数 vs `SOURCES` 条目数 对不上 → 快照过期, 重启会话喵~
+
+
 ## Wayland 下 GTK 应用 fcitx5 候选窗灰白无主题 (2026-09-12 实锤)
 
 ### 问题
