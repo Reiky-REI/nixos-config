@@ -66,10 +66,27 @@ btmtk-fix (内部双重条件: bluetooth 标签 + 内核 < 6.12.93)。
    用 `lib.mkDefault true` 让位 (NixMEOW 行为不变)。
 3. **`meow` 胶水模块必须先于 hosts 导入** — 不影响正确性但语义上是"先注册标签再消费"。
 4. `imports` 不能依赖 config 值 (条件 import 是反模式), 所以叶子模块在文件内部 mkIf。
+5. **Nix 函数形参必须显式声明才在作用域内** — `...` 只静默多余参数,
+   不会把 caller 传的 `lib` 绑进作用域 (报 undefined variable 'lib')。
+6. **HM 选项拼写**: `manual.manpages.enable` (小写 p); 26.05 把
+   `documentation.man.generateCaches` 改名为 `documentation.man.cache.enable`。
+7. **WSL build 的网络坑三连**:
+   - nixos-render-docs 的 python 依赖在 cache.nixos.org 404 (上游没构建) → 试验台直接
+     `documentation.nixos.enable = false` + HM `manual.manpages.enable = false`;
+   - 走代理大文件传输 SSL EOF — flake nixConfig 的 `http2 = false` 对 daemon 无效,
+     要写进 daemon 的 /etc/nix/nix.conf (session hack, switch 后会被 NixOS 重新生成);
+   - daemon 的 /etc/nix/nix.conf 会被莫名回滚, 改完要 `systemctl restart nix-daemon` 并复查。
 
-## 6. 后续 (Phase 3+, 未做)
+## 6. home/ 树的标签化 (2026-09-22 追加)
 
-- home/ 树未标签化 (WSL 也在吃完整桌面 home; runtime 有问题再拆)
+home-manager 同样吃 meow 标签 (mkHost 把 `meow = { kind, features }` 加进
+extraSpecialArgs), `home/Reiky-REI/default.nix` 按组自我屏蔽:
+`apps` / `music` 是最重的 GUI 组, `kind == "wsl"` 时跳过 (closure 差 ~2-3G,
+也绕开 krita/dolphin 等大包 substitute 不稳的问题); NixMEOW (kind=laptop) 全量不变。
+
+## 7. 后续 (Phase 3+, 未做)
+
+- home/ 树标签化仅到分组级 (apps/music); desktop/apps 内部粒度 (如 wallpaper/hyprlock) 待细化
 - overlay 里的 zen-ime wrap / qq / netease 仍无条件 (eval 无害)
 - `nixos-generators` (同配置出 wsl/vm/iso) 备选未引入
 - `modules/features/` 文件名即标签的 readDir 自动注册 (lib/features.nix) 备选未引入

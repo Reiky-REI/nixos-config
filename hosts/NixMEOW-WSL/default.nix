@@ -5,6 +5,7 @@
 {
   inputs,
   pkgs,
+  lib,
   username,
   fullName,
   ...
@@ -17,6 +18,16 @@
   ];
 
   networking.hostName = "NixMEOW-WSL";
+
+  # WSL NAT 下国内镜像不稳定: 只走官方 cache + 禁 HTTP/2 (走代理已知问题)
+  nix.settings.substituters = lib.mkForce ["https://cache.nixos.org"];
+  nix.settings.http2 = lib.mkForce false;
+
+  # 试验台不开文档生成: nixos-render-docs 的 python 依赖在 cache.nixos.org 上 404
+  # (上游 Hydra 没构建), 会让整个 build 打地鼠; NixMEOW 不受影响
+  documentation.nixos.enable = false;
+  documentation.man.cache.enable = lib.mkForce false;
+  home-manager.users.${username}.manual.manpages.enable = false;
 
   wsl.enable = true;
   wsl.defaultUser = username;

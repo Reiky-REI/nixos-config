@@ -122,6 +122,8 @@ in
             username = user.username;
             fullName = user.fullName;
             inherit (config.hardware) profile isLowPerf isHighPerf isMediumPerf;
+            # 机器标签同样喂给 home-manager (home/ 树按 kind/features 自我屏蔽)
+            meow = { inherit (machine) kind features; };
           };
           home-manager.users.${user.username} = {
             imports = [

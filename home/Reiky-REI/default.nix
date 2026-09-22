@@ -2,6 +2,7 @@
   config,
   pkgs,
   lib,
+  meow,
   ...
 }: let
   # MikuCat 光标主题打包
@@ -22,16 +23,23 @@
       map (f: "${userServicesDir}/${f}") nixFiles
     else [];
 in {
-  imports = [
-    ./shell
-    ./terminal
-    ./music
-    ./desktop
-    ./apps
-    ./tools
-    ./editors
-    ./dev
-  ] ++ userServices;
+  # home 分组按机器标签自我屏蔽:
+  # apps/music 是最重的 GUI 组 (浏览器/KDE 全家桶/音乐播放器), WSL 试验台跳过
+  # (单次 closure 差 ~2-3G; NixMEOW kind=laptop 全量不变)
+  imports =
+    [
+      ./shell
+      ./terminal
+      ./editors
+      ./dev
+      ./tools
+      ./desktop
+    ]
+    ++ lib.optionals (meow.kind != "wsl") [
+      ./apps
+      ./music
+    ]
+    ++ userServices;
 
   home.packages = with pkgs; [
     libnotify
