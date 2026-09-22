@@ -1,4 +1,8 @@
-{lib, ...}: {
+{
+  config,
+  lib,
+  ...
+}: {
   imports = [
     ./media
     ./dsh-fence.nix
@@ -11,43 +15,44 @@
 
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。
   # 下次 nixos-rebuild switch 前,先停掉手动启动的 dsh 进程(端口 3080)。
-  services.dsh-fence.enable = true;
+  services.dsh-fence.enable = lib.mkIf (config.meow.enabled ? "dsh-fence") true;
   services.dsh-fence.trustedHosts = ["nixmeow.miku-garibaldi.ts.net"];
 
   # AstrBot 已弃用 (2026-09-20), 关闭服务 + watchdog
   services.astrabot.enable = false;
 
-  services.llama-cpp.enable = true;
+  services.llama-cpp.enable = lib.mkIf (config.meow.enabled ? "llama-cpp") true;
 
-  services.opencode-root.enable = true;
+  services.opencode-root.enable = lib.mkIf (config.meow.enabled ? "opencode-root") true;
 
-  services.mcp-agents-bridge.enable = true;
+  services.mcp-agents-bridge.enable = lib.mkIf (config.meow.enabled ? "mcp-agents-bridge") true;
 
-  services.netease-cdn-bypass.enable = true;
+  services.netease-cdn-bypass.enable = lib.mkIf (config.meow.enabled ? "netease-cdn-bypass") true;
 
-  services.udisks2.enable = true;
+  services.udisks2.enable = lib.mkIf (config.meow.enabled ? "udisks2") true;
 
-  services.pulseaudio.enable = false;
-  security.rtkit.enable = true;
-  services.pipewire = {
+  services.pulseaudio.enable = lib.mkIf (config.meow.enabled ? "audio") false;
+  security.rtkit.enable = lib.mkIf (config.meow.enabled ? "audio") true;
+  services.pipewire = lib.mkIf (config.meow.enabled ? "audio") {
     enable = true;
     alsa.enable = true;
     alsa.support32Bit = true;
     pulse.enable = true;
   };
 
-  services.power-profiles-daemon.enable = true;
-  services.upower.enable = true;
+  services.power-profiles-daemon.enable = lib.mkIf (config.meow.enabled ? "power") true;
+  services.upower.enable = lib.mkIf (config.meow.enabled ? "power") true;
 
-  services.flatpak.enable = true;
+  services.flatpak.enable = lib.mkIf (config.meow.enabled ? "flatpak") true;
 
-  services.printing.enable = true;
+  services.printing.enable = lib.mkIf (config.meow.enabled ? "printing") true;
 
-  services.libinput.enable = true;
+  services.libinput.enable = lib.mkIf (config.meow.enabled ? "libinput") true;
 
-  services.timesyncd.enable = true;
+  # mkDefault: 让位给 nixos-wsl 模块的 timesyncd.enable=false (WSL 走自己的时钟同步)
+  services.timesyncd.enable = lib.mkDefault true;
 
-  systemd.sleep.settings.Sleep = {
+  systemd.sleep.settings.Sleep = lib.mkIf (config.meow.enabled ? "suspend-block") {
     # 2026-09-01: 一天三连黑屏强重启 (8-31 ~16:00 无日志期/8-31 19:53/9-1 01:34), 根因均为
     # Noctalia idle 自动挂起 (suspendTimeout=1800) + amdgpu deep 挂起唤醒必坏 (8-17 known-issue, 7.1.5 未修).
     # 触发源已在 noctalia settings.json 禁用 (suspendTimeout→0 + 会话菜单 suspend 按钮关闭, 运行时状态不入库),
@@ -59,8 +64,10 @@
     AllowSuspendThenHibernate = "no";
   };
 
-  environment.sessionVariables.XDG_DATA_DIRS = lib.mkAfter [
-    "/var/lib/flatpak/exports/share"
-    "$HOME/.local/share/flatpak/exports/share"
-  ];
+  environment.sessionVariables.XDG_DATA_DIRS = lib.mkIf (config.meow.enabled ? "flatpak") (
+    lib.mkAfter [
+      "/var/lib/flatpak/exports/share"
+      "$HOME/.local/share/flatpak/exports/share"
+    ]
+  );
 }

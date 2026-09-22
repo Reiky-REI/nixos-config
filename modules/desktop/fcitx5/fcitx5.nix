@@ -4,6 +4,7 @@
   config,
   ...
 }: {
+  config = lib.mkIf (config.meow.enabled ? "fcitx5") {
   nixpkgs.overlays = [
     (final: prev: {
       fcitx5 = prev.fcitx5.overrideAttrs (old: {
@@ -93,4 +94,5 @@
     Type=Application
     Hidden=true
   '';
+  };
 }

@@ -59,5 +59,6 @@
   };
 in {
   # 内核 >= 6.12.93 已含修复, 用内核自带 btmtk; 否则用补丁版
-  boot.extraModulePackages = lib.mkIf fixNeeded [patched-btmtk];
+  # 且仅 bluetooth 特性机器 (WSL 内核无蓝牙模块树, 不编译)
+  boot.extraModulePackages = lib.mkIf (fixNeeded && (config.meow.enabled ? "bluetooth")) [patched-btmtk];
 }

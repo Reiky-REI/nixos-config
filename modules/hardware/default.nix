@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: {
   imports = [
@@ -8,8 +9,8 @@
     ./bluetooth/btmtk-fix.nix
   ];
 
-  hardware.bluetooth.enable = true;
-  services.blueman.enable = true;
+  hardware.bluetooth.enable = lib.mkIf (config.meow.enabled ? "bluetooth") true;
+  services.blueman.enable = lib.mkIf (config.meow.enabled ? "bluetooth") true;
 
   hardware.graphics = {
     enable = true;
@@ -27,11 +28,12 @@
   hardware.enableAllFirmware = true;
   hardware.cpu.intel.updateMicrocode = true;
 
-  environment.systemPackages = with pkgs; [
-    pciutils
-    bluez
-    ffmpeg
-    libva
-    libva-utils
-  ];
+  environment.systemPackages =
+    with pkgs; [
+      pciutils
+      ffmpeg
+      libva
+      libva-utils
+    ]
+    ++ lib.optionals (config.meow.enabled ? "bluetooth") [bluez];
 }

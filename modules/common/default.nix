@@ -7,6 +7,7 @@
 }: {
   imports = [
     ./hardware-profile.nix
+    ./options.nix
   ];
 
   # users setting

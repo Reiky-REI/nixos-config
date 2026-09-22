@@ -108,6 +108,22 @@
         "type": "github"
       }
     },
+    "flake-compat": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1767039857,
+        "narHash": "sha256-vNpUSpF5Nuw8xvDLj2KCwwksIbjua2LZCqhV1LNRDns=",
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "rev": "5edf11c44bc78a0d334f6334cdaf7d60d732daab",
+        "type": "github"
+      },
+      "original": {
+        "owner": "edolstra",
+        "repo": "flake-compat",
+        "type": "github"
+      }
+    },
     "flake-parts": {
       "inputs": {
         "nixpkgs-lib": "nixpkgs-lib"
@@ -207,6 +223,28 @@
       "original": {
         "owner": "YaLTeR",
         "repo": "niri",
+        "type": "github"
+      }
+    },
+    "nixos-wsl": {
+      "inputs": {
+        "flake-compat": "flake-compat",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1789157919,
+        "narHash": "sha256-3+r8UDwPkTlB9hhHoN4rjGtZow3+wEFOganBKurhJhY=",
+        "owner": "nix-community",
+        "repo": "NixOS-WSL",
+        "rev": "b98199a76ab180be55f7a6a97bd4984a87c99964",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "ref": "release-26.05",
+        "repo": "NixOS-WSL",
         "type": "github"
       }
     },
@@ -362,6 +400,7 @@
         "catppuccin": "catppuccin",
         "home-manager": "home-manager_2",
         "niri": "niri",
+        "nixos-wsl": "nixos-wsl",
         "nixpkgs": "nixpkgs_2",
         "nixpkgs-715": "nixpkgs-715",
         "nixpkgs-unstable": "nixpkgs-unstable",

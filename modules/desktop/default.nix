@@ -1,6 +1,7 @@
 {
   pkgs,
   lib,
+  config,
   ...
 }: {
   imports = [
@@ -11,24 +12,25 @@
 
   programs.xwayland.enable = true;
 
-  programs.niri.enable = true;
+  programs.niri.enable = lib.mkIf (config.meow.enabled ? "compositor-niri") true;
 
-  services.xserver.enable = true;
+  services.xserver.enable = lib.mkIf (config.meow.enabled ? "display-manager-ly") true;
 
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
   };
 
-  environment.systemPackages = with pkgs; [
-    xwayland-satellite
+  environment.systemPackages =
+    with pkgs; [
+      xwayland-satellite
+    ]
     # 屏幕背光控制 (niri / ly TTY 亮度键都需要)
-    brightnessctl
+    ++ lib.optionals (config.meow.enabled ? "backlight") [brightnessctl]
     # niri startup: nm-applet 需要在 PATH 中(此前未安装)
-    networkmanagerapplet
-  ];
+    ++ lib.optionals (config.meow.enabled ? "networkmanager") [networkmanagerapplet];
 
   # backlight 设备权限: video 组可写
-  services.udev.extraRules = ''
+  services.udev.extraRules = lib.mkIf (config.meow.enabled ? "backlight") ''
     SUBSYSTEM=="backlight", ACTION=="add", RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/backlight/%k/brightness", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/backlight/%k/brightness"
     SUBSYSTEM=="leds", KERNEL=="*kbd*", ACTION=="add", RUN+="${pkgs.coreutils}/bin/chgrp video /sys/class/leds/%k/brightness", RUN+="${pkgs.coreutils}/bin/chmod g+w /sys/class/leds/%k/brightness"
   '';
@@ -37,7 +39,7 @@
   # 有 active 图形会话 (wayland/x11) 时跳过, 避免与 niri 的 XF86 绑定重复处理
   # 注意: 不能用 grep seat0 判断 — ly 登录界面时 logind 会给 tty1 挂 seat0 会话,
   # 导致 handler 误判"有图形会话"而跳过, ly 界面亮度键失效
-  services.acpid = {
+  services.acpid = lib.mkIf (config.meow.enabled ? "backlight") {
     enable = true;
     handlers = {
       brightness-up = {

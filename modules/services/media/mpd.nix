@@ -1,5 +1,5 @@
-{username, ...}: {
-  services.mpd.enable = true;
+{config, lib, username, ...}: {
+  services.mpd.enable = lib.mkIf (config.meow.enabled ? "media-mpd") true;
   services.mpd = {
     # 26.05 起用声明式 settings (RFC42), 替代废弃的 extraConfig
     settings = {

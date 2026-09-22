@@ -23,6 +23,7 @@
   mount_point = "/home/${username}/nas";
   home = "/home/${username}";
 in {
+  config = lib.mkIf (config.meow.enabled ? "nas-smb") {
   # 安装 rclone
   environment.systemPackages = [pkgs.rclone];
 
@@ -120,5 +121,6 @@ in {
       '';
       User = username;
     };
+  };
   };
 }

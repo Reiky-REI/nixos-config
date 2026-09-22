@@ -23,9 +23,10 @@
 #           1-9(工具切换), f(全屏), esc(取消)
 #   - 复合键不支持直接映射, 需用 xdotool/脚本
 
-{ pkgs, ... }:
+{ pkgs, config, lib, ... }:
 
 {
+  config = lib.mkIf (config.meow.enabled ? "tablet") {
   # hwdb: 将 Pad 按键重映射为自定义键码
   # 匹配规则: Bus=0003 Vendor=256c Product=006d (所有固件版本)
   services.udev.extraHwdb = ''
@@ -70,4 +71,5 @@
 
   # 确保 input 组存在
   users.groups.input = {};
+  };
 }

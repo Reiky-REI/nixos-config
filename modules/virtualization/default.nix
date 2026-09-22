@@ -5,7 +5,7 @@
   ...
 }: {
   # 容器: podman (无守护进程, 更轻量; CLI 兼容 docker)
-  virtualisation.podman = {
+  virtualisation.podman = lib.mkIf (config.meow.enabled ? "podman") {
     enable = true;
     # 提供 docker CLI 兼容别名 (docker → podman)
     dockerCompat = true;
@@ -13,13 +13,15 @@
     dockerSocket.enable = true;
   };
 
-  virtualisation.libvirtd.enable = true;
-  virtualisation.libvirtd.qemu = {
-    runAsRoot = false;
-    swtpm.enable = true;
-    vhostUserPackages = [
-      pkgs.virtiofsd
-    ];
+  virtualisation.libvirtd = lib.mkIf (config.meow.enabled ? "libvirt") {
+    enable = true;
+    qemu = {
+      runAsRoot = false;
+      swtpm.enable = true;
+      vhostUserPackages = [
+        pkgs.virtiofsd
+      ];
+    };
   };
-  programs.virt-manager.enable = true;
+  programs.virt-manager.enable = lib.mkIf (config.meow.enabled ? "libvirt") true;
 }

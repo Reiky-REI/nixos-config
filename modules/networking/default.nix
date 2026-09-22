@@ -1,6 +1,7 @@
 {
   lib,
   pkgs,
+  config,
   ...
 }: {
   imports = [
@@ -8,7 +9,8 @@
     ./tailscale.nix
   ];
 
-  networking.networkmanager.enable = true;
+  networking.networkmanager.enable =
+    lib.mkIf (config.meow.enabled ? "networkmanager") true;
   networking.firewall.allowedTCPPorts = [
     5900
   ];
@@ -23,7 +25,8 @@
     ];
   };
 
-  networking.proxy = {
+  # 系统级代理环境变量跟 clash 走 (clash 起在本机 7897)
+  networking.proxy = lib.mkIf (config.meow.enabled ? "clash") {
     default = "http://127.0.0.1:7897";
     httpProxy = "http://127.0.0.1:7897";
     httpsProxy = "http://127.0.0.1:7897";
