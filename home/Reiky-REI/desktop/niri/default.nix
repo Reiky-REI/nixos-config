@@ -25,9 +25,13 @@
     then builtins.readFile (sectionDir + /low.kdl)
     else builtins.readFile (sectionDir + /low.kdl);
 
-  # mod 替换: 只动 "Mod+" 绑定 token (注释里的 "Mod-" 不受影响)
-  # mod = "Mod" 时替换是恒等操作, NixMEOW 配置逐字节不变
-  withMod = text: lib.replaceStrings ["Mod+"] ["${mod}+"] text;
+  # mod 替换: 只动 "Mod+" / "Super+" 绑定 token (注释里的 "Mod-" 不受影响)。
+  # 注意 base.kdl 两种写法混用 (noctalia 绑定是字面 Super+), 都要替换;
+  # mod = "Mod" 时原样返回, NixMEOW 配置逐字节不变
+  withMod = text:
+    if mod == "Mod"
+    then text
+    else lib.replaceStrings ["Mod+" "Super+"] ["${mod}+" "${mod}+"] text;
 in {
   programs.fuzzel.enable = true;
 
