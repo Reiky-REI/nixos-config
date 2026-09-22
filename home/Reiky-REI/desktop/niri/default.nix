@@ -2,9 +2,15 @@
   isLowPerf,
   isHighPerf,
   isMediumPerf,
+  lib,
+  meow,
   ...
 }: let
   sectionDir = ./sections;
+
+  # WSL 嵌套场景: Windows 键被宿主系统吃掉 (Win+D/E/L 全局快捷键轮不到嵌套 niri),
+  # 改用 Alt 作 Mod; 真机 (kind != wsl) 保持 Mod = Super 原样
+  mod = if meow.kind == "wsl" then "Alt" else "Mod";
 
   base = builtins.readFile (sectionDir + /base.kdl);
 
@@ -18,8 +24,12 @@
     else if isLowPerf
     then builtins.readFile (sectionDir + /low.kdl)
     else builtins.readFile (sectionDir + /low.kdl);
+
+  # mod 替换: 只动 "Mod+" 绑定 token (注释里的 "Mod-" 不受影响)
+  # mod = "Mod" 时替换是恒等操作, NixMEOW 配置逐字节不变
+  withMod = text: lib.replaceStrings ["Mod+"] ["${mod}+"] text;
 in {
   programs.fuzzel.enable = true;
 
-  home.file.".config/niri/config.kdl".text = base + "\n" + profileKdl;
+  home.file.".config/niri/config.kdl".text = withMod base + "\n" + withMod profileKdl;
 }
