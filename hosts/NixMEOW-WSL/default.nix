@@ -9,7 +9,18 @@
   username,
   fullName,
   ...
-}: {
+}: let
+  # ===== 浏览器桌面共量 =====
+  # noVNC 链路: 浏览器 --websocket--> websockify(0.0.0.0:8080) --> x11vnc(:5901)
+  #   --> Xvfb(:93) --> niri (winit/X11 软件渲染) + spawn-at-startup noctalia
+  # 局域网访问走 Windows 侧 netsh portproxy 8080 -> WSL IP (计划任务随 IP 变自动刷新)
+  # 每个组件独立服务 + Restart=always
+  # (2026-09-23: 单脚本 wait 版里 websockify/x11vnc 死了不会被发现, 也不会被拉起)
+  # ⚠️ VNC 密码明文在仓库里 —— 试验台/LAN 范围用, 改密码就改这里
+  novncShare = "${pkgs.novnc}/share/webapps/novnc";
+  websockifyPkg = pkgs.python3Packages.websockify;
+  vncPass = "meow-8080-lan";
+in {
   imports = [
     inputs.nixos-wsl.nixosModules.default
 
@@ -24,9 +35,8 @@
   nix.settings.http2 = lib.mkForce false;
 
   # NAS: 挂 Windows 已认证的 Z: 映射 (drvfs 复用宿主 SMB 凭据, 不需要 NAS 密码)
-  # 重启后 systemd 自动重挂
-  # 注意: PATH 必须含 /run/current-system/sw/bin 与 /sbin —— NixOS 单元脚本默认 PATH
-  # 没有 mount/mountpoint (见 2026-09-23 switch 后 failed 的教训)
+  # 注意: PATH 必须含 /run/current-system/sw/bin 与 /sbin —— NixOS 单元脚本默认
+  # PATH 里没有 mount/mountpoint (2026-09-23 switch 后 failed 的教训)
   systemd.services.nas-drvfs = {
     description = "Mount Windows Z: (NAS share) via drvfs";
     wantedBy = ["multi-user.target"];
@@ -44,52 +54,83 @@
     '';
   };
 
-  # ===== 浏览器桌面: noVNC on :8080 (暴露给局域网) =====
-  # 链路: 浏览器 --websocket--> websockify(0.0.0.0:8080) --> x11vnc(:5901)
-  #       --> Xvfb(:93) --> niri (winit/X11 软件渲染) + spawn-at-startup noctalia
-  # 局域网访问需要 Windows 侧 netsh portproxy 8080 -> WSL IP (防火墙另放行)
-  # ⚠️ VNC 密码明文在仓库里 —— 试验台/LAN 范围用, 改密码就改这里
-  systemd.services.browser-desktop = {
-    description = "niri desktop in browser via noVNC (0.0.0.0:8080)";
+  environment.systemPackages = with pkgs; [
+    x11vnc
+    xorg.xvfb
+    websockifyPkg
+    novnc
+  ];
+
+  systemd.services.browser-xvfb = {
+    description = "Xvfb :93 for niri-in-browser";
     wantedBy = ["multi-user.target"];
-    after = ["network.target"];
-    path = with pkgs; [
-      x11vnc
-      xorg.xvfb
-      (pkgs.python3Packages.websockify)
-      coreutils
-    ];
+    serviceConfig = {
+      User = username;
+      Type = "simple";
+      Restart = "always";
+      RestartSec = "3";
+      ExecStart = "${pkgs.xorg.xvfb}/bin/Xvfb :93 -screen 0 1920x1080x24 -nolisten tcp";
+    };
+  };
+
+  systemd.services.browser-niri = {
+    description = "niri on Xvfb :93 (browser desktop session)";
+    wantedBy = ["multi-user.target"];
+    after = ["browser-xvfb.service"];
+    requires = ["browser-xvfb.service"];
     environment = {
       HOME = "/home/${username}";
-      XDG_CONFIG_HOME = "/home/${username}/.config";
+      DISPLAY = ":93";
+      XDG_RUNTIME_DIR = "/run/user/1000";
+      # winit X11 后端运行时 dlopen libXcursor/libXrandr/libXi (非硬链接依赖)
+      LD_LIBRARY_PATH = lib.makeLibraryPath (with pkgs.xorg; [
+        libXcursor
+        libXrandr
+        libXi
+        libXinerama
+      ]);
+    };
+    serviceConfig = {
+      User = username;
+      Type = "simple";
+      Restart = "always";
+      RestartSec = "3";
+      ExecStart = "${pkgs.niri}/bin/niri";
+    };
+  };
+
+  systemd.services.browser-vnc = {
+    description = "x11vnc :5901 serving Xvfb :93";
+    wantedBy = ["multi-user.target"];
+    after = ["browser-niri.service"];
+    serviceConfig = {
+      User = username;
+      Type = "simple";
+      Restart = "always";
+      RestartSec = "3";
+      ExecStart = "${pkgs.x11vnc}/bin/x11vnc -display :93 -rfbport 5901 -forever -shared -passwd ${vncPass}";
+    };
+  };
+
+  systemd.services.browser-novnc = {
+    description = "websockify 0.0.0.0:8080 (noVNC static + WebSocket bridge)";
+    wantedBy = ["multi-user.target"];
+    after = ["browser-vnc.service"];
+    environment = {
+      HOME = "/home/${username}";
       XDG_RUNTIME_DIR = "/run/user/1000";
     };
     serviceConfig = {
       User = username;
       Type = "simple";
+      Restart = "always";
+      RestartSec = "3";
+      WorkingDirectory = novncShare;
+      ExecStart = "${websockifyPkg}/bin/websockify 0.0.0.0:8080 --web ${novncShare} localhost:5901";
     };
-    # Type=simple + 末尾 wait = systemd 托管整个 cgroup, stop 时全部干净收掉
-    script = let
-      novncShare = "${pkgs.novnc}/share/webapps/novnc";
-      websockify = "${pkgs.python3Packages.websockify}/bin/websockify";
-      vncPass = "meow-8080-lan";
-    in ''
-      # WSLg 的 /tmp/.X11-unix 是只读挂载 (777 可写但不能 chmod)
-      # → sticky bit 警告无害, 别 chmod (会导致 unit 报错退出)
-      ${pkgs.xorg.xvfb}/bin/Xvfb :93 -screen 0 1920x1080x24 -nolisten tcp \
-        > /tmp/browser-desktop-xvfb.log 2>&1 &
-      sleep 1
-      ${pkgs.niri}/bin/niri > /tmp/browser-desktop-niri.log 2>&1 &
-      sleep 2
-      ${pkgs.x11vnc}/bin/x11vnc -display :93 -rfbport 5901 -forever -shared \
-        -passwd "${vncPass}" > /tmp/browser-desktop-x11vnc.log 2>&1 &
-      ${websockify} 0.0.0.0:8080 --web "${novncShare}" localhost:5901 \
-        > /tmp/browser-desktop-websockify.log 2>&1 &
-      wait
-    '';
   };
 
-  # browser-desktop 需要从局域网访问 (Windows portproxy 转发进来)
+  # browser-noVNC 需要从局域网访问 (Windows portproxy 转发进来)
   networking.firewall.allowedTCPPorts = [8080];
 
   # 试验台不开文档生成: nixos-render-docs 的 python 依赖在 cache.nixos.org 上 404
