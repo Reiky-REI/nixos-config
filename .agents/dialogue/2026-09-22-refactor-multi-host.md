@@ -84,7 +84,31 @@ extraSpecialArgs), `home/Reiky-REI/default.nix` 按组自我屏蔽:
 `apps` / `music` 是最重的 GUI 组, `kind == "wsl"` 时跳过 (closure 差 ~2-3G,
 也绕开 krita/dolphin 等大包 substitute 不稳的问题); NixMEOW (kind=laptop) 全量不变。
 
-## 7. 后续 (Phase 3+, 未做)
+## 8. 追加: 浏览器桌面 (noVNC:8080 → 局域网) — 2026-09-23
+
+**链路**: 浏览器 --ws--> websockify(0.0.0.0:8080) --> x11vnc(:5901) --> Xvfb(:93) --> niri(winit/X11 软渲)
+
+**架构纪律**: 每个组件独立 systemd 服务 + `Restart=always`。
+单脚本 `&`+`wait` 版的教训: 子进程 (websockify/x11vnc) 死了 cgroup 还显示 active,
+既不会被发现也不会被拉起, 排查了半小时才发现。
+
+**踩坑**:
+1. `pkgs.novnc` 的 web 根是 `share/webapps/novnc` 不是 `share/novnc`
+   (websockify `os.chdir(web)` 直接 FileNotFound)
+2. winit X11 后端运行时 dlopen libXcursor/libXrandr/libXi —— 单元环境必须
+   `LD_LIBRARY_PATH = lib.makeLibraryPath [ ... ]`, 否则 niri 起 101 循环重启
+3. WSLg 的 `/tmp/.X11-unix` 是只读挂载, cannot chmod —— Xvfb 直接建 socket 不受影响
+4. websockify "In exit" 多数是 nixos-rebuild switch 重启单元的风暴窗口, 不是它自己崩
+5. systemd 诊断: `systemctl show -p NRestarts,Result` 比 `is-active` 信息量大
+
+**Windows 侧局域网暴露** (WSL2 NAT 下其他设备够不到 WSL IP):
+- `netsh interface portproxy add v4tov4 ...` (需 UAC, 一次性)
+- WSL VM 重启 IP 会变 → 计划任务 `WSL-noVNC-portproxy` (SYSTEM, 登录触发,
+  幂等重写 portproxy, 脚本在 `C:\WSL\novnc-portproxy-refresh.ps1`)
+- 排障顺序: WSL 监听 → 宿主直连 WSL IP → portproxy 表 → 127.0.0.1 (回环监听者
+  被别的进程抢走会表现成 RST, `netstat -ano | findstr :8080` 看 PID)
+
+## 9. 后续 (Phase 3+, 未做)
 
 - home/ 树标签化仅到分组级 (apps/music); desktop/apps 内部粒度 (如 wallpaper/hyprlock) 待细化
 - overlay 里的 zen-ime wrap / qq / netease 仍无条件 (eval 无害)
