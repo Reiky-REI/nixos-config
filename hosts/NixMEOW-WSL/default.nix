@@ -82,6 +82,8 @@ in {
       HOME = "/home/${username}";
       DISPLAY = ":93";
       XDG_RUNTIME_DIR = "/run/user/1000";
+      # 强制 X11 后端: WSL 可能向服务环境注入 WAYLAND_DISPLAY, 抢掉 Xvfb 的 DISPLAY
+      WINIT_UNIX_BACKEND = "x11";
       # winit X11 后端运行时 dlopen libXcursor/libXrandr/libXi (非硬链接依赖)
       LD_LIBRARY_PATH = lib.makeLibraryPath (with pkgs.xorg; [
         libXcursor
@@ -89,6 +91,22 @@ in {
         libXi
         libXinerama
       ]);
+      # spawn-at-startup 的 noctalia/fcitx5 二进制在用户 profile 里,
+      # systemd 默认 PATH 找不到 (spawn 静默失败 → 桌面"光有 niri")
+      # mkForce + 保留 systemd 模块的基础路径 (否则与其默认 PATH 同优先级冲突)
+      PATH = lib.mkForce (lib.concatStringsSep ":" [
+        "/etc/profiles/per-user/${username}/bin"
+        "/run/current-system/sw/bin"
+        (lib.makeBinPath [
+          pkgs.coreutils
+          pkgs.findutils
+          pkgs.gnugrep
+          pkgs.gnused
+          pkgs.systemd
+        ])
+      ]);
+      # Xvfb/软件渲染下 QML 没硬件 GL, noctalia(QtQuick) 走软件后端
+      QT_QUICK_BACKEND = "software";
     };
     serviceConfig = {
       User = username;
@@ -96,8 +114,26 @@ in {
       Restart = "always";
       RestartSec = "3";
       ExecStart = "${pkgs.niri}/bin/niri";
+      # 无外层 WM, 窗口按 winit 默认大小出 (没吃满屏幕的坑) — X 直接改窗口几何
+      # (niri 的 output 会动态跟随窗口尺寸, 所以改窗口 = 改桌面大小)
+      ExecStartPost = pkgs.writeShellScript "browser-niri-resize" ''
+        for i in 1 2 3 4 5; do
+          sleep 2
+          for id in $(${pkgs.xdotool}/bin/xdotool search --onlyvisible --name ""); do
+            ${pkgs.xdotool}/bin/xdotool windowmove "$id" 0 0 2>/dev/null
+            ${pkgs.xdotool}/bin/xdotool windowsize "$id" 1920 1080 2>/dev/null
+          done
+        done
+      '';
     };
   };
+
+  # logind 建用户 session 才会有 /run/user/1000 → niri socket PermissionDenied
+  # (2026-09-23 黑屏根因); tmpfiles 在服务启动前建好
+  systemd.tmpfiles.rules = [
+    "d /run/user 0755 root root -"
+    "d /run/user/1000 0700 Reiky-REI users -"
+  ];
 
   systemd.services.browser-vnc = {
     description = "x11vnc :5901 serving Xvfb :93";
@@ -128,6 +164,32 @@ in {
       WorkingDirectory = novncShare;
       ExecStart = "${websockifyPkg}/bin/websockify 0.0.0.0:8080 --web ${novncShare} localhost:5901";
     };
+  };
+
+  # noctalia 壳: 不走 niri 的 spawn-at-startup (systemd-run 依赖 user session 就绪,
+  # 时机不稳) —— 独立服务 Restart, 每次启动自己找最新的 niri wayland socket
+  systemd.services.browser-noctalia = {
+    description = "noctalia-shell in browser desktop session";
+    wantedBy = ["multi-user.target"];
+    after = ["browser-niri.service"];
+    environment = {
+      HOME = "/home/${username}";
+      XDG_RUNTIME_DIR = "/run/user/1000";
+      QT_QUICK_BACKEND = "software";
+    };
+    serviceConfig = {
+      User = username;
+      Type = "simple";
+      Restart = "always";
+      RestartSec = "3";
+    };
+    script = ''
+      SOCK=$(ls -t /run/user/1000/niri.*.sock 2>/dev/null | head -1)
+      if [ -n "$SOCK" ]; then
+        exec env WAYLAND_DISPLAY="$(basename "$SOCK")" /etc/profiles/per-user/${username}/bin/noctalia-shell
+      fi
+      exit 0
+    '';
   };
 
   # browser-noVNC 需要从局域网访问 (Windows portproxy 转发进来)
