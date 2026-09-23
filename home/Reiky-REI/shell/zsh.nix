@@ -1,4 +1,12 @@
-{pkgs, ...}: {
+{
+  pkgs,
+  meow,
+  ...
+}: let
+  # 真机 clash-verge 端口 7897; WSL 走宿主 clash = 7890
+  # (WSL .wslconfig hostAddressLoopback=true, 127.0.0.1 直达 Windows, 已实测)
+  proxyPort = if meow.kind == "wsl" then "7890" else "7897";
+in {
   home.packages = with pkgs; [
     zsh-powerlevel10k
   ];
@@ -60,8 +68,8 @@
       export PATH="$HOME/WorkSpace/bin:$PATH"
 
       # === 代理设置 ===
-      export http_proxy=http://127.0.0.1:7897
-      export https_proxy=http://127.0.0.1:7897
+      export http_proxy=http://127.0.0.1:${proxyPort}
+      export https_proxy=http://127.0.0.1:${proxyPort}
     '';
     autosuggestion.enable = true;
     syntaxHighlighting.enable = true;
