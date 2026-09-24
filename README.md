@@ -21,39 +21,43 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 ```
 /etc/nixos/
 ├── config.nix                      # 用户配置中心 (username/fullName/githubHandle)
-├── machines.nix                    # 机器注册中心 (hostname → hardware profile)
-├── flake.nix                       # 入口：输入输出 + 系统实例
+├── machines.nix                    # 机器注册中心 (hostname → profile/kind/features)
+├── flake.nix                       # 入口：inputs + mkHost 装配 (由注册表驱动)
 ├── flake.lock                      # 锁定依赖版本
 ├── justfile                        # 常用命令
 ├── opencode.json                   # OpenCode AI 配置
 ├── CLAUDE.md                       # Claude Code 工作指南
+├── AGENTS.md                       # AI 辅助工作指南
+├── docs/
+│   └── NixMEOW-WSL.md              # WSL 试验台的完整文档 (访问/网络/排障)
 ├── hosts/
-│   └── MEOW/
-│       ├── default.nix            # Composition root (仅 imports + host-specific)
-│       ├── hardware.nix           # Host-specific 硬件策略（内核参数等）
-│       └── hardware-configuration.nix  # nixos-generate-config 生成，不动
+│   ├── NixMEOW/                    # 目录名 = 主机名 (machines.nix 的 key)
+│   │   ├── default.nix            # Composition root (仅 imports + host-specific)
+│   │   ├── hardware.nix           # Host-specific 硬件策略（内核参数等）
+│   │   └── hardware-configuration.nix  # nixos-generate-config 生成，不动
+│   └── NixMEOW-WSL/                # Windows WSL2 试验台 (详见 docs/NixMEOW-WSL.md)
+│       └── default.nix
 ├── modules/
 │   ├── default.nix                # 聚合所有子模块
-│   ├── common/                    # 全局基础设置 + hardware profile
+│   ├── common/                    # 全局基础设置 + hardware profile + meow.* 标签选项
 │   ├── hardware/                  # CPU/GPU/蓝牙/设备策略
-│   ├── desktop/                   # 桌面会话栈 (Niri, Ly display manager, fcitx5)
+│   ├── desktop/                   # 桌面会话栈 (niri, ly, fcitx5, tablet, backlight)
 │   ├── networking/                # 网络/代理/防火墙/SSH
 │   ├── services/                  # 后台 daemon / 系统服务 (PipeWire, MPD, Flatpak)
-│   ├── development/               # 开发工具链 (wine 等)
-│   └── virtualization/            # Docker, libvirtd, Waydroid
+│   ├── development/               # 开发工具链 (opencode 等)
+│   └── virtualization/            # Podman, libvirtd
 ├── home/
 │   └── Reiky-REI/                 # 用户名与 config.nix 一致
-│       ├── default.nix            # 用户态入口
-│       ├── desktop/               # 桌面态配置 (niri, hyprland[legacy], hyprlock, rofi, wallpaper)
-│       │   ├── niri/              # Niri WM — 主力 Wayland compositor
-│       │   └── hyprland/          # Hyprland — 遗留配置（保留参考）
+│       ├── default.nix            # 用户态入口 (按 meow.kind 分组自我屏蔽)
+│       ├── desktop/               # 桌面态配置 (niri, noctalia, rofi, wallpaper)
 │       ├── shell/                 # Zsh
 │       ├── terminal/              # Kitty / Alacritty
 │       ├── editors/               # Neovim, VSCode, Zed 等
-│       ├── apps/                  # 浏览器、社交、媒体、办公
-│       ├── music/                 # 音乐播放器
+│       ├── apps/                  # 浏览器、社交、媒体、办公 (wsl 跳过)
+│       ├── music/                 # 音乐播放器 (wsl 跳过)
 │       └── tools/                 # 系统工具、搜索、查看器
 ├── lib/
+│   ├── mkHost.nix                 # 由 machines.nix 注册表生成 nixosConfigurations
 │   ├── claude-config.nix          # Claude Code 配置生成
 │   └── opencode-config.nix        # OpenCode 配置生成
 ├── pkgs/
@@ -90,49 +94,64 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 - **系统层 (NixOS modules)**：`services.mpd`, `services.pipewire`, `virtualisation.docker`, `services.openssh`, `services.flatpak`, `hardware.nvidia`, `programs.niri`, `services.displayManager`
 - **Home 层 (home-manager)**：`programs.kitty`, `programs.rofi`, `programs.waybar`, `programs.wlogout`, `programs.zsh`, `programs.bat`, `programs.fzf`, home 文件部署
 
-## 6. 机器注册与硬件档位
+## 6. 机器注册与特性标签 (meow.*)
 
-本仓库支持多机器共享配置，通过 **machines.nix** 注册每台机器的硬件档位：
+本仓库支持多机器共享配置，通过 **machines.nix** 注册每台机器的标签：
 
 ```nix
 # machines.nix
 {
-  "NixMEOW" = { profile = "high"; note = "主力机 — RTX 4070"; };
-  "NixPentium" = { profile = "low"; note = "老奔腾笔记本"; };
+  "NixMEOW" = {
+    profile = "high";       # 硬件档位: high/medium/low (视觉特效/构建并行度)
+    kind = "laptop";        # 机器种类: laptop/desktop/wsl/vm
+    features = [ "bluetooth" "gpu-nvidia" "compositor-niri" ... ];  # 特性标签
+    note = "主力机 — RTX 4070 + AMD 核显";
+  };
+  "NixMEOW-WSL" = {
+    profile = "medium";
+    kind = "wsl";
+    features = [ "compositor-niri" ];
+    note = "Windows WSL2 试验台";
+  };
 }
 ```
 
-| 档位 | 视觉效果 | 自启服务 | 构建并行度 | 适用场景 |
-|------|----------|---------|-----------|---------|
-| `high` | blur + shadow + 半透明 + 动画 | waydroid, clash-verge, swww, wayvnc | 8 jobs | 独显或高性能集显 |
-| `medium` | 轻度模糊 + 无阴影 | 无重型服务 | 4 jobs | 中端笔记本 |
-| `low` | 无特效、无半透明 | 仅必需项 | 2 jobs | 老奔腾/赛扬/低端设备 |
+**两种标签的用法完全不同**：
 
-### 添加新机器
+| 标签 | 决定什么 | 消费方式 |
+|------|---------|---------|
+| **profile**（档位） | 视觉特效 / 构建并行度 | `hardware.profile` (`isHighPerf` 等，也传给了 home-manager) |
+| **kind / features**（多机部署） | 哪些模块在本机生效 | 各模块自己 `lib.mkIf (config.meow.enabled ? "tag")` **自我屏蔽** |
+
+- 可用 features 标签清单看 `machines.nix` 头部注释 + 各模块 mkIf 里的字符串
+- flake 级标签（`kernel-715` / `agenix-secrets`）由 `lib/mkHost.nix` 消费
+- `meow` 同样注入 home-manager (`extraSpecialArgs`)，`home/Reiky-REI/default.nix`
+  按分组自我屏蔽（如 `kind=wsl` 时跳过 apps/music 组）
+
+### 添加新机器（**不需要动 flake.nix**）
 
 ```bash
 # 1. 生成新机器的硬件配置
 nixos-generate-config --root /mnt
 # 得到 /mnt/etc/nixos/hardware-configuration.nix
 
-# 2. 在 machines.nix 注册
-echo '"NixPentium" = { profile = "low"; };' >> machines.nix
+# 2. 在 machines.nix 注册 (hostname + profile + kind + features)
 
-# 3. 创建主机配置目录
-mkdir -p hosts/PENTIUM
-cp hosts/MEOW/hardware-configuration.nix hosts/PENTIUM/
-# 编辑 hosts/PENTIUM/default.nix（可参考 MEOW 的模板）
+# 3. 创建 hosts/<hostname>/default.nix (imports ../../modules + 本机专属配置)
+#    ⚠ 目录名必须与 machines.nix 的 key 一致
 
-# 4. 在 flake.nix 添加 nixosConfigurations 条目
-NixPentium = nixpkgs.lib.nixosSystem { ... modules = [ ./hosts/PENTIUM/default.nix ... ]; };
-
-# 5. 构建
-nixos-rebuild build --flake /etc/nixos#NixPentium
+# 4. 构建
+nixos-rebuild build --flake /etc/nixos#<hostname>
 ```
+
+`nixosConfigurations` 由 `lib/mkHost.nix` 依据 machines.nix 自动生成 —— 新增机器 =
+**machines.nix 写一行 + hosts/<hostname>/ 建一个目录**，不复贴 flake.nix。
 
 **注意**：未在 `machines.nix` 注册的 hostname 会直接 `abort` 报错退出，防止意外部署。
 
 ## 7. 如何新增一个系统模块
+
+
 
 ```bash
 # 1. 创建模块目录
@@ -209,3 +228,16 @@ nixos-rebuild build --flake /etc/nixos#NixMEOW
 - 选项冲突 → 在对应模块的 `default.nix` 中搜索该选项定义
 - 行为不符合预期 → 检查 `hosts/{HOST}/default.nix` 是否包含不应在 composition root 中的配置
 - 找不到模块 → 检查 `modules/default.nix` 或 `home/{username}/default.nix` 的 imports
+
+## 13. WSL2 试验台 (NixMEOW-WSL)
+
+第二台"机器"：Windows WSL2 里跑的 NixOS，定位是**无 NVIDIA 黑屏风险的 switch 迭代场** +
+嵌套 niri 桌面。完整文档见 **[docs/NixMEOW-WSL.md](docs/NixMEOW-WSL.md)**，覆盖：
+
+- 安装/重建流程 (VHD 50G 上限)
+- 网络三件套: 宿主 Clash 代理 / 代理环境 / nixrun.sh
+- browser-* 服务组 (Xvfb + niri + x11vnc + noVNC + noctalia) 与踩坑
+- 从浏览器访问 (`localhost:8080`, portproxy + 保活计划任务)
+- 运行时活文件同步清单 (noctalia/cliphist/zsh_history/opencode)
+
+铁律: 试验台上 `nixos-rebuild switch` 随便跑；真机仍然只 `build`，switch 由人工执行。
