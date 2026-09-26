@@ -94,7 +94,13 @@ Noctalia 壁纸回本地; 双系统 WSL 侧收尾与知识树统一留待办** �
 - 说明: `/etc/nixos/.agents` (随 nixos-config 仓库走, cwd 在 /etc/nixos 时 kb-mcp 命中的"项目级根")
   与 `~/.agents` (用户级根, 独立 git 仓, 含 memory/rules/skills/flake) 是 kb-mcp **多根设计**下的
   两套根, **并非重复 bug**; 本次补的是用户级根缺失的远端。
-- WSL host 收尾 (nix 代理/access-tokens 声明式化) 与 Linux 侧能力对齐 **未完成** (待办)。
+- **WSL host 收尾 (2026-09-27)**:
+  - `hosts/NixMEOW-WSL/default.nix` 新增 `systemd.services.nix-daemon.environment` 代理
+    (关键认知: **Nix 没有 nix.conf 的 `proxy` 选项**, 文档旧写法无效, daemon 出网只能靠环境变量)。
+  - 新增 `wsl-rebuild` 包装 (声明式替代 tmpfs `/root/nixrun.sh`): 自动带代理 +
+    存在 token 文件 (`~/.config/nix/access-token` 或 `/etc/nix/access-token`) 时注入 `access-tokens`。
+  - `docs/NixMEOW-WSL.md`: §3 改写成声明式方案; 新增 §6.1「知识层 ~/.agents 共享」clone 步骤。
+  - WSL 配置已从 NixMEOW 侧 `nix eval`/`nix build #NixMEOW-WSL` 验证 (同一份 flake 复现)。
 
 ## 六、壁纸体系收口: 移除 awww/swww
 
@@ -113,10 +119,12 @@ Noctalia 壁纸回本地; 双系统 WSL 侧收尾与知识树统一留待办** �
 ## 待办
 1. **switch/reboot 后验收** (AI 不主动 switch): 日志无 `failed to load plugin` +
    改文件后 `~/.local/state/opencode-edit-backups/<今天>/` 出快照。
-2. 统一 `/etc/nixos/.agents` 与 `~/.agents` 两份知识树。
-3. WSL host (`hosts/NixMEOW-WSL`) 的 nix 代理/access-tokens 声明式化 + 能力标签对齐。
-4. Windows 侧 `C:\Users\reiky\.agents` 改为 clone `agents-knowledge`, Windows 适配作为一次 commit 并入。
-5. (可选) 清理 v1 遗留库 `opencode-stable.db` (94M+100M+75M 损坏副本)。
+2. WSL host 能力标签按需补充 (目前只 `compositor-niri`; kb-mcp/llama-cpp 是否要上待定)。
+3. Windows 侧 `C:\Users\reiky\.agents` 改为 clone `agents-knowledge`, Windows 适配作为一次 commit 并入。
+4. (可选) 清理 v1 库: ⚠️ `opencode-stable.db` 仍被 root 通道使用
+   (`opencode-root.service` = `User=root` + `HOME=/home/Reiky-REI`), **不能删**;
+   只有 `opencode-stable.db.corrupted` (75M, 6月) 可清理。
+5. 视频壁纸迁到 Noctalia `video-wallpaper` 插件 (mpvpaper 会被 Noctalia 顶层背景盖住)。
 6. 用户在 Windows 上还有壁纸的话, 可通过 `~/win/Pictures` 取回。
 
 ## 教训

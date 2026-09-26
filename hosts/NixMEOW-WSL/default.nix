@@ -20,6 +20,32 @@
   novncShare = "${pkgs.novnc}/share/webapps/novnc";
   websockifyPkg = pkgs.python3Packages.websockify;
   vncPass = "meow-8080-lan";
+
+  # WSL 内手工重建的包装 (声明式替代文档里的 tmpfs /root/nixrun.sh):
+  #   - 强制走宿主 Clash 代理 (WSL2 NAT 下 GitHub 直连不稳)
+  #   - 可选 GitHub token: 写一行到 ~/.config/nix/access-token (root 用 /etc/nix/access-token)
+  #   用法: wsl-rebuild build --flake ~/nixos-config#NixMEOW-WSL
+  #         sudo wsl-rebuild switch --flake ~/nixos-config#NixMEOW-WSL
+  wslRebuild = pkgs.writeShellScriptBin "wsl-rebuild" ''
+    set -euo pipefail
+    export http_proxy=http://127.0.0.1:7890
+    export https_proxy=http://127.0.0.1:7890
+
+    cfg="extra-experimental-features = nix-command flakes
+    http2 = false"
+    tok_file=""
+    for f in "''${NIX_ACCESS_TOKEN_FILE:-}" "$HOME/.config/nix/access-token" /etc/nix/access-token; do
+      if [ -n "$f" ] && [ -r "$f" ]; then tok_file="$f"; break; fi
+    done
+    if [ -n "$tok_file" ]; then
+      tok="$(tr -d ' \r\n' < "$tok_file")"
+      cfg="$cfg
+    access-tokens = github.com=$tok"
+    fi
+    export NIX_CONFIG="$cfg"
+
+    exec nixos-rebuild "$@"
+  '';
 in {
   imports = [
     inputs.nixos-wsl.nixosModules.default
@@ -33,6 +59,14 @@ in {
   # WSL NAT 下国内镜像不稳定: 只走官方 cache + 禁 HTTP/2 (走代理已知问题)
   nix.settings.substituters = lib.mkForce ["https://cache.nixos.org"];
   nix.settings.http2 = lib.mkForce false;
+
+  # Nix 没有 nix.conf 里的 proxy 选项 —— daemon 出网只能靠环境变量。
+  # 宿主 Clash 混合端口 7890, WSL2 的 127.0.0.1 即 Windows 的 127.0.0.1
+  # (.wslconfig: hostAddressLoopback=true)。
+  systemd.services.nix-daemon.environment = {
+    http_proxy = "http://127.0.0.1:7890";
+    https_proxy = "http://127.0.0.1:7890";
+  };
 
   # NAS: 挂 Windows 已认证的 Z: 映射 (drvfs 复用宿主 SMB 凭据, 不需要 NAS 密码)
   # 注意: PATH 必须含 /run/current-system/sw/bin 与 /sbin —— NixOS 单元脚本默认
@@ -59,6 +93,7 @@ in {
     xorg.xvfb
     websockifyPkg
     novnc
+    wslRebuild
   ];
 
   systemd.services.browser-xvfb = {

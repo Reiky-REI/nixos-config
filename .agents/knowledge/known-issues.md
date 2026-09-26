@@ -737,3 +737,17 @@ NAS 挂载整体失效 → 壁纸不加载 + Noctalia 启动卡 30 秒喵~ (见�
 - 凭据走 agenix `nas-smb-credentials`; 共享名 `ReikyZconnect`喵~
 - **永久删除 `nas-migrate.service`**喵~
 - 动态网络上的远程挂载一律**按身份(MAC/名字)发现, 不要写死 IP**喵~
+
+---
+
+## Nix 没有 nix.conf 的 `proxy` 选项 (2026-09-27)
+
+### 问题
+给 `nix-daemon` 配代理时, 常见写法是往 `/etc/nix/nix.conf` 加 `proxy = http://...`,
+但 **Nix 根本不认识这个配置项** (2.34.8 `nix config show` 无 `proxy`), 等于没写喵~
+
+### 正确做法
+- daemon 出网: 设 **systemd 服务环境变量**
+  `systemd.services.nix-daemon.environment.http_proxy/https_proxy = "http://127.0.0.1:7890"`
+- CLI (nix/git 拉 flake 输入): 在调用它的环境里导出 `http_proxy/https_proxy`
+- WSL 场景见 `docs/NixMEOW-WSL.md` §3 与 `wsl-rebuild` 包装脚本喵~

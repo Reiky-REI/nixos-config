@@ -46,28 +46,25 @@ WSL2 NAT 模式下, WSL 里的 127.0.0.1 就是 Windows 的 127.0.0.1 (.wslconfi
   **只信 cache.nixos.org** (见 machines 配置 `nix.settings.substituters = mkForce [...]`)
 - 走代理大文件必须 **http2=false** (真机 flake 里那个 `http2=false` 注释已说明原因)
 
-**维护用的 `nixrun.sh`** (root 在 WSL 里, 属于 tmpfs `/root`, 不入仓库):
+**代理 + token 已声明式化 (2026-09-27 收尾)** 喵~
 
-```bash
-# 每次 VM 重建后手动放一次
-export https_proxy=http://127.0.0.1:7890
-TOK=$(tr -d ' \r\n' < /mnt/c/Users/reiky/AppData/Local/Temp/opencode/gh-token.txt)
-export NIX_CONFIG="extra-experimental-features = nix-command flakes
-access-tokens = github.com=${TOK}
-http2 = false"
-exec nix --option substituters https://cache.nixos.org "$@"
-```
+- `hosts/NixMEOW-WSL/default.nix` 里:
+  - `systemd.services.nix-daemon.environment = { http_proxy/https_proxy = http://127.0.0.1:7890; }`
+    ⚠️ Nix **没有** nix.conf 的 `proxy` 选项 (文档旧写法 `echo "proxy=..." >> /etc/nix/nix.conf`
+    其实无效), daemon 出网只能靠环境变量。
+  - `nix.settings.substituters = mkForce [cache.nixos.org]` + `http2 = false` (原有)。
+- 手工重建用 **`wsl-rebuild`** 包装 (替代旧的 tmpfs `/root/nixrun.sh`):
 
-同时 nix-daemon 需要代理 (`/etc/nix/nix.conf` 是只读 mount tmpfs, **switch 后会重置**):
+  ```bash
+  wsl-rebuild build  --flake ~/nixos-config#NixMEOW-WSL
+  sudo wsl-rebuild switch --flake ~/nixos-config#NixMEOW-WSL
+  ```
 
-```bash
-# session 级 hack
-cp /etc/static/nix/nix.conf /etc/nix/nix.conf
-echo "proxy = http://127.0.0.1:7890
-http2 = false" >> /etc/nix/nix.conf
-systemctl restart nix-daemon
-```
-→ 永久化应写进 `hosts/NixMEOW-WSL/default.nix` 的 `nix.*` 配置 (尚未做)。
+  它自动带代理, 并在有 token 文件时注入 `access-tokens`:
+  - 普通用户: `~/.config/nix/access-token` (一行)
+  - root/switch: `/etc/nix/access-token`
+
+  找不到就跳过 —— 公开 flake 输入本身不需要 token, 只是为了避开 GitHub 限流。
 
 ## 4. 桌面服务组 (browser-*) — 每个组件一个 systemd 服务
 
@@ -151,6 +148,23 @@ opencode   # 配置+auth 已从真机同步
 | `~/.config/opencode/plugins` (含 node_modules) | 真机 | noVNC 云的插件 |
 
 同步方法: 从挂载盘拷 (需 root, 见 AGENTS.md WSL 章节) 或用 `scp`/共享路径。
+
+### 6.1 知识层 `~/.agents` — 共享知识库 (2026-09-27)
+
+`~/.agents`（skills / rules / knowledge / memory / dialogue）**不在 nixos-config 仓库里**,
+是独立 git 仓。它现在有了私有远端, 双系统共享知识层就靠它喵~:
+
+```bash
+# WSL / Windows 侧首次:
+git clone git@github.com:Reiky-REI/agents-knowledge.git ~/.agents
+
+# 已有旧本地仓 → 接上远端:
+git -C ~/.agents remote add origin git@github.com:Reiky-REI/agents-knowledge.git
+git -C ~/.agents fetch origin && git -C ~/.agents reset --hard origin/main
+```
+
+口径喵: **配置靠 `nixos-rebuild` 复现 (同一份 flake), 知识层靠 `git clone/pull` 同步 (同一个仓)**,
+两边从此是同一套, 不再"各有一份、靠拷文件对齐"喵~
 
 ## 7. 故障排查速查
 
