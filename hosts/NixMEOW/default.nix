@@ -44,6 +44,9 @@
   users.users.${username} = {
     description = "__${fullName}__";
     isNormalUser = true;
+    # 固定 uid: users.<name>.uid 默认是 null (激活时才分配), 会让 NTFS 挂载的
+    # `uid=` 选项拼成空值; 固定成当前实际值 1002 保证挂载选项可解析。
+    uid = 1002;
     home = "/home/${username}";
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;

@@ -87,6 +87,13 @@ Noctalia 壁纸回本地; 双系统 WSL 侧收尾与知识树统一留待办** �
   只读是为规避 hiberfil/快速启动的写入损坏 + `modules/common` 已记录的 nvme1 关机 I/O 超时问题。
 - 直接收益: 可读 Windows 的 `opencode.db` (19 会话/1489 消息的历史)、`.agents`、`.ssh`。
 
+### 实施踩坑 (两个挂载 bug, switch 后才发现)
+- **Windows 挂载**: `config.users.users.<name>.uid` 默认是 **null** (激活时才分配), 导致
+  `uid=${toString ...}` 拼成空 → ntfs3 报 `Bad value for 'uid'`。修法: 显式固定 `uid = 1002;`。
+- **NAS 挂载**: `${pkgs.cifs-utils}/bin/mount.cifs` 指向默认 `out` output, 而 `mount.cifs` 在 **`-bin` output**,
+  死路径 → CIFS 静默失败。修法: `lib.getBin pkgs.cifs-utils`。
+- 两处修完 switch 后实测: `~/win` (ntfs3 ro uid=1002) 与 `~/nas` (`//192.168.124.9/ReikyZconnect`) 均正常挂载。
+
 ## 五、双系统共享 + 知识库 (部分完成)
 
 - `~/.agents` 建私有远端并推送: `https://github.com/Reiky-REI/agents-knowledge`

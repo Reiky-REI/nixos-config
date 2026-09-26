@@ -85,12 +85,12 @@ in {
         fi
         echo "NAS 发现于 $IP"
 
-        ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
-        if ${pkgs.util-linux}/bin/mountpoint -q ${mountPoint}; then
-          ${pkgs.util-linux}/bin/umount -l ${mountPoint} || true
+        ${lib.getBin pkgs.coreutils}/bin/mkdir -p ${mountPoint}
+        if ${lib.getBin pkgs.util-linux}/bin/mountpoint -q ${mountPoint}; then
+          ${lib.getBin pkgs.util-linux}/bin/umount -l ${mountPoint} || true
         fi
 
-        if ${pkgs.cifs-utils}/bin/mount.cifs "//$IP/${share}" ${mountPoint} \
+        if ${lib.getBin pkgs.cifs-utils}/bin/mount.cifs "//$IP/${share}" ${mountPoint} \
           -o "credentials=${credPath},uid=${toString user.uid},gid=${toString group.gid},iocharset=utf8,vers=3.0,_netdev"; then
           echo "已挂载 //$IP/${share} -> ${mountPoint}"
         else

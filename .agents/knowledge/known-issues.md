@@ -751,3 +751,19 @@ NAS 挂载整体失效 → 壁纸不加载 + Noctalia 启动卡 30 秒喵~ (见�
   `systemd.services.nix-daemon.environment.http_proxy/https_proxy = "http://127.0.0.1:7890"`
 - CLI (nix/git 拉 flake 输入): 在调用它的环境里导出 `http_proxy/https_proxy`
 - WSL 场景见 `docs/NixMEOW-WSL.md` §3 与 `wsl-rebuild` 包装脚本喵~
+
+---
+
+## NixOS 挂载类两坑: users.uid 是 null + 多 output 包的 bin 路径 (2026-09-27)
+
+### 坑 1: `config.users.users.<name>.uid` 默认是 **null**
+NixOS 的实际 uid 是激活时分配的, `users.users.<name>.uid` 选项**默认 null**。
+直接 `"uid=${toString config.users.users.${username}.uid}"` 会拼成空串 `uid=`,
+导致 ntfs3 报 `fsconfig() failed: ntfs3: Bad value for 'uid'` 挂载失败喵~
+**规避**: 显式 `users.users.<name>.uid = 1002;` 固定 uid (也是好实践)喵~
+
+### 坑 2: 用 `${pkgs.foo}/bin/bar` 前先确认 bar 在哪个 output
+`cifs-utils` 的 `mount.cifs` 在 **`-bin` output**, 不在默认 `out`:
+`${pkgs.cifs-utils}/bin/mount.cifs` 是死路径 (No such file or directory),
+CIFS 挂载静默失败 (脚本里被 `|| { echo 失败; exit 0; }` 兜住, 只看到"挂载失败")喵~
+**规避**: 用 `lib.getBin pkgs.cifs-utils` / `lib.getExe'` 取正确 output喵~
