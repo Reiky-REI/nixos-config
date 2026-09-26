@@ -231,6 +231,26 @@ nixos-rebuild build --flake /etc/nixos#NixMEOW
 > **⚠️ NVIDIA PRIME 系统**：`switch` 会重启 polkit → compositor 失去 DRM master → 黑屏。
 > 日常验证用 `build` + 手动 `reboot`，避免直接 `switch`。
 
+### 编译完成自动拉起 AI (默认 switch 开)
+
+每次 `build`/`switch` 结束时都会尝试"唤醒 AI"：在你的会话里弹桌面通知，
+并在**没有**其它 OpenCode 会话运行时开一个 `opencode --continue` 终端。
+若已有交互会话在跑，则只通知、不重复拉起。
+
+默认策略：**`switch` 开，`build` 关**（`build` 太频繁，避免打扰）。
+
+```bash
+# 强制开 / 强制关
+sudo REBUILD_WAKE_AGENT=1 .agents/config/rebuild.sh build
+sudo REBUILD_WAKE_AGENT=0 .agents/config/rebuild.sh switch
+
+# 或标记文件 (sudo 会重置环境, 这个更省事): 让 build 也拉起
+mkdir -p ~/.config/rebuild && touch ~/.config/rebuild/wake-agent
+```
+
+实现见 `.agents/config/wake-agent.sh`（由 `rebuild.sh` 在 nixos-rebuild 结束后调用，
+成功/失败都会尝试）。
+
 ## 12. 排查配置归属错误
 
 - 选项不存在 → 检查模块是否在正确的层（系统 vs home），以及是否被导入

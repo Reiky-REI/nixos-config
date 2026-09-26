@@ -62,6 +62,17 @@ in {
         User = username;
         Group = "users";
         WorkingDirectory = cfg.workspace;
+        # dsh 插件 (如 dsh-market-pkg) 会 import 宿主自带的 @deepseek-ai/* peer deps,
+        # 但 Node 从插件目录向上解析时找不到; 这里把宿主的 @deepseek-ai 链到
+        # workspace/node_modules, 让 workspace 下所有插件都能解析到 ——
+        # 目标用 cfg.package 拼, dsh 升级后路径自动跟随, 不再手改软链。
+        ExecStartPre = pkgs.writeShellScript "dsh-fence-peerdeps" ''
+          set -eu
+          host_nm="${cfg.package}/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai"
+          [ -d "$host_nm" ] || exit 0
+          mkdir -p "${cfg.workspace}/node_modules"
+          ln -sfn "$host_nm" "${cfg.workspace}/node_modules/@deepseek-ai"
+        '';
         ExecStart = "${cfg.package}/bin/dsh web ${lib.concatStringsSep " " (map (h: "--trusted-host ${h}") cfg.trustedHosts)}";
         Restart = "on-failure";
         RestartSec = "5s";

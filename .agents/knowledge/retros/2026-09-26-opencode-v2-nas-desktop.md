@@ -123,6 +123,21 @@ Noctalia 壁纸回本地; 双系统 WSL 侧收尾与知识树统一留待办** �
 - 立即恢复: `noctalia-shell ipc call wallpaper set ~/Pictures/Wallpapers/static/119923025_p0.png <screen>` 已生效。
 - 遗留: 视频壁纸 mpvpaper 同样受 Noctalia 顶层背景限制, 后续应迁到 Noctalia `video-wallpaper` 插件。
 
+## 七、收尾增补 (2026-09-27)
+
+- **dsh-fence 崩溃修复 (历史问题, NRestarts=106)**: `dsh-market-pkg` 插件 import
+  `@deepseek-ai/dsh-settings` / `schemastery` / `cordis` (peerDeps) 解析不到 —— 宿主其实自带,
+  但 Node 从插件目录向上解析不到。修法: `dsh-fence.service` 加 `ExecStartPre`,
+  把 `${cfg.package}` 里的 `@deepseek-ai` 链到 `${workspace}/node_modules/@deepseek-ai`,
+  dsh 升级后路径自动跟随。修完 `dsh web` 正常起在 3080。
+- **编译完成自动拉起 AI**: 新增 `.agents/config/wake-agent.sh` + `rebuild.sh` 尾钩。
+  opt-in (`REBUILD_WAKE_AGENT=1` 或 `~/.config/rebuild/wake-agent` 标记):
+  结束后弹通知 + 在调用者 Wayland 会话开 `opencode --continue` 终端; 已有交互会话则只通知。
+- **清理**: 删除 `opencode-stable.db.corrupted` (75M, 6月, 已留删除清单);
+  `opencode-stable.db` 保留 (仍被 root 通道使用)。
+- **token 轮换**: NIX_ACCESS_TOKEN 换新 (agenix), 旧 token 已在 GitHub 撤销 (实测旧 401 / 新 200)。
+- 分支 `fix/opencode-v2-nas-desktop` 合并回 `main` + `refactor/multi-host` 后删除。
+
 ## 待办
 1. **switch/reboot 后验收** (AI 不主动 switch): 日志无 `failed to load plugin` +
    改文件后 `~/.local/state/opencode-edit-backups/<今天>/` 出快照。

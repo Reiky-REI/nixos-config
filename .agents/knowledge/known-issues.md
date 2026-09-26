@@ -767,3 +767,25 @@ NixOS 的实际 uid 是激活时分配的, `users.users.<name>.uid` 选项**默�
 `${pkgs.cifs-utils}/bin/mount.cifs` 是死路径 (No such file or directory),
 CIFS 挂载静默失败 (脚本里被 `|| { echo 失败; exit 0; }` 兜住, 只看到"挂载失败")喵~
 **规避**: 用 `lib.getBin pkgs.cifs-utils` / `lib.getExe'` 取正确 output喵~
+
+---
+
+## dsh 插件 peerDeps 解析不到导致服务崩溃 (2026-09-27)
+
+### 问题
+`dsh-fence.service` 反复崩溃重启 (`NRestarts` 上百), 报:
+`Cannot find package '@deepseek-ai/dsh-settings' imported from .../dsh-market-pkg/lib/settings.js`喵~
+
+### 根因
+dsh 插件 (如 dsh-market-pkg) 把 `@deepseek-ai/dsh-settings`/`schemastery`/`cordis` 声明为
+peerDependencies, 期望宿主提供; 宿主 dsh 包**确实带了**这些包 (在
+`<dsh>/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai/`), 但 Node 从插件目录
+逐级向上解析时找不到宿主的 node_modules喵~
+
+### 规避
+在 `dsh-fence.service` 加 `ExecStartPre`, 把宿主的 `@deepseek-ai` 链到
+`${workspace}/node_modules/@deepseek-ai` (用 `cfg.package` 拼路径, dsh 升级自动跟随)喵~
+```bash
+ln -sfn "<dsh>/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai" \
+        "$workspace/node_modules/@deepseek-ai"
+```

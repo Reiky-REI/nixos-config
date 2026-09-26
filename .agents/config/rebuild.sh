@@ -34,8 +34,17 @@ if [ "$MODE" = "switch" ]; then
   sleep 5
 fi
 
+rc=0
 sudo env \
   http_proxy="$http_proxy" \
   https_proxy="$https_proxy" \
   NIX_ACCESS_TOKEN="$NIX_ACCESS_TOKEN" \
-  nixos-rebuild "${ARGS[@]}"
+  nixos-rebuild "${ARGS[@]}" || rc=$?
+
+# 编译结束后拉起 AI (opt-in):
+#   REBUILD_WAKE_AGENT=1  或  调用者家目录 ~/.config/rebuild/wake-agent 标记存在
+# 成功/失败都会尝试; 未开启则直接跳过。
+if [ -x "$SCRIPT_DIR/wake-agent.sh" ]; then
+  "$SCRIPT_DIR/wake-agent.sh" "$MODE" "$rc" || true
+fi
+exit "$rc"
