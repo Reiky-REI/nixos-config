@@ -31,8 +31,10 @@ if [ -z "${GH:-}" ]; then echo "空输入, 取消"; exit 1; fi
 PUB="$(grep -o 'ssh-ed25519 [A-Za-z0-9+/]*' secrets/secrets.nix | head -1)"
 if [ -z "$PUB" ]; then echo "secrets/secrets.nix 里找不到公钥"; exit 1; fi
 
-cp -p "$SECRET" "$SECRET.bak-$(date +%Y%m%d-%H%M%S)"
-echo "已备份旧密钥"
+BACKUP_DIR="$HOME/.local/state/secret-backups"
+mkdir -p "$BACKUP_DIR"
+cp -p "$SECRET" "$BACKUP_DIR/$(basename "$SECRET").bak-$(date +%Y%m%d-%H%M%S)"
+echo "已备份旧密钥到 $BACKUP_DIR (仓库外, 避免误提交)"
 
 tmp="$(mktemp)"
 trap 'shred -u "$tmp" 2>/dev/null || rm -f "$tmp"' EXIT
@@ -46,12 +48,17 @@ fi
 
 nix-shell -p age --run "age -r '$PUB' -o '$SECRET'" < "$tmp"
 
-printf '%s' "$GH" > .agents/config/token
-chmod 600 .agents/config/token
+if printf '%s' "$GH" > .agents/config/token 2>/dev/null; then
+  chmod 600 .agents/config/token 2>/dev/null || true
+else
+  echo "⚠️ 回退文件 .agents/config/token 写入失败 (属主/只读?), 跳过 —— 不影响 agenix 主路径"
+fi
 
 unset GH
-echo "✅ 已更新 agenix 密钥 + .agents/config/token"
+echo "✅ 已更新 agenix 密钥 (+ 回退文件)"
 echo "校验 (值已打码):"
 nix-shell -p age --run "age -d -i '$KEY' '$SECRET'" 2>/dev/null | sed -E 's/=.*/=<REDACTED>/'
 echo
-echo "下一步: 去 GitHub 把旧 token 撤销 (revoke), 然后 nixos-rebuild build/switch 验证。"
+echo "下一步:"
+echo "  1) 去 GitHub 撤销旧 token (revoke)"
+echo "  2) 让 agenix 重新解密生效: sudo nixos-rebuild switch  (或重启)"
