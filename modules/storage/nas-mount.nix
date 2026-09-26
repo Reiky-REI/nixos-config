@@ -1,15 +1,13 @@
-# ===== NAS WebDAV 挂载配置 =====
-# 通过 rclone mount 挂载 NAS WebDAV 到 ~/nas
-#
-# NAS 信息:
-#   地址: 192.168.124.8
-#   WebDAV: https://192.168.124.8:5006/sata11-15585280324
-#   协议: WebDAV (SMB 不可用)
-#
-# 迁移计划（释放 ~7.2G 本地空间）:
-#   ~/WorkSpace/models (6.5G) -> ~/nas/models
-#   ~/Pictures (455M)         -> ~/nas/Pictures
-#   ~/Documents (282M)        -> ~/nas/Documents
+# ===== NAS 挂载 (SMB/CIFS + 按 MAC 发现) =====
+# 背景 (2026-09-26):
+#   - NAS 是 极空间 Z4Pro ("Z4Pro-5XES"), IP **每周变一次** (旧配置写死 192.168.124.8 已失效),
+#     且不广播 mDNS → 改按 **MAC** 在本地网段扫描发现。
+#   - 协议由 WebDAV 改为 **SMB/CIFS** (2026-08-31 7.2G 数据丢失事故根因就是 WebDAV 写入静默失败,
+#     known-issues 明说"WebDAV 写入不可靠, 优先 SMB/NFS")。
+#   - 凭据走 agenix 密钥 `nas-smb-credentials` (mkHost 在 agenix-secrets feature 下注入, 内容:
+#     username=/password=)。
+#   - ⛔ 已删除旧 `nas-migrate.service`: 它使用被 AGENTS.md 铁律禁止的
+#     `rsync --remove-source-files` + `rm -rf` 迁移本地数据, 是 7.2G 事故的元凶代码。
 {
   config,
   lib,
@@ -17,110 +15,87 @@
   ...
 }: let
   username = "Reiky-REI";
-  nas_ip = "192.168.124.8";
-  nas_webdav_port = 5006;
-  nas_share = "sata11-15585280324";
-  mount_point = "/home/${username}/nas";
-  home = "/home/${username}";
+  user = config.users.users.${username};
+  group = config.users.groups.${user.group};
+  nasMac = "1c:83:41:e4:3c:d4"; # 极空间 Z4Pro 网卡 MAC (发现用)
+  share = "ReikyZconnect"; # 个人空间: 含 models / Pictures / documents
+  mountPoint = "/home/${username}/nas";
+  credPath = config.age.secrets.nas-smb-credentials.path;
+
+  # 按 MAC 在当前网段找 NAS, 输出 IP (stdout); 找不到返回非 0。
+  # 顺序: 先查 ARP 邻居表 (命中快) → 再并行 ping 扫本网段 → 再查表。
+  discover = pkgs.writeShellScript "nas-discover" ''
+    set -u
+    MAC="${nasMac}"
+    IP=""
+    AWK=${pkgs.gawk}/bin/awk
+    IPCMD=${pkgs.iproute2}/bin/ip
+    PING=${pkgs.iputils}/bin/ping
+
+    lookup() {
+      local dev="$1"
+      "$IPCMD" -4 neigh show dev "$dev" 2>/dev/null \
+        | "$AWK" -v m="$MAC" 'tolower($4)==tolower(m){print $1; exit}'
+    }
+
+    for dev in $("$IPCMD" -o link show up | "$AWK" -F': ' '{print $2}'); do
+      [ "$dev" = "lo" ] && continue
+      IP=$(lookup "$dev")
+      [ -n "$IP" ] && { echo "$IP"; exit 0; }
+
+      NET=$("$IPCMD" -4 -o addr show dev "$dev" scope global 2>/dev/null | "$AWK" '{print $4}' | head -1)
+      [ -z "$NET" ] && continue
+      BASE=$(echo "$NET" | cut -d/ -f1 | cut -d. -f1-3)
+      for i in $(seq 1 254); do "$PING" -c1 -W1 "$BASE.$i" >/dev/null 2>&1 & done
+      wait
+
+      IP=$(lookup "$dev")
+      [ -n "$IP" ] && { echo "$IP"; exit 0; }
+    done
+    exit 1
+  '';
 in {
   config = lib.mkIf (config.meow.enabled ? "nas-smb") {
-  # 安装 rclone
-  environment.systemPackages = [pkgs.rclone];
+    environment.systemPackages = [pkgs.cifs-utils];
 
-  # rclone 配置文件
-  environment.etc."rclone/rclone.conf".text = ''
-    [nas-webdav]
-    type = webdav
-    url = https://${nas_ip}:${toString nas_webdav_port}/${nas_share}
-    vendor = other
-    user = 15585280324
-    pass = g-hI69r5XVhwEzIbMMertH7TU1u5KADIbo5o
-    tls_skip_verify = true
-  '';
+    # 挂载点目录 (用户可写, 便于手动操作)
+    systemd.tmpfiles.rules = [
+      "d ${mountPoint} 0755 ${username} ${user.group} -"
+    ];
 
-  # systemd 服务：开机自动挂载 NAS WebDAV
-  systemd.services.nas-mount = {
-    description = "Mount NAS WebDAV to ~/nas";
-    after = ["network-online.target"];
-    wants = ["network-online.target"];
-    wantedBy = ["multi-user.target"];
-    serviceConfig = {
-      Type = "notify";
-      ExecStartPre = "${pkgs.coreutils}/bin/mkdir -p ${mount_point}";
-      ExecStart = "${pkgs.rclone}/bin/rclone mount nas-webdav: ${mount_point} --config /etc/rclone/rclone.conf --no-check-certificate --vfs-cache-mode full --vfs-cache-max-size 5G --vfs-cache-max-age 24h --dir-cache-time 15m --attr-timeout 15m --no-modtime --allow-other --allow-non-empty --volname nas --rc --rc-addr :5572 --rc-user admin --rc-pass ij/D3XeVJdHH7FRBAKXg3Q75";
-      ExecStop = "/run/current-system/sw/bin/fusermount -uz ${mount_point}";
-      Restart = "on-failure";
-      RestartSec = "10s";
-    };
-  };
+    systemd.services.nas-mount = {
+      description = "Discover (by MAC) and mount NAS ${share} via SMB/CIFS";
+      after = ["network-online.target"];
+      wants = ["network-online.target"];
+      wantedBy = ["multi-user.target"];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        # NAS 不在线/不在本网段时优雅跳过, 绝不阻塞启动
+        TimeoutStartSec = "90s";
+      };
+      script = ''
+        set -u
+        IP="$(${discover})" || IP=""
+        if [ -z "$IP" ]; then
+          echo "NAS (MAC ${nasMac}) 未在本地网段发现, 跳过挂载 (nofail)"
+          exit 0
+        fi
+        echo "NAS 发现于 $IP"
 
-  # 确保挂载点目录存在
-  systemd.tmpfiles.rules = [
-    "d ${mount_point} 0755 ${username} users -"
-  ];
-
-  # 挂载后自动迁移数据并创建符号链接
-  # ⚠️ 首次迁移需要手动触发: systemctl start nas-migrate.service
-  systemd.services.nas-migrate = {
-    description = "Migrate data to NAS";
-    after = ["nas-mount.service"];
-    wants = ["nas-mount.service"];
-    serviceConfig = {
-      Type = "oneshot";
-      ExecStart = pkgs.writeShellScript "nas-migrate.sh" ''
-        #!/bin/bash
-        set -e
-
-        echo "=== NAS 数据迁移 ==="
-
-        # 等待挂载就绪
-        for i in $(seq 1 30); do
-          if [ -d "${mount_point}" ] && [ "$(ls -A ${mount_point} 2>/dev/null)" ]; then
-            break
-          fi
-          echo "等待 NAS 挂载... ($i/30)"
-          sleep 2
-        done
-
-        if [ ! -d "${mount_point}" ] || [ ! "$(ls -A ${mount_point} 2>/dev/null)" ]; then
-          echo "NAS 未就绪，跳过迁移"
-          exit 1
+        ${pkgs.coreutils}/bin/mkdir -p ${mountPoint}
+        if ${pkgs.util-linux}/bin/mountpoint -q ${mountPoint}; then
+          ${pkgs.util-linux}/bin/umount -l ${mountPoint} || true
         fi
 
-        # 迁移 models (6.5G)
-        if [ -d "${home}/WorkSpace/models" ] && [ ! -L "${home}/WorkSpace/models" ]; then
-          echo "迁移 models -> nas/models ..."
-          mkdir -p ${mount_point}/models
-          rsync -av --remove-source-files "${home}/WorkSpace/models/" "${mount_point}/models/" 2>/dev/null || true
-          rm -rf "${home}/WorkSpace/models"
-          ln -s "${mount_point}/models" "${home}/WorkSpace/models"
-          echo "  ✓ models 迁移完成"
+        if ${pkgs.cifs-utils}/bin/mount.cifs "//$IP/${share}" ${mountPoint} \
+          -o "credentials=${credPath},uid=${toString user.uid},gid=${toString group.gid},iocharset=utf8,vers=3.0,_netdev"; then
+          echo "已挂载 //$IP/${share} -> ${mountPoint}"
+        else
+          echo "CIFS 挂载失败 (凭据/共享名?), 跳过 (nofail)"
+          exit 0
         fi
-
-        # 迁移 Pictures (455M)
-        if [ -d "${home}/Pictures" ] && [ ! -L "${home}/Pictures" ]; then
-          echo "迁移 Pictures -> nas/Pictures ..."
-          mkdir -p ${mount_point}/Pictures
-          rsync -av --remove-source-files "${home}/Pictures/" "${mount_point}/Pictures/" 2>/dev/null || true
-          rm -rf "${home}/Pictures"
-          ln -s "${mount_point}/Pictures" "${home}/Pictures"
-          echo "  ✓ Pictures 迁移完成"
-        fi
-
-        # 迁移 Documents (282M)
-        if [ -d "${home}/Documents" ] && [ ! -L "${home}/Documents" ]; then
-          echo "迁移 Documents -> nas/Documents ..."
-          mkdir -p ${mount_point}/Documents
-          rsync -av --remove-source-files "${home}/Documents/" "${mount_point}/Documents/" 2>/dev/null || true
-          rm -rf "${home}/Documents"
-          ln -s "${mount_point}/Documents" "${home}/Documents"
-          echo "  ✓ Documents 迁移完成"
-        fi
-
-        echo "=== NAS 迁移完成 ==="
       '';
-      User = username;
     };
-  };
   };
 }

@@ -1,5 +1,5 @@
 {
   imports = [
-    ./swww.nix
+    ./wallpaper.nix
   ];
 }

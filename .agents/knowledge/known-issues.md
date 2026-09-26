@@ -698,3 +698,42 @@ v2 的 `opencode serve` 启动打印随机 `server password`，无鉴权请求�
 ### 排障速查
 - 单文件二进制行为异常（变成解释器本体）→ 先查是否被 patchelf/strip 动过喵~
 - 升级 opencode 后 bridge/root 通道 401 → v2 鉴权，勿盲目重试，回 pin v1 喵~
+
+---
+
+## OpenCode v2 插件/配置迁移 (2026-09-26, 已修复)
+
+### 问题
+系统 opencode 升到 v2 后, `edit-backup` 插件**静默失效**(安全网没了), 配置仍是 V1 形态靠归一化兜着喵~
+
+### 根因
+- **V2 不执行 V1 插件实现**。V1 的 `export const X = async () => ({"tool.execute.before": ...})` 在 v2 完全不运行,
+  加载日志报: `Plugin must export a default definition with an id and an effect or setup function (Missing key at ["default"])`喵~
+- 配置(V1)会被自动归一化, 但**插件 API 是有意破坏性变更**喵~
+
+### 修复/规避
+- 插件改 `export default { id, setup(ctx) { ctx.tool.hook("execute.before", e => ...) } }`,
+  参数取 `e.tool` / `e.input` (不是 V1 的 `(input, output)`)喵~
+- 零依赖写法: 本地插件加载器**解析不到裸包名** `@opencode/plugin`, 但 `{id,setup}` 就是其等价产物, 不 import 最稳喵~
+- 配置转 V2: `providers`(+`settings`) / `permissions[]` / `agents.<id>.system` / `mcp.servers` / `skills` / `plugins` / `update`喵~
+- ⚠️ V2 **接受但不加载** `instructions` 条目 → 指令链靠 `AGENTS.md`喵~
+- **排障神器**: `opencode debug config` 打印归一化后的**真实生效配置**, 判断字段是否被接受以它为准喵~
+  (`opencode.ai/config.json` schema 本身仍是 V1 形态, 别被误导)喵~
+
+## NAS 挂载: 写死 IP 必崩 + 事故元凶代码残留 (2026-09-26, 已修复)
+
+### 问题
+NAS 挂载整体失效 → 壁纸不加载 + Noctalia 启动卡 30 秒喵~ (见复盘 `retros/2026-09-26-opencode-v2-nas-desktop.md`)
+
+### 根因
+1. 极空间 Z4Pro 的 **IP 每周变一次** (旧配置写死 `192.168.124.8`, 实际漂到 `.9`), 且**不广播 mDNS**喵~
+2. 协议用 WebDAV (写入不可靠, 2026-08-31 事故根因)喵~
+3. `nas-migrate.service` 用被铁律禁止的 `rsync --remove-source-files`+`rm -rf`,
+   是 7.2G 事故的元凶代码, 复盘写了却**一直没从配置里删掉**喵~
+
+### 修复/规避
+- 改 **SMB/CIFS** + **按 MAC 发现** (`1c:83:41:e4:3c:d4`): 先查 ARP 邻居表, 未命中并行 ping 扫本网段;
+  找不到就 `exit 0` 跳过, **绝不阻塞启动/UI**喵~
+- 凭据走 agenix `nas-smb-credentials`; 共享名 `ReikyZconnect`喵~
+- **永久删除 `nas-migrate.service`**喵~
+- 动态网络上的远程挂载一律**按身份(MAC/名字)发现, 不要写死 IP**喵~

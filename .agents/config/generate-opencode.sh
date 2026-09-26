@@ -31,9 +31,10 @@ if model_raw:
 if agent_raw:
     cfg['default_agent'] = json.loads(agent_raw)
 if prompt_raw:
-    cfg.setdefault('agent', {})
-    cfg['agent'].setdefault('plan', {})
-    cfg['agent']['plan']['prompt'] = json.loads(prompt_raw)
+    # V2 形态: agents.<id>.system (V1 的 agent.<id>.prompt 已废弃)
+    cfg.setdefault('agents', {})
+    cfg['agents'].setdefault('plan', {})
+    cfg['agents']['plan']['system'] = json.loads(prompt_raw)
 
 with open(file, 'w') as f:
     json.dump(cfg, f, indent=2)
@@ -46,6 +47,6 @@ echo "Patching root config..."
 patch_json "opencode.json" "$ROOT_INSTRUCTIONS" "$ROOT_MODEL" "$ROOT_DEFAULT_AGENT" "$ROOT_AGENT_PLAN_PROMPT"
 
 echo "Patching host config..."
-patch_json "hosts/MEOW/opencode.json" "$HOST_INSTRUCTIONS" "" "" ""
+patch_json "hosts/NixMEOW/opencode.json" "$HOST_INSTRUCTIONS" "" "" ""
 
 echo "Done."

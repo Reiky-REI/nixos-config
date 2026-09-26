@@ -1,4 +1,13 @@
 #!/usr/bin/env bash
+# 壁纸切换 (rofi 菜单) — 由 niri 快捷键 Mod+Shift+W 调用。
+#
+# 渲染方式 (2026-09-26 起): Noctalia 自带壁纸 (noctalia-background 顶层 layer),
+#   静态图通过 `noctalia-shell ipc call wallpaper set <path> <screen>` 设置;
+#   原 awww/swww 守护已弃用并从系统移除 (它渲染的 background layer 会被
+#   Noctalia 顶层背景遮住, 属于重复渲染)。
+#
+# 视频壁纸: mpvpaper (注意: 同样位于 background layer, 可能被 Noctalia 顶层背景遮挡;
+#   彻底方案是启用 Noctalia 的 video-wallpaper 插件, 属后续事项)。
 set -euo pipefail
 
 STATIC_DIR="$HOME/Pictures/Wallpapers/static"
@@ -13,6 +22,17 @@ get_all_outputs() {
   else
     echo "eDP-1"
   fi
+}
+
+set_wallpaper() {
+  local path="$1" out
+  if ! command -v noctalia-shell >/dev/null 2>&1; then
+    echo "找不到 noctalia-shell, 无法设置壁纸" >&2
+    return 1
+  fi
+  while IFS= read -r out; do
+    [ -n "$out" ] && noctalia-shell ipc call wallpaper set "$path" "$out" >/dev/null 2>&1 || true
+  done < <(get_all_outputs)
 }
 
 mapfile -t IMAGES < <(find -L "$STATIC_DIR" -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) 2>/dev/null | sort)
@@ -69,15 +89,9 @@ case "$SELECTED" in
     ;;
   *)
     pkill mpvpaper 2>/dev/null || true
-    if ! pgrep -x "awww-daemon" >/dev/null 2>&1; then
-      awww-daemon >/dev/null 2>&1 &
-      sleep 0.25
-    fi
-    types=(fade grow outer center wipe wave simple left top right bottom any)
-    transition=${types[$RANDOM % ${#types[@]}]}
-    awww img "$SELECTED"
+    set_wallpaper "$SELECTED"
     if command -v notify-send >/dev/null 2>&1; then
-      notify-send "壁纸已切换" "$(basename "$SELECTED") - 效果: $transition" -i "$SELECTED"
+      notify-send "壁纸已切换" "$(basename "$SELECTED")" -i "$SELECTED"
     fi
     ;;
 esac

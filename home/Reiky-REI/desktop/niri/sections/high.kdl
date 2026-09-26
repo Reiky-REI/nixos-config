@@ -7,8 +7,6 @@ cursor {
 }
 
 spawn-at-startup "noctalia-shell"
-// awww-daemon (恢复 2026-08-18: 内核 7.1.5 后无闪烁; full-path 防 GC/PATH 失效)
-spawn-at-startup "/nix/store/i335n1yrb8s8mk17x1gkl99pij3k5r02-awww-0.12.1/bin/awww-daemon"
 spawn-at-startup "fcitx5"
 spawn-at-startup "nm-applet"
 spawn-sh-at-startup "sh -c 'wayvnc 0.0.0.0'"

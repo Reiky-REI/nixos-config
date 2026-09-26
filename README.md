@@ -81,6 +81,15 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 | 虚拟化 | `modules/virtualization/` | Docker、libvirtd、Waydroid | 容器内应用配置 |
 | 用户态 | `home/{username}/` | 应用、shell、编辑器、WM 配置文件、终端工具 | 系统 daemon、内核参数 |
 
+### 壁纸管理
+
+壁纸由 **Noctalia 自带渲染** (`noctalia-background` 顶层 layer) 统一管理，**已弃用 awww/swww**（2026-09-26）：
+
+- 静态壁纸：`~/Pictures/Wallpapers/static/`（用户自管，不经 nix 部署）
+- 视频壁纸：`~/Pictures/Wallpapers/videos/`（暂用 mpvpaper；受 Noctalia 顶层背景限制，待迁移到 Noctalia video-wallpaper 插件）
+- 切换快捷键 `Mod+Shift+W` → `~/.config/wallpaper/script/wallpaper-rofi.sh`（rofi 选图，经 `noctalia-shell ipc call wallpaper set` 设置）
+- 配置位置：`home/Reiky-REI/desktop/wallpaper/`
+
 ## 5. 职责边界
 
 | 角色 | 职责 |
