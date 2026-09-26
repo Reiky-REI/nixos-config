@@ -34,8 +34,10 @@
 
     lookup() {
       local dev="$1"
+      # 不依赖字段位置: ip neigh 的格式随是否带 "dev" 而变 (IP [dev X] lladdr MAC STATE),
+      # 直接扫描整行找 MAC, 命中则打印行首的 IP。
       "$IPCMD" -4 neigh show dev "$dev" 2>/dev/null \
-        | "$AWK" -v m="$MAC" 'tolower($4)==tolower(m){print $1; exit}'
+        | "$AWK" -v m="$MAC" '{ for (i = 1; i <= NF; i++) if (tolower($i) == tolower(m)) { print $1; exit } }'
     }
 
     for dev in $("$IPCMD" -o link show up | "$AWK" -F': ' '{print $2}'); do
