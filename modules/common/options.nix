@@ -15,9 +15,9 @@
     };
 
     features = lib.mkOption {
-      type = lib.types.listOf lib.types.str;
+      type = lib.types.listOf (lib.types.enum (import ../../lib/features.nix));
       default = [];
-      description = "特性标签列表, 来自 machines.nix 的 features 字段";
+      description = "经 lib/features.nix 校验的特性标签, 来自 machines.nix";
     };
 
     enabled = lib.mkOption {

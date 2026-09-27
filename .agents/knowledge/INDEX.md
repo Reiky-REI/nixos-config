@@ -40,6 +40,7 @@ Agent 每次启动时，按以下顺序加载知识：
 |------|------|------|
 | [niri-focus-ring-transparent-overlay.md](decisions/niri-focus-ring-transparent-overlay.md) | niri, focus-ring, transparent, opacity, overlay, electron | 2026-05-27 |
 | [nixos-26.05-upgrade-plan.md](decisions/nixos-26.05-upgrade-plan.md) | upgrade, nixos-26.05, waydroid, gbinder, niri | 2026-05-27 |
+| [nixos-multi-dimension-registry.md](decisions/nixos-multi-dimension-registry.md) | nixos, multi-host, multi-user, multi-agent, architecture | 2026-09-27 |
 
 ## 🚨 铁律速查（所有 AI 必读）
 
@@ -74,4 +75,4 @@ Agent 每次启动时，按以下顺序加载知识：
 | **pkill -f 不要用** | AGENTS.md 纪律7 | 误杀自身进程 |
 
 ## 复盘索引
-完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 78 篇）
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 79 篇）

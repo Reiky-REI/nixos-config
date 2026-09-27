@@ -2,8 +2,8 @@
 
 ## 1. 仓库目标
 
-管理个人 NixOS 系统的 declarative 配置，遵循分层清晰的模块化架构，降低耦合，便于维护。
-支持**多机器共享同一套配置**，通过硬件档位自动适配高低算力设备。
+管理 NixOS declarative 配置，host、user 与 agent 是相互独立的注册维度，按明确绑定组合共享能力。
+不同用途与硬件的 host 可以共享模块，同时只启用各自需要的功能。
 
 ## 2. 分层原则
 
@@ -20,8 +20,9 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 
 ```
 /etc/nixos/
-├── config.nix                      # 用户配置中心 (username/fullName/githubHandle)
-├── machines.nix                    # 机器注册中心 (hostname → profile/kind/features)
+├── users.nix                       # 用户身份注册表 (stable ID → login/home/profile)
+├── config.nix                      # users.nix 的兼容视图，旧脚本过渡用
+├── machines.nix                    # host 注册表 (hostname → profile/kind/features/users)
 ├── flake.nix                       # 入口：inputs + mkHost 装配 (由注册表驱动)
 ├── flake.lock                      # 锁定依赖版本
 ├── justfile                        # 常用命令
@@ -47,7 +48,7 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 │   ├── development/               # 开发工具链 (opencode 等)
 │   └── virtualization/            # Podman, libvirtd
 ├── home/
-│   └── Reiky-REI/                 # 用户名与 config.nix 一致
+│   └── Reiky-REI/                 # 可复用 Home Manager 配置集，由 users.nix.homeProfile 绑定
 │       ├── default.nix            # 用户态入口 (按 meow.kind 分组自我屏蔽)
 │       ├── desktop/               # 桌面态配置 (niri, noctalia, rofi, wallpaper)
 │       ├── shell/                 # Zsh
@@ -58,6 +59,7 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 │       └── tools/                 # 系统工具、搜索、查看器
 ├── lib/
 │   ├── mkHost.nix                 # 由 machines.nix 注册表生成 nixosConfigurations
+│   ├── features.nix                # 已知 feature ID 清单，拼写错误在 eval 时失败
 │   ├── claude-config.nix          # Claude Code 配置生成
 │   └── opencode-config.nix        # OpenCode 配置生成
 ├── pkgs/
@@ -113,12 +115,16 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
   "NixMEOW" = {
     profile = "high";       # 硬件档位: high/medium/low (视觉特效/构建并行度)
     kind = "laptop";        # 机器种类: laptop/desktop/wsl/vm
+    users = [ "reiky" ];    # users.nix 中的稳定身份 ID
+    primaryUser = "reiky";  # 尚未迁移的单用户 system module 的兼容身份
     features = [ "bluetooth" "gpu-nvidia" "compositor-niri" ... ];  # 特性标签
     note = "主力机 — RTX 4070 + AMD 核显";
   };
   "NixMEOW-WSL" = {
     profile = "medium";
     kind = "wsl";
+    users = [ "reiky" ];
+    primaryUser = "reiky";
     features = [ "compositor-niri" ];
     note = "Windows WSL2 试验台";
   };
@@ -132,10 +138,14 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 | **profile**（档位） | 视觉特效 / 构建并行度 | `hardware.profile` (`isHighPerf` 等，也传给了 home-manager) |
 | **kind / features**（多机部署） | 哪些模块在本机生效 | 各模块自己 `lib.mkIf (config.meow.enabled ? "tag")` **自我屏蔽** |
 
-- 可用 features 标签清单看 `machines.nix` 头部注释 + 各模块 mkIf 里的字符串
+- feature ID 清单集中在 `lib/features.nix`，未知标签会导致 eval 失败
 - flake 级标签（`kernel-715` / `agenix-secrets`）由 `lib/mkHost.nix` 消费
 - `meow` 同样注入 home-manager (`extraSpecialArgs`)，`home/Reiky-REI/default.nix`
   按分组自我屏蔽（如 `kind=wsl` 时跳过 apps/music 组）
+
+### 用户身份与 host 绑定
+
+`users.nix` 使用稳定 ID 注册登录名、home 路径和可复用 Home Manager profile；每个 host 通过 `machines.nix.users` 显式绑定一个或多个身份喵~ 当前 NixMEOW 与 WSL 都绑定 `reiky`，原 `home/Reiky-REI/` 目录继续使用；`config.nix` 暂时保留为兼容视图喵~ `primaryUser` 仅供仍采用单一默认用户的系统模块兼容使用，新代码应使用 host 的 user 列表或具体 user 身份喵~
 
 ### 添加新机器（**不需要动 flake.nix**）
 
@@ -144,7 +154,7 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 nixos-generate-config --root /mnt
 # 得到 /mnt/etc/nixos/hardware-configuration.nix
 
-# 2. 在 machines.nix 注册 (hostname + profile + kind + features)
+# 2. 在 machines.nix 注册 (hostname + profile + kind + users + features)
 
 # 3. 创建 hosts/<hostname>/default.nix (imports ../../modules + 本机专属配置)
 #    ⚠ 目录名必须与 machines.nix 的 key 一致
@@ -174,15 +184,15 @@ touch modules/<category>/<module-name>/default.nix
 
 ## 8. 如何新增一个 home module
 
-> `{username}` 即 `config.nix` 中定义的 `username` 值，当前为 `Reiky-REI`。
+> `{profile}` 是 `users.nix` 的 `homeProfile` 字段，当前为 `Reiky-REI`，不要求和登录名相同。
 
 ```bash
 # 1. 创建模块目录
-mkdir -p home/{username}/<module-name>
-touch home/{username}/<module-name>/default.nix
+mkdir -p home/{profile}/<module-name>
+touch home/{profile}/<module-name>/default.nix
 
 # 2. 在 default.nix 中编写 home-manager 选项
-# 3. 在 home/{username}/default.nix 的 imports 中添加 ./<module-name>
+# 3. 在 home/{profile}/default.nix 的 imports 中添加 ./<module-name>
 ```
 
 ## 9. 软件归类判断规则

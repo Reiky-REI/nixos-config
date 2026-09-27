@@ -76,11 +76,13 @@
   } @ inputs: let
     system = "x86_64-linux";
 
-    user = import ./config.nix;
+    users = import ./users.nix;
+    machines = import ./machines.nix;
+    primaryUser = users.${machines.NixMEOW.primaryUser};
     opencodeConfig = import ./lib/opencode-config.nix {flakeRoot = self;};
     claudeConfig = import ./lib/claude-config.nix {
       flakeRoot = self;
-      username = user.username;
+      username = primaryUser.username;
     };
 
     # 机器由 machines.nix 注册表生成, 见 lib/mkHost.nix:
@@ -91,8 +93,16 @@
 
     formatter.${system} = nixpkgs.legacyPackages.${system}.alejandra;
 
-    checks.${system}.nixos = self.nixosConfigurations.NixMEOW.config.system.build.toplevel;
+    checks.${system} =
+      nixpkgs.lib.mapAttrs' (
+        hostName: host:
+          nixpkgs.lib.nameValuePair "nixos-${hostName}" host.config.system.build.toplevel
+      )
+      self.nixosConfigurations
+      // {
+        nixos = self.nixosConfigurations.NixMEOW.config.system.build.toplevel;
+      };
 
-    nixosConfigurations = builtins.mapAttrs mkHost (import ./machines.nix);
+    nixosConfigurations = builtins.mapAttrs mkHost machines;
   };
 }

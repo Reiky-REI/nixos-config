@@ -17,12 +17,14 @@
 - home-manager options (`home.packages`, `home.file`, `programs.waybar` 等) 放在 home 层
 - `environment.sessionVariables` 按语义拆分到对应模块
 
-## 用户标识集中管理
-- 用户名及相关标识统一在仓库根目录 `config.nix` 中定义
-- NixOS 模块通过 `specialArgs` 接收 `username` 和 `fullName` 参数
-- home-manager 模块通过 `extraSpecialArgs` 接收
-- 新增/删改用户时只需修改 `config.nix`，所有模块自动引用新值
-- 详见 `architecture.md` 中的变量传递路径
+## Host 与用户身份注册
+- host 在 `machines.nix` 注册 feature 和 user ID 绑定；用户身份在 `users.nix` 按稳定 ID 注册
+- `users.nix` 显式声明 login、homeDirectory、homeProfile；home profile 不从登录名推导
+- 一个用户可绑定多个 host，一个 host 可绑定多个用户；host-local 的 UID/组等差异保留在 host 配置
+- `primaryUser` 仅用于尚未迁移的 legacy system modules；新增模块应使用具体用户 ID 或 user registry
+- feature ID 集中在 `lib/features.nix`，禁止静默接受拼错的标签
+- `config.nix` 是旧脚本兼容视图，不作为新配置入口
+- 详见 `architecture.md` 的信息流向
 
 ## 环境变量归类
 - `NIXOS_OZONE_WL` → desktop
@@ -87,4 +89,3 @@ experience:
 - **nixpkgs 没有的包** → 一律上传到个人私源 [`Reiky-nixpkgs`](https://github.com/Reiky-REI/Reiky-nixpkgs)（新增 `pkgs/<name>/default.nix` + 挂 overlay），主仓以 `nixpkgs.overlays = [ Reiky-nixpkgs.overlays.default ]` 消费
 - **禁止**：把包塞进主仓 `pkgs/`、或用 `npm install`/curl 安装器等非声明式方式长期驻留（临时验证除外，验证完必须回收到私源）
 - 私源新增包要在其 README 的「收录的包」表格登记一行（包名/说明/为何本地打包）
-

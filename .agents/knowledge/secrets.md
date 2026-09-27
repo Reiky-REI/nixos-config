@@ -92,17 +92,17 @@ agenix -r -i ~/.ssh/id_ed25519
 ## 系统集成说明
 
 ### flake.nix 中的配置
-用户名来自 `config.nix` 的 `username` 变量（通过 `specialArgs` 传递）：
+用户身份集中登记在 `users.nix`，host 通过 `machines.nix.users` 绑定；当前兼容的 system-level secrets 仍使用 host 的 `primaryUser`：
 ```nix
-# config.nix 中定义
-{ username = "Reiky-REI"; ... }
+# users.nix 中定义
+reiky = { username = "Reiky-REI"; ... };
 
-# flake.nix 中通过 user.username 引用
+# lib/mkHost.nix 中由 users.nix 与 machines.nix 解析
 age.secrets.ai_api_key_REIKY_REI = {
   file = ./secrets/ai_api_key_REIKY_REI.age;
-  owner = user.username;           # 从 config.nix 读取
+  owner = primaryUser.username;
 };
-age.identityPaths = [ "/home/${user.username}/.ssh/id_ed25519" ];
+age.identityPaths = [ "${primaryUser.homeDirectory}/.ssh/id_ed25519" ];
 ```
 
 ### zsh 中的自动加载

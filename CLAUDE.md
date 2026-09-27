@@ -36,7 +36,7 @@ just generate-all       # 全部生成
 
 - 数据源：`lib/claude-config.nix`（定义权限、路径等）
 - 生成脚本：`.agents/config/generate-claude.sh`
-- 用户名等标识读取自 `config.nix`，修改后重新 `just generate-claude` 即可同步
+- 用户身份读取自 `users.nix`；`config.nix` 仅作为旧脚本兼容视图
 
 ## 工作流
 

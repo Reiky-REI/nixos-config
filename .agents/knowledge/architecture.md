@@ -2,10 +2,10 @@
 
 ## 分层结构
 ```
-config.nix (用户标识定义)
-  → flake.nix (import 并通过 specialArgs 传递 username/fullName)
-    → hosts/{hostname}/default.nix → modules/{common,hardware,desktop,...}
-                                   → home/{username}/
+machines.nix (host → features + user IDs)
+  ├→ lib/mkHost.nix → hosts/{hostname}/default.nix + modules/{common,hardware,desktop,...}
+  └→ users.nix (stable user ID → login/home/profile)
+       └→ Home Manager: home/{profile}/
 ```
 
 ## 各层职责
@@ -17,12 +17,14 @@ config.nix (用户标识定义)
 - **modules/development/** — 系统级开发工具链和平台支持
 - **home/{username}/** — 用户态配置
 
-## 用户配置中心
-- `config.nix` — 仓库根目录，定义 `username`、`fullName`、`githubHandle`
-- 所有用户标识符统一在此定义，其他地方通过 `specialArgs` 引用
-- 变量传递路径: `config.nix → flake.nix specialArgs/extraSpecialArgs → NixOS/home-manager 模块`
-- 新增用户: 改 `config.nix` 中的定义，`secrets/secrets.nix` 添加公钥，创建对应 `.age` 文件
-- **已知耦合**：`home/{username}/` 目录名与 `config.nix` 的 `username` 值需要保持一致。修改用户名时需要同时重命名目录和改 `config.nix`。当前未自动化，属于半完成抽象。
+## Host 与 User 两个独立维度
+- `machines.nix` 注册 host，声明 `features`、`users` 和兼容用的 `primaryUser`
+- `users.nix` 按稳定 user ID 注册 `username`、`fullName`、`homeDirectory`、`homeProfile` 等身份字段
+- 同一 user ID 可以绑定多个 host；一个 host 可以绑定多个 user ID
+- `home/{profile}/` 是可复用 Home Manager 配置集，由 `users.nix.homeProfile` 显式选择，不再从登录名推导
+- `lib/mkHost.nix` 为每个绑定用户生成 NixOS 用户与 Home Manager 用户；`primaryUser` 目前仅供尚未迁移的单用户 system modules 兼容
+- `config.nix` 保留为旧脚本兼容视图，新配置应直接使用 `users.nix`
+- 未知 user ID、重复绑定、重复登录名/home 路径及缺失 Home profile 会在求值时报错；feature ID 由 `lib/features.nix` 类型校验
 
 ## 分类决策规则
 - daemon / 后台长期运行 → **services**

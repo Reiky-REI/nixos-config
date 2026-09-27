@@ -9,8 +9,10 @@
 #   features — 特性标签列表。
 #              每个模块自己检查 (config.meow.enabled ? "<tag>") 决定是否生效,
 #              宿主不再挑选模块 (见 lib/mkHost.nix 与 modules/common/options.nix)。
-#              标签打错不会 eval 报错(只是对应模块不启用), 改标签请对照下方
-#              "可用标签"清单 —— 即各模块 mkIf 里出现过的字符串。
+#              feature ID 由 modules/common/options.nix 对照 lib/features.nix 校验,
+#              标签拼错会直接 eval 失败。
+#   users    — 此 host 上部署哪些 users.nix 身份 ID。
+#   primaryUser — legacy system modules 使用的默认用户, 必须包含在 users 中。
 #   note     — 人类可读备注, 不参与任何逻辑。
 #
 # 使用方式：
@@ -26,6 +28,8 @@
   "NixMEOW" = {
     profile = "high";
     kind = "laptop";
+    users = ["reiky"];
+    primaryUser = "reiky";
     features = [
       # --- hardware ---
       "bluetooth"
@@ -69,6 +73,8 @@
   "NixMEOW-WSL" = {
     profile = "medium";
     kind = "wsl";
+    users = ["reiky"];
+    primaryUser = "reiky";
     features = [
       # nested niri (无 ly/无 xserver/无背光; desktop 基础 xwayland 无条件启用)
       "compositor-niri"
