@@ -16,22 +16,30 @@
 ## 2. 构建
 
 ```bash
-nix build .#packages.x86_64-linux.NixMEOW-CTR-docker
-ls -lh result/tarball/
+nix build .#packages.x86_64-linux.NixMEOW-CTR-docker \
+  -o ~/.local/share/nixmeow-ctr-docker
+ls -lh ~/.local/share/nixmeow-ctr-docker/tarball/
 ```
 
-产物是 docker 可直接 `import` 的 rootfs tarball。
+产物是 docker 可直接 `import` 的 rootfs tarball喵~
+
+> 用 `-o <path>` 建一个 gcroot: 否则 `--no-link` 构建的 tarball 没有被任何 root 引用,
+> 下一次 `nix-collect-garbage` 就会把它删掉 (3.3 GB 要重编)喵~
 
 ## 3. 导入与运行
 
+docker 与 podman 都可以 (本机 podman 提供 docker 兼容命令):
+
 ```bash
-docker import result/tarball/nixos-system-*.tar.xz nixmeow-ctr
+# 导入 (docker / podman 二选一)
+docker import ~/.local/share/nixmeow-ctr-docker/tarball/nixos-system-*.tar.xz nixmeow-ctr
+podman import ~/.local/share/nixmeow-ctr-docker/tarball/nixos-system-*.tar.xz localhost/nixmeow-ctr:latest
 
-# systemd 需要容器特权: 用 --privileged (或至少 cgroup + tmpfs 相关配置)
-docker run --privileged -it --name nixmeow nixmeow-ctr /init
+# systemd 需要容器特权: 用 --privileged
+podman run --privileged -d --name nixmeow localhost/nixmeow-ctr:latest /init
 
-# 进入容器
-docker exec -it nixmeow /run/current-system/sw/bin/bash
+# 等 systemd 起好后进入容器
+podman exec -it nixmeow /run/current-system/sw/bin/bash
 ```
 
 > 该镜像以 systemd 为 PID 1, 因此不能按普通单进程容器以 `docker run image <cmd>`

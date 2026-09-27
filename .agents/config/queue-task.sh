@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+# queue-task.sh — 把长任务放进 agent-resume 断电续命队列
+#
+# 为什么需要它: 裸跑后台 shell 会随 AI 会话/服务重启一起被杀 (shell cancelled),
+# 长任务 (rebuild / 大镜像导入 / 批量改造) 必须走队列才算"不允许中断"喵~
+#
+# 用法:
+#   queue-task.sh --id <唯一id> --desc <一句话> --exec '<shell 命令>' [--wake] [--max-retries N] [--notify 0|1]
+#
+# 参数:
+#   --wake  任务结束后, 若当前没有交互式 opencode 会话, 就调用 wake-agent.sh
+#           在调用者 Wayland 会话里拉起 `opencode --continue` (真正"激活 AI")
+#   --notify 1 时 (默认) 由 runner 发消息板通报
+#
+# 说明: task 文件格式由 resume-runner.sh 消费 (key=value, payload=base64 单行)。
+set -euo pipefail
+
+BASE="${AGENT_RESUME_DIR:-$HOME/.local/state/agent-resume}"
+WAKE_AGENT="/etc/nixos/.agents/config/wake-agent.sh"
+
+id=""
+desc=""
+exec_cmd=""
+wake=0
+max_retries=3
+notify=1
+
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --id) id="${2:-}"; shift 2 ;;
+    --desc) desc="${2:-}"; shift 2 ;;
+    --exec) exec_cmd="${2:-}"; shift 2 ;;
+    --wake) wake=1; shift ;;
+    --max-retries) max_retries="${2:-3}"; shift 2 ;;
+    --notify) notify="${2:-1}"; shift 2 ;;
+    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    *) echo "queue-task.sh: 未知参数 '$1'" >&2; exit 2 ;;
+  esac
+done
+
+[ -n "$id" ] || { echo "queue-task.sh: 缺少 --id" >&2; exit 2; }
+[ -n "$exec_cmd" ] || { echo "queue-task.sh: 缺少 --exec" >&2; exit 2; }
+
+payload="$exec_cmd"
+if [ "$wake" = "1" ]; then
+  # 记录真实退出码 -> 触发唤醒 -> 再把退出码传回去
+  payload="{ $exec_cmd; }; rc=\$?; MODE=agent-resume RC=\$rc '$WAKE_AGENT' agent-resume \$rc || true; exit \$rc"
+fi
+
+mkdir -p "$BASE/queue" "$BASE/running" "$BASE/done" "$BASE/failed" "$BASE/log"
+
+task="$BASE/queue/$id.task"
+printf 'id=%s\ndesc=%s\nmax_retries=%s\nnotify_board=%s\npayload=%s\n' \
+  "$id" "$desc" "$max_retries" "$notify" \
+  "$(printf '%s' "$payload" | base64 -w0)" \
+  > "$task"
+
+echo "queued: $task"
+echo "  desc  : $desc"
+echo "  wake  : $wake"
+echo "  payload: $payload"
+
+# path unit 会在队列出现文件时秒触发; 这里不直接调用 runner, 避免和 systemd 抢锁
+exit 0

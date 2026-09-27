@@ -25,8 +25,10 @@ rt="/run/user/$inv_uid"
 
 # ---- 开关 (默认: switch 开启, build 关闭) ----
 # REBUILD_WAKE_AGENT=1 强制开 / =0 强制关; 标记文件也可开
+# agent-resume 队列完成任务后也用本脚本唤醒 (MODE=agent-resume), 默认开
 enabled=0
 [ "$MODE" = "switch" ] && enabled=1
+[ "$MODE" = "agent-resume" ] && enabled=1
 case "${REBUILD_WAKE_AGENT:-}" in
   1) enabled=1 ;;
   0) enabled=0 ;;

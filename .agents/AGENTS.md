@@ -67,12 +67,20 @@ D=~/.local/state/agent-resume
 printf 'id=<唯一id>\ndesc=<一句话说明>\nmax_retries=3\nnotify_board=1\npayload=%s\n' \
   "$(base64 -w0 <<<'<要执行的 shell 命令>')" > "$D/queue/<id>.task"
 ```
+或用仓库助手 (推荐, 自带格式与唤醒) 喵~
+```bash
+.agents/config/queue-task.sh --id <唯一id> --desc '<说明>' --exec '<shell 命令>' [--wake]
+```
+- `--wake`: 任务结束后若没有交互式 opencode 会话, 调 `wake-agent.sh` 在调用者会话里
+  拉起 `opencode --continue`, 即"干完活把 AI 叫回来"喵~
+
 行为: 成功 → 移入 done/ 并自动发消息板通报；失败 → 退避 20s×n 重试至 max_retries 后移入 failed/ 并发失败通报喵~ 日志在 `$D/log/`, 最新结果 `$D/state.json`喵~ 
 
 ### 使用纪律喵
-- 预计超过 5 分钟或不允许中断的任务（rebuild/switch、批量改造、跨 AI 派活）一律走队列, 不裸跑 systemd-run喵~ 
-- 会话临终前把未完成步骤写成 task 入队 —— 这是唯一的免人工干预续命通道喵~ 
-- 需要拉起其他 AI 时也走队列（payload 里执行对应启动命令）喵~ 
+- 预计超过 5 分钟或不允许中断的任务（rebuild/switch、批量改造、大镜像导入、跨 AI 派活）一律走队列, 不裸跑后台 shell喵~
+  (裸跑的后台 shell 会随 AI 会话/服务重启一起被杀, 表现为 `shell cancelled` 且任务半途而废)喵~
+- 会话临终前把未完成步骤写成 task 入队 —— 这是唯一的免人工干预续命通道喵~
+- 需要拉起其他 AI 时也走队列（payload 里执行对应启动命令, 或用 `queue-task.sh --wake`）喵~
 
 ## 三级工作流
 
