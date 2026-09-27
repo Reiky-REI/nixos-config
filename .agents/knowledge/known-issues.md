@@ -555,6 +555,13 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 - runner 的 task log 只收 systemd-run 客户端输出, unit stdout 进 journal 收不到; payload 里 `| tail` 把退出码吃成 0 → 构建失败也报 OK 喵~
 - 规避: 关键任务 payload 内部文件重定向到固定路径 + 显式 `echo EXIT=$?`; runner 本体待修喵~
 
+#### 复发 (2026-09-27, 已加固): `systemctl stop` 也会让 `systemd-run --wait` 返回 0
+- 现场: 手动 `systemctl --user stop aresume-<task>.service` 中断一个卡住的 run, runner 却把该任务
+  标记 OK、移入 `done/` 并发出"成功"板报; 实际镜像根本没导入喵~
+- 根因: `systemd-run --wait` 对"被外部停止"也可能返回 0, runner 只看退出码喵~
+- 加固: 成功分支先检查 `running/<task>.task` 是否还在; 不在则记 `ANOMALY` 并拒绝报 OK喵~
+- 教训: 队列的成功判定不能只信退出码; 慢任务还要 `--runtime-max` 给足时间, 否则超时被杀同样收不到收尾语句喵~
+
 ### 坑 2: sudo 在 AI 沙箱/user 单元均不可用
 - `sudo: must be owned by uid 0 and have the setuid bit set` — AI 会话沙箱与 systemd user 单元都被剥 setuid 喵~
 - 正解: **系统级 systemd-run** (`systemd-run --unit=<name> --collect ...`) 以 root 跑, polkit 对活跃本地会话放行 (8-30 复盘先例一致) 喵~
@@ -839,3 +846,23 @@ Docker rootfs/tarball 仍由 nixpkgs 的 `nixos/modules/virtualisation/docker-im
 `codex` 会被局部绑定遮蔽, 列表元素变成配置集合, 报
 `A definition for option home.packages."[definition ...]" is not of type package`喵~
 **规避**: 注册表/配置变量改名 (如 `codexCfg`), 或别用 `with pkgs;`喵~
+
+## agent-resume 队列的三类"看起来没反应" (2026-09-27)
+
+### 坑 1: task 缺 `retries=` 行 → 无限重试, 永不失败通报
+runner 用 `sed -i "s/^retries=.*/retries=$ret/"` 累加计数; 若 task 文件里根本没有
+`retries=` 行, sed 静默不匹配, 计数每次从 0 变 1 → 永远到不了 `max_retries`,
+任务每 30 分钟重跑一次, 而 `failed/` 与失败通报永远不会出现喵~
+**规避**: 入队时写入 `retries=0` (`queue-task.sh` 已修), runner 也补了防御性 append喵~
+
+### 坑 2: 默认 `RuntimeMaxSec=1800s` 对慢任务太短, 且超时会吞掉收尾语句
+`systemd-run --wait --property=RuntimeMaxSec=...` 超时会**杀掉整个 transient 单元**;
+task payload 末尾的"发通报/唤醒"语句根本没机会执行, 现场只剩一行 `FAIL rc=1`喵~
+本机 3.3G 容器镜像 `podman import` + 启动冒烟就超过了 30 分钟喵~
+**规避**: 入队时用 `--runtime-max` 给足时间 (runner 已支持按 task 读取)喵~
+
+### 坑 3: 有交互式会话时 wake 只会通知, 真正"唤醒"需要会话已退出
+`wake-agent.sh` 检测到已有交互式 opencode 时不会重复拉起 TUI, 只弹通知;
+现在额外写一条消息板, 保证下次会话一定看到结果喵~
+**规避**: 想让它真的开新会话, 得在无交互会话时结束任务, 或改成用 `--runtime-max` + `--wake`
+让任务在会话退出后才完成喵~

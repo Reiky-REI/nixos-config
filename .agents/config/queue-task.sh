@@ -24,6 +24,7 @@ exec_cmd=""
 wake=0
 max_retries=3
 notify=1
+runtime_max=3600
 
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -32,6 +33,7 @@ while [ $# -gt 0 ]; do
     --exec) exec_cmd="${2:-}"; shift 2 ;;
     --wake) wake=1; shift ;;
     --max-retries) max_retries="${2:-3}"; shift 2 ;;
+    --runtime-max) runtime_max="${2:-3600}"; shift 2 ;;
     --notify) notify="${2:-1}"; shift 2 ;;
     -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
     *) echo "queue-task.sh: 未知参数 '$1'" >&2; exit 2 ;;
@@ -50,14 +52,17 @@ fi
 mkdir -p "$BASE/queue" "$BASE/running" "$BASE/done" "$BASE/failed" "$BASE/log"
 
 task="$BASE/queue/$id.task"
-printf 'id=%s\ndesc=%s\nmax_retries=%s\nnotify_board=%s\npayload=%s\n' \
-  "$id" "$desc" "$max_retries" "$notify" \
+# 注意: 必须带 `retries=0` 这一行 —— runner 用 `sed s/^retries=.*/retries=N/` 累加,
+# 文件里若没有该行, sed 静默不匹配, 计数永远停在 1 -> 无限重试且永不进入失败通报喵~
+printf 'id=%s\ndesc=%s\nmax_retries=%s\nretries=0\nruntime_max=%s\nnotify_board=%s\npayload=%s\n' \
+  "$id" "$desc" "$max_retries" "$runtime_max" "$notify" \
   "$(printf '%s' "$payload" | base64 -w0)" \
   > "$task"
 
 echo "queued: $task"
 echo "  desc  : $desc"
 echo "  wake  : $wake"
+echo "  runtime_max: ${runtime_max}s (单次执行上限)"
 echo "  payload: $payload"
 
 # path unit 会在队列出现文件时秒触发; 这里不直接调用 runner, 避免和 systemd 抢锁

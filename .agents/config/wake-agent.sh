@@ -16,6 +16,7 @@ set -u
 
 MODE="${1:-build}"
 RC="${2:-0}"
+DIALOGUE="/etc/nixos/.agents/config/dialogue.sh"
 
 # ---- 定位调用者 (sudo 下的真实用户) ----
 inv_user="${SUDO_USER:-$(id -un)}"
@@ -48,6 +49,11 @@ if pgrep -x opencode -a 2>/dev/null | grep -qE '[0-9]+ opencode$'; then
     runuser -u "$inv_user" -- env XDG_RUNTIME_DIR="$rt" DBUS_SESSION_BUS_ADDRESS="unix:path=$rt/bus" \
       bash -c 'command -v notify-send >/dev/null && notify-send "$1" "$2"' _ \
       "NixOS ${MODE} 完成 (${status})" "已有 OpenCode 会话在跑, 未重复拉起" >/dev/null 2>&1 || true
+  fi
+  # 没有新会话可拉时, 至少在消息板留一条, 保证下次会话一定能看到结果喵~
+  if [ -x "$DIALOGUE" ]; then
+    printf '唤醒钩子: MODE=%s 已结束 (%s)喵 因已有交互式 OpenCode 会话, 未重复拉起; 结果见日志/板报喵~ \n' \
+      "$MODE" "$status" | "$DIALOGUE" post -f watchdog -t opencode -T "唤醒: ${MODE} 完成 (已有会话)" >/dev/null 2>&1 || true
   fi
   echo "wake-agent: 已有 opencode 交互会话, 跳过拉起"
   exit 0

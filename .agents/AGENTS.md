@@ -69,10 +69,19 @@ printf 'id=<唯一id>\ndesc=<一句话说明>\nmax_retries=3\nnotify_board=1\npa
 ```
 或用仓库助手 (推荐, 自带格式与唤醒) 喵~
 ```bash
-.agents/config/queue-task.sh --id <唯一id> --desc '<说明>' --exec '<shell 命令>' [--wake]
+.agents/config/queue-task.sh --id <唯一id> --desc '<说明>' --exec '<shell 命令>' \
+  [--wake] [--runtime-max 3600] [--max-retries 3]
 ```
 - `--wake`: 任务结束后若没有交互式 opencode 会话, 调 `wake-agent.sh` 在调用者会话里
-  拉起 `opencode --continue`, 即"干完活把 AI 叫回来"喵~
+  拉起 `opencode --continue`, 即"干完活把 AI 叫回来"; 若已有会话则只发通知 + 留板报喵~
+- `--runtime-max`: 单次执行上限秒数 (runner 的 `RuntimeMaxSec`), 大镜像导入这类慢任务要调大喵~
+
+⚠️ 两个已踩过的坑 (2026-09-27)喵~
+- task 文件**必须有 `retries=0` 行**: runner 用 `sed s/^retries=.*/retries=N/` 累加,
+  缺这行时 sed 静默不匹配, 计数永远是 1 → 无限重试且永不进入失败通报 (看起来"没反应")喵~
+- `runtime_max` 默认 3600s 对本机 3.3G 容器镜像导入仍然不够;
+  超时是 systemd 直接杀掉整个 transient 单元, **放在最后的唤醒语句不会执行**,
+  所以慢任务要显式给足时间喵~
 
 行为: 成功 → 移入 done/ 并自动发消息板通报；失败 → 退避 20s×n 重试至 max_retries 后移入 failed/ 并发失败通报喵~ 日志在 `$D/log/`, 最新结果 `$D/state.json`喵~ 
 
