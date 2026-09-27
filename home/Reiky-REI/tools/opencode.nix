@@ -1,9 +1,57 @@
 {pkgs, ...}: let
   # opencode v2 数据库清理脚本 (声明式部署, 见 opencode-gc.py)
   opencodeGc = pkgs.writeScript "opencode-gc" (builtins.readFile ./opencode-gc.py);
+
+  # Deferred restart runs outside Home Manager activation so it cannot deadlock switch.
+  opencodePluginDeferredRestart = pkgs.writeShellScript "opencode-plugin-deferred-restart" ''
+    set -eu
+    while ${pkgs.systemd}/bin/systemctl --system is-active --quiet nixos-rebuild-switch-to-configuration.service; do
+      ${pkgs.coreutils}/bin/sleep 1
+    done
+    ${pkgs.coreutils}/bin/sleep 2
+    if ! ${pkgs.procps}/bin/pgrep -f '[o]pencode serve --service' >/dev/null; then
+      exit 0
+    fi
+    exec ${pkgs.opencode-v2}/bin/opencode service restart
+  '';
+
+  # The path unit can trigger during HM activation; only enqueue the detached job here.
+  opencodePluginRestart = pkgs.writeShellScript "opencode-plugin-restart" ''
+    set -eu
+    if ! ${pkgs.procps}/bin/pgrep -f '[o]pencode serve --service' >/dev/null; then
+      exit 0
+    fi
+    exec ${pkgs.systemd}/bin/systemd-run --user \
+      --unit="opencode-plugin-restart-deferred-$$" \
+      --collect \
+      "${opencodePluginDeferredRestart}"
+  '';
 in {
-  # 全局 edit 前自动快照插件 (与仓库 .opencode/plugins 同源, 内容见该文件)
-  home.file.".config/opencode/plugins/edit-backup.js".source = ../../../.opencode/plugins/edit-backup.js;
+  # 全局 edit 前自动快照插件; 放在 .opencode/plugins 外, 避免项目级与全局重复加载。
+  home.file.".config/opencode/plugins/edit-backup.js".source = ./opencode-edit-backup.js;
+
+  # 插件源码或 HM 生成的全局插件软链变化时, 自动重启 OpenCode V2 服务清除 Bun 模块缓存。
+  # 目录监视用于捕获 HM 原子替换软链; 文件监视用于捕获源码原地修改。
+  systemd.user.services.opencode-plugin-restart = {
+    Unit.Description = "Restart OpenCode V2 after plugin source changes";
+    Service = {
+      Type = "oneshot";
+      ExecStartPre = "${pkgs.coreutils}/bin/sleep 1";
+      ExecStart = "${opencodePluginRestart}";
+    };
+  };
+
+  systemd.user.paths.opencode-plugin-restart = {
+    Unit.Description = "Watch OpenCode plugin source and deployed plugin path";
+    Path = {
+      PathChanged = [
+        "/etc/nixos/home/Reiky-REI/tools/opencode-edit-backup.js"
+        "/home/Reiky-REI/.config/opencode/plugins"
+      ];
+      Unit = "opencode-plugin-restart.service";
+    };
+    Install.WantedBy = ["default.target"];
+  };
 
   # opencode 数据库清理脚本 (替换历史遗留的手工真实文件, 故 force)
   home.file.".local/bin/opencode-gc" = {

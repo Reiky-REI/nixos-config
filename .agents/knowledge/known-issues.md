@@ -720,6 +720,14 @@ v2 的 `opencode serve` 启动打印随机 `server password`，无鉴权请求�
 - **排障神器**: `opencode debug config` 打印归一化后的**真实生效配置**, 判断字段是否被接受以它为准喵~
   (`opencode.ai/config.json` schema 本身仍是 V1 形态, 别被误导)喵~
 
+### 追加坑: V2 服务缓存旧插件模块 (2026-09-27)
+- 现象: 源码和全局软链已是 V2, 长驻服务仍反复报 `Missing key at ["default"]`; `opencode plugin list` 可能把该实例显示成无 ID 喵~
+- 根因: V2 服务/Bun 按稳定插件模块路径缓存导出; 文件 watcher 再加载同一路径时仍可能读到旧模块。手动 `opencode service restart` 后, 新服务能正确读取当前源码喵~
+- 规避: Home Manager 声明 `opencode-plugin-restart.path` + oneshot service, 监视插件源码与全局插件目录变化; service 只入队独立的 user transient unit, 后者等 `nixos-rebuild-switch-to-configuration.service` 完成再重启 V2, 避免 HM 激活与 switch 互等或杀掉 rebuild shell 喵~
+- 避免重复注册: 插件源码放在 `.opencode/plugins/` 外, 仅由全局 Home Manager 插件目录加载, 否则 `/etc/nixos` 项目级与全局会各加载一份喵~
+- `patch` 工具的事件输入是 `patchText`, 文件路径在 `*** Update File:` / `*** Delete File:` 指令中; 不能只查 `filePath/path/file`, 否则 patch 修改不会产生备份喵~
+- 日志里的旧 `failed to load plugin` 行会保留; 以新服务启动时间后的日志和 `opencode plugin list` 为准喵~
+
 ## NAS 挂载: 写死 IP 必崩 + 事故元凶代码残留 (2026-09-26, 已修复)
 
 ### 问题
