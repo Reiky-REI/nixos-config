@@ -13,6 +13,7 @@ in {
       ./search.nix
       ./viewers.nix
       ./monitors.nix
+      ./agent-resume.nix
       ./dsh.nix
     ]
     ++ lib.optionals (hasAgentTools && system == "x86_64-linux") [./opencode.nix];

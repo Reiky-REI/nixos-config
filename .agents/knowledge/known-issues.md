@@ -862,7 +862,13 @@ task payload 末尾的"发通报/唤醒"语句根本没机会执行, 现场只�
 **规避**: 入队时用 `--runtime-max` 给足时间 (runner 已支持按 task 读取)喵~
 
 ### 坑 3: 有交互式会话时 wake 只会通知, 真正"唤醒"需要会话已退出
-`wake-agent.sh` 检测到已有交互式 opencode 时不会重复拉起 TUI, 只弹通知;
-现在额外写一条消息板, 保证下次会话一定看到结果喵~
-**规避**: 想让它真的开新会话, 得在无交互会话时结束任务, 或改成用 `--runtime-max` + `--wake`
-让任务在会话退出后才完成喵~
+`wake-agent.sh` 检测到已有交互式 opencode 时不会重复拉起 TUI, 只弹通知喵~
+**规避**: 队列路径 (`queue-task.sh --wake`) 现在会传 `WAKE_FORCE=1` 强制开新会话;
+手动调用时也可以 `WAKE_FORCE=1 MODE=agent-resume <rc> wake-agent.sh agent-resume <rc>`喵~
+若不想重复开窗, 就用 `REBUILD_WAKE_AGENT=0` 关掉喵~
+
+### 坑 4: resume 基础设施曾不在仓库里 (2026-09-27, 已声明式化)
+runner 与 `agent-resume.{service,path,timer}` 原本是 `~/.local/state` 与 `~/.config/systemd/user`
+下的手写真实文件, 改了半天其实**不可复现**, 同一类坑会反复踩喵~
+**规避**: 已迁到 `home/Reiky-REI/tools/agent-resume.nix` + `.agents/config/agent-resume-runner.sh`;
+迁移时旧单元真实文件按铁律留了删除清单 (`~/.local/state/delete-manifests/`), 否则 HM 部署同路径会 clobber 报错喵~

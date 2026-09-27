@@ -12,7 +12,8 @@
 #           在调用者 Wayland 会话里拉起 `opencode --continue` (真正"激活 AI")
 #   --notify 1 时 (默认) 由 runner 发消息板通报
 #
-# 说明: task 文件格式由 resume-runner.sh 消费 (key=value, payload=base64 单行)。
+# 说明: task 文件格式由 .agents/config/agent-resume-runner.sh 消费 (key=value, payload=base64 单行),
+# 该 runner 由 home/Reiky-REI/tools/agent-resume.nix 声明式部署为 agent-resume.service。
 set -euo pipefail
 
 BASE="${AGENT_RESUME_DIR:-$HOME/.local/state/agent-resume}"
@@ -45,8 +46,8 @@ done
 
 payload="$exec_cmd"
 if [ "$wake" = "1" ]; then
-  # 记录真实退出码 -> 触发唤醒 -> 再把退出码传回去
-  payload="{ $exec_cmd; }; rc=\$?; MODE=agent-resume RC=\$rc '$WAKE_AGENT' agent-resume \$rc || true; exit \$rc"
+  # 记录真实退出码 -> 强制唤醒 (WAKE_FORCE=1, 即使已有会话也开新 TUI) -> 再把退出码传回去
+  payload="{ $exec_cmd; }; rc=\$?; WAKE_FORCE=1 MODE=agent-resume RC=\$rc '$WAKE_AGENT' agent-resume \$rc || true; exit \$rc"
 fi
 
 mkdir -p "$BASE/queue" "$BASE/running" "$BASE/done" "$BASE/failed" "$BASE/log"

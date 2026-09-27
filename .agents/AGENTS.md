@@ -72,8 +72,8 @@ printf 'id=<唯一id>\ndesc=<一句话说明>\nmax_retries=3\nnotify_board=1\npa
 .agents/config/queue-task.sh --id <唯一id> --desc '<说明>' --exec '<shell 命令>' \
   [--wake] [--runtime-max 3600] [--max-retries 3]
 ```
-- `--wake`: 任务结束后若没有交互式 opencode 会话, 调 `wake-agent.sh` 在调用者会话里
-  拉起 `opencode --continue`, 即"干完活把 AI 叫回来"; 若已有会话则只发通知 + 留板报喵~
+- `--wake`: 任务结束后**强制**调 `wake-agent.sh` 在调用者会话里拉起 `opencode --continue`
+  (队列路径用 `WAKE_FORCE=1`, 即使已有交互式会话也开新 TUI, 真正做到"干完活把 AI 叫回来")喵~
 - `--runtime-max`: 单次执行上限秒数 (runner 的 `RuntimeMaxSec`), 大镜像导入这类慢任务要调大喵~
 
 ⚠️ 两个已踩过的坑 (2026-09-27)喵~
@@ -90,6 +90,14 @@ printf 'id=<唯一id>\ndesc=<一句话说明>\nmax_retries=3\nnotify_board=1\npa
   (裸跑的后台 shell 会随 AI 会话/服务重启一起被杀, 表现为 `shell cancelled` 且任务半途而废)喵~
 - 会话临终前把未完成步骤写成 task 入队 —— 这是唯一的免人工干预续命通道喵~
 - 需要拉起其他 AI 时也走队列（payload 里执行对应启动命令, 或用 `queue-task.sh --wake`）喵~
+
+### 声明式部署喵~
+runner 与三个单元已纳入 Home Manager, 见 `home/Reiky-REI/tools/agent-resume.nix` 喵~
+- 唯一真相: `.agents/config/agent-resume-runner.sh` (HM 用 `writeShellScript` 包装)
+- 单元: `agent-resume.path` (queue 出现 task 秒触发) + `agent-resume.timer` (每 2 分钟兜底) +
+  `agent-resume.service` (oneshot, 消费队列)
+- 依赖 `loginctl enable-linger`: 系统级设置, 见 `hosts/<host>/`; WSL 由 `wsl.defaultUser` 处理喵~
+- 改 runner/单元后走常规 `nixos-rebuild build` + switch, 不再有「改了本机却没进仓库」的漂移喵~
 
 ## 三级工作流
 

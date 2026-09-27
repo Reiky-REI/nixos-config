@@ -44,7 +44,8 @@ wl="${wl:+$(basename "$wl")}"
 status="成功"; [ "$RC" != "0" ] && status="退出码 $RC"
 
 # ---- 已有交互式 opencode TUI 在跑, 就不重复拉起 (只通知) ----
-if pgrep -x opencode -a 2>/dev/null | grep -qE '[0-9]+ opencode$'; then
+# WAKE_FORCE=1 时跳过该短路, 即使已有会话也强制开新会话 (队列任务 --wake 使用)
+if [ "${WAKE_FORCE:-0}" != "1" ] && pgrep -x opencode -a 2>/dev/null | grep -qE '[0-9]+ opencode$'; then
   if [ -S "$rt/bus" ]; then
     runuser -u "$inv_user" -- env XDG_RUNTIME_DIR="$rt" DBUS_SESSION_BUS_ADDRESS="unix:path=$rt/bus" \
       bash -c 'command -v notify-send >/dev/null && notify-send "$1" "$2"' _ \
