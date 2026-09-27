@@ -37,7 +37,7 @@ if prompt_raw:
     cfg['agents']['plan']['system'] = json.loads(prompt_raw)
 
 with open(file, 'w') as f:
-    json.dump(cfg, f, indent=2)
+    json.dump(cfg, f, indent=2, ensure_ascii=False)
     f.write('\n')
 " "$file" "$2" "$3" "$4" "$5"
     echo "  patched $file"

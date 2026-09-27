@@ -80,10 +80,20 @@
     machines = import ./machines.nix;
     systems = nixpkgs.lib.unique (map (machine: machine.system or defaultSystem) (builtins.attrValues machines));
     primaryUser = users.${machines.NixMEOW.primaryUser};
-    opencodeConfig = import ./lib/opencode-config.nix {flakeRoot = self;};
+    # agent 注册表: 一次校验, 供 flake 输出与各 host 的客户端适配层消费
+    agentsConfig = import ./lib/agents.nix {
+      lib = nixpkgs.lib;
+      agents = import ./agents.nix;
+      inherit users machines;
+    };
+    opencodeConfig = import ./lib/opencode-config.nix {
+      flakeRoot = self;
+      inherit agentsConfig;
+    };
     claudeConfig = import ./lib/claude-config.nix {
       flakeRoot = self;
       username = primaryUser.username;
+      inherit agentsConfig;
     };
 
     # 机器由 machines.nix 注册表生成, 见 lib/mkHost.nix:
@@ -96,7 +106,7 @@
       hostName
       machine;
   in {
-    inherit opencodeConfig claudeConfig;
+    inherit opencodeConfig claudeConfig agentsConfig;
 
     formatter.${defaultSystem} = nixpkgs.legacyPackages.${defaultSystem}.alejandra;
 

@@ -43,6 +43,18 @@ in
       userIds;
     primaryUser = selectedUsers.${primaryUserId} or (throw "Host '${name}' has no valid primaryUser");
 
+    # agent 注册表 (含校验); 本 host × user 的实际绑定与 codex 渲染字段
+    agentsConfig = import ./agents.nix {
+      inherit lib;
+      agents = import ../agents.nix;
+      users = userRegistry;
+      machines = import ../machines.nix;
+    };
+    agentConfig = {
+      inherit (agentsConfig) codex opencode;
+      bindings = agentsConfig.bindings.${name} or {};
+    };
+
     userAccounts = builtins.listToAttrs (map (
         id:
           lib.nameValuePair selectedUsers.${id}.username {
@@ -106,7 +118,7 @@ in
 
         specialArgs = {
           inherit inputs pkgs-unstable;
-          inherit userRegistry selectedUsers primaryUser;
+          inherit userRegistry selectedUsers primaryUser agentConfig;
           username = primaryUser.username;
           fullName = primaryUser.fullName;
         };
@@ -190,7 +202,7 @@ in
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
               inherit inputs pkgs-unstable;
-              inherit system;
+              inherit system agentConfig;
               inherit (config.hardware) profile isLowPerf isHighPerf isMediumPerf;
               desktopEffects = machine.desktopEffects or "minimal";
               # 机器标签同样喂给 home-manager (home/ 树按 kind/features 自我屏蔽)

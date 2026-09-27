@@ -25,6 +25,7 @@ machines.nix (host → roles/features/users)
 ```
 /etc/nixos/
 ├── users.nix                       # 用户身份注册表 (stable ID → login/home/profile)
+├── agents.nix                      # AI agent 注册表 (client/model/system/hosts/users)
 ├── config.nix                      # users.nix 的兼容视图，旧脚本过渡用
 ├── machines.nix                    # host 注册表 (hostname → profile/kind/roles/desktopEffects/features/users)
 ├── flake.nix                       # 入口：inputs + mkHost 装配 (由注册表驱动)
@@ -68,6 +69,7 @@ machines.nix (host → roles/features/users)
 │   ├── mkHost.nix                 # 由 machines.nix 注册表生成 nixosConfigurations
 │   ├── features.nix                # 已知 feature ID 清单，拼写错误在 eval 时失败
 │   ├── roles.nix                   # 已知 role ID 清单
+│   ├── agents.nix                  # agent 注册表解析/校验/按 host+user 求交
 │   ├── claude-config.nix          # Claude Code 配置生成
 │   └── opencode-config.nix        # OpenCode 配置生成
 ├── pkgs/
@@ -166,6 +168,16 @@ machines.nix (host → roles/features/users)
 ### 用户身份与 host 绑定
 
 `users.nix` 使用稳定 ID 注册登录名、home 路径和可复用 Home Manager profile；每个 host 通过 `machines.nix.users` 显式绑定一个或多个身份喵~ 当前 NixMEOW 与 WSL 都绑定 `reiky`，原 `home/Reiky-REI/` 目录继续使用；`config.nix` 暂时保留为兼容视图喵~ `primaryUser` 仅供仍采用单一默认用户的系统模块兼容使用，新代码应使用 host 的 user 列表或具体 user 身份喵~
+
+### AI agent 注册 (`agents.nix`)
+
+三个客户端（OpenCode / Claude Code / Codex）共用一份 agent 定义喵~
+
+- 作用域：`hosts` 默认全部 host；`users` 必须显式列出；`privileged = true` 还必须写非空 `hosts.allow`
+- 实际生效 = `(agent, user, host)` 交集，即 agent 的 `users` ∩ host 绑定的 `users`
+- 未知 client/user/host、空 `users`、privileged 缺 allowlist 都会在 eval 阶段失败
+- flake 输出 `agentsConfig` 提供解析结果；`#opencodeConfig` / `#claudeConfig` 与 Codex 的
+  `config.toml` 均由它派生，客户端专属样板仍在各自适配层
 
 ### 添加新机器（**不需要动 flake.nix**）
 

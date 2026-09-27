@@ -42,6 +42,14 @@ machines.nix (host → features + user IDs)
 - **系统层 (NixOS modules)**: daemon, kernel, hardware, 系统能力, 图形会话基础设施
 - **Home 层 (home-manager)**: 用户应用, shell, editor, WM config, 终端工具, GUI apps, 用户偏好
 
+## AI agent 维度
+- `agents.nix` 注册 AI agent（OpenCode / Claude / Codex），与 host、user 平级
+- `lib/agents.nix` 校验定义并把 agent 与 host/user 求交，输出 `agentsConfig`
+- 作用域规则: `hosts` 默认全部, `users` 必须显式, `privileged` 必须写 `hosts.allow`
+- 客户端专属样板保留在 `lib/opencode-config.nix` / `lib/claude-config.nix` 与 Codex 的 HM 模块；
+  共享定义只放模型、系统提示与绑定关系
+- 凭据属于 user/secret 层，不写进 agent 定义
+
 ---
 
 ## 信息流向（Agent 上下文投递）

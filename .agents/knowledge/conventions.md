@@ -26,6 +26,9 @@
 - `primaryUser` 仅用于尚未迁移的 legacy system modules；新增模块应使用具体用户 ID 或 user registry
 - home module 的 `imports` 与文件列表不得依赖 `config`；需要按用户计算的导入放 `lib/mkHost.nix`
 - 微码/固件属于设备事实，写在 `hosts/<host>/`
+- AI agent 在 `agents.nix` 注册；`lib/agents.nix` 负责校验与 `(agent,user,host)` 求交
+- agent 作用域: `hosts` 默认全部、`users` 必须显式、`privileged` 必须写非空 `hosts.allow`
+- 客户端样板与共享定义分离；agent 凭据走 user/secret 层，不写进 `agents.nix`
 - `config.nix` 是旧脚本兼容视图，不作为新配置入口
 - 详见 `architecture.md` 的信息流向
 

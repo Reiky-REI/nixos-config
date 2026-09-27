@@ -833,3 +833,9 @@ Docker rootfs/tarball 仍由 nixpkgs 的 `nixos/modules/virtualisation/docker-im
 `services.resolved`, 求值会失败:
 `Failed assertions: Using host resolv.conf is not supported with systemd-resolved`喵~
 **规避**: 按 `meow.kind == "container"` 关闭 `services.resolved`, 容器走宿主 DNS喵~
+
+### 附: `with pkgs;` 会遮蔽同名局部变量
+在 home 模块里写 `let codex = agentConfig.codex; in { home.packages = with pkgs; [codex]; }`,
+`codex` 会被局部绑定遮蔽, 列表元素变成配置集合, 报
+`A definition for option home.packages."[definition ...]" is not of type package`喵~
+**规避**: 注册表/配置变量改名 (如 `codexCfg`), 或别用 `with pkgs;`喵~

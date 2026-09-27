@@ -7,8 +7,12 @@
 {
   flakeRoot,
   username,
+  agentsConfig,
 }: let
   inherit (builtins) readFile;
+
+  # 该 host/user 可用的 claude agent 名字, 供 CLAUDE.md 记录 (样板仍在下方)
+  claudeAgents = builtins.filter (id: id != null) agentsConfig.claude.agents;
 in {
   # ===== settings.json 内容（项目级，提交到仓库）=====
   settings = {
@@ -82,6 +86,13 @@ in {
       - Git 工作流一致：feature branch → build 验证 → 提交 → 推送 → 复盘
       - **Claude 特有**：利用持久化记忆跨会话保持上下文
       - 经验教训共享：发现的新坑同时更新到 known-issues.md
+    '';
+
+    # 由 agents.nix 注册表派生的可用 agent 清单
+    agents = ''
+      ## 可用 agent (来自 agents.nix 注册表)
+
+      ${builtins.concatStringsSep ", " claudeAgents}
     '';
   };
 }

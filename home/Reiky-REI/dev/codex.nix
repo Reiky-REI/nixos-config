@@ -1,23 +1,30 @@
-{pkgs, ...}: {
-  home.packages = with pkgs; [
-    codex
-  ];
+{
+  pkgs,
+  lib,
+  agentConfig,
+  ...
+}: let
+  codexCfg = agentConfig.codex;
+in {
+  home.packages = [pkgs.codex];
 
-  # Codex 配置: DeepSeek 后端 + AGENTS.md 知识体系桥接
-  home.file.".config/codex/config.toml".text = ''
-    model_provider = "deepseek"
-    model = "deepseek-chat"
+  # Codex 配置由 agents.nix 注册表渲染 (模型/provider 不再写死在这里)
+  home.file.".config/codex/config.toml" = lib.mkIf (codexCfg != null) {
+    text = ''
+      model_provider = "deepseek"
+      model = "${codexCfg.model}"
 
-    [model_providers.deepseek]
-    name = "DeepSeek"
-    base_url = "https://api.deepseek.com/v1"
-    env_key = "DEEPSEEK_API_KEY_REIKY_REI"
-    wire_api = "chat"
+      [model_providers.deepseek]
+      name = "${codexCfg.providerName}"
+      base_url = "${codexCfg.baseUrl}"
+      env_key = "${codexCfg.envKey}"
+      wire_api = "chat"
 
-    # 额外识别 .agents/AGENTS.md 作为项目指令
-    project_doc_fallback_filenames = ["AGENTS.md", ".agents/AGENTS.md"]
-    project_doc_max_bytes = 65536
-  '';
+      # 额外识别 .agents/AGENTS.md 作为项目指令
+      project_doc_fallback_filenames = ["AGENTS.md", ".agents/AGENTS.md"]
+      project_doc_max_bytes = 65536
+    '';
+  };
 
   # 全局指令: 让 Codex 在任意仓库都遵循 NixMEOW 的工作纪律
   home.file.".codex/AGENTS.md".text = ''
@@ -38,7 +45,7 @@
     ## Git 工作流
     - 始终在 feature branch 上工作, 禁止直接在 main 修改
     - 开工前 git status + git branch 确认工作区干净
-    - 修改 Nix 配置后必须 nixos-rebuild build --flake /etc/nixos#NixMEOW 验证
+    - 修改 Nix 配置后必须 nixos-rebuild build 验证
     - 非平凡变更完成后写复盘到 .agents/knowledge/retros/
     - 提交用 bot 身份, 提交后自己合并回 main 并删分支
     - 不要主动执行 nixos-rebuild switch (NVIDIA PRIME 崩溃风险), 用 build 验证后提示用户手动处理

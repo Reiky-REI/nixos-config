@@ -27,6 +27,8 @@ Host、User、Agent 是三个独立维度，不是父子层级；三者之间通
   交互/图形/硬件能力按 role 与 feature 自我屏蔽，微码与固件放 host 本地喵~
 - 阶段 C：使用 NixOS 内建 Docker rootfs/tarball module 产出 systemd PID 1 容器镜像；不引入已弃用的 nixos-generators flake 喵~
 - 阶段 D：定义 agent registry，并用 OpenCode/Claude/Codex 客户端适配器输出配置；共享定义不包含用户凭据喵~
+- 阶段 D 作用域规则：`hosts` 默认全部 host、`users` 必须显式列出、`privileged` 必须写非空 `hosts.allow`；
+  实际生效范围是 `(agent, user, host)` 交集喵~
 
 ## 验证要求
 

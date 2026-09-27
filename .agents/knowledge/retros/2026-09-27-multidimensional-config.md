@@ -64,6 +64,25 @@ Host、User、Agent 是三套独立的实体，彼此以多对多关系组合；
 阶段 C 产出 Docker systemd rootfs 镜像 (走 nixpkgs 内建 image 模块, 不引入已弃用的 nixos-generators)喵~
 阶段 D 整理共享 agent registry 与客户端适配器喵~
 
+## 阶段 D：agent 注册表
+
+- 新增 `agents.nix` (共享定义) 与 `lib/agents.nix` (校验 + `(agent,user,host)` 求交)喵~
+- 作用域按用户裁定: `hosts` 默认全部 host、`users` 必须显式、`privileged` 必须写非空 `hosts.allow`喵~
+- flake 输出 `agentsConfig`; `opencodeConfig` / `claudeConfig` 改为从注册表派生模型、默认 agent 与系统提示喵~
+- Codex 的 `config.toml` 由 `agentConfig` 渲染, 不再把模型/provider 写死在 home 模块里喵~
+- 负向验证: 未知 user、privileged 缺 allowlist 均在 eval 阶段 `throw`喵~
+
+### 阶段 D 验证
+
+- `agentsConfig.opencode`: `defaultAgent = "plan"`, `model = "deepseek/deepseek-v4-flash"`喵~
+- `bindings` 覆盖三台 host × `reiky` 的交集结果喵~
+- NixMEOW 与 NixMEOW-WSL 构建通过 (含 Codex 渲染)喵~
+
+### 阶段 D 踩坑
+
+- `home.packages` 里用 `with pkgs;` 且又 `let codex = agentConfig.codex;` 会**遮蔽包名**,
+  导致 `[codex]` 变成配置集合而不是包; 注册表变量要改名 (如 `codexCfg`)喵~
+
 ## 阶段 C：Docker 容器 host
 
 - 新增 `kind = "container"`; `NixMEOW-CTR` 以 `roles = [ "server" ]` 注册, `features = []`喵~
