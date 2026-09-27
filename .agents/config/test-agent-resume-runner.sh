@@ -27,6 +27,26 @@ exec "$@"
 FAKE_SYSTEMD_RUN
 chmod +x "$TMP/bin/systemd-run"
 
+cat >"$TMP/bin/systemctl" <<'FAKE_SYSTEMCTL'
+#!/usr/bin/env bash
+[ "${1:-}" = "--user" ] && shift
+command=${1:-}
+shift || true
+unit="${@: -1}"
+case "$command" in
+  is-active)
+    [ -n "${FAKE_ACTIVE_UNIT:-}" ] && [ "$unit" = "$FAKE_ACTIVE_UNIT" ] && exit 0
+    exit 3
+    ;;
+  list-units)
+    if [ -n "${FAKE_ACTIVE_UNIT:-}" ] && [[ "$FAKE_ACTIVE_UNIT" == $unit ]]; then
+      printf '%s loaded active running fake\n' "$FAKE_ACTIVE_UNIT"
+    fi
+    ;;
+esac
+FAKE_SYSTEMCTL
+chmod +x "$TMP/bin/systemctl"
+
 run_case() {
   local id="$1" mode="$2" command="$3" base="$TMP/$1"
   mkdir -p "$base"
@@ -62,5 +82,48 @@ AGENT_RESUME_DIR="$TMP/wake" "$QUEUE" --id wake-payload --desc 'wake payload syn
 wake_payload=$(base64 -d < <(sed -n 's/^payload=//p' "$TMP/wake/queue/wake-payload.task"))
 grep -q 'WAKE_FORCE=1' <<<"$wake_payload"
 bash -n -c "$wake_payload"
+
+# A runner reload can leave a task in running/. Inactive, incomplete attempts retry;
+# attempts with a success sentinel are finalized; active transients are not duplicated.
+recovered="$TMP/recovered"
+mkdir -p "$recovered/running"
+printf 'id=recovered\ndesc=recovered interrupted task\nmax_retries=2\nretries=1\nnotify_board=0\npayload=%s\n' \
+  "$(printf '%s' 'printf recovered > "$TEST_MARKER"' | base64 -w0)" \
+  > "$recovered/running/recovered.task"
+AGENT_RESUME_DIR="$recovered" XDG_RUNTIME_DIR="$TMP/runtime" TEST_MARKER="$TMP/recovered.marker" \
+  FAKE_SYSTEMD_RUN_MODE=execute PATH="$TMP/bin:$PATH" "$RUNNER"
+test "$(cat "$TMP/recovered.marker")" = recovered
+test -f "$recovered/done/recovered.task"
+grep -q '^retries=2$' "$recovered/done/recovered.task"
+
+completed="$TMP/recovered-completed"
+mkdir -p "$completed/running"
+printf 'id=recovered-completed\ndesc=sentinel survived runner restart\nmax_retries=2\nretries=1\nnotify_board=0\n' \
+  > "$completed/running/recovered-completed.task"
+printf 'unit=aresume-recovered-completed-r1-old.service\nresult=%s/running/recovered-completed-r1.exit\nlog=%s/recovered.log\n' \
+  "$completed" "$completed" > "$completed/running/recovered-completed.attempt"
+printf '0\n' > "$completed/running/recovered-completed-r1.exit"
+AGENT_RESUME_DIR="$completed" XDG_RUNTIME_DIR="$TMP/runtime" PATH="$TMP/bin:$PATH" "$RUNNER"
+test -f "$completed/done/recovered-completed.task"
+grep -q 'recovered after runner restart' "$completed/recovered.log"
+
+active="$TMP/active"
+mkdir -p "$active/running"
+printf 'id=active\ndesc=transient still running\nmax_retries=2\nretries=1\nnotify_board=0\n' \
+  > "$active/running/active.task"
+printf 'unit=aresume-active-r1-old.service\nresult=%s/running/active-r1.exit\nlog=%s/active.log\n' \
+  "$active" "$active" > "$active/running/active.attempt"
+AGENT_RESUME_DIR="$active" XDG_RUNTIME_DIR="$TMP/runtime" FAKE_ACTIVE_UNIT=aresume-active-r1-old.service \
+  PATH="$TMP/bin:$PATH" "$RUNNER"
+test -f "$active/running/active.task"
+test ! -e "$active/queue/active.task"
+
+legacy="$TMP/legacy-running"
+mkdir -p "$legacy/running"
+printf 'id=legacy\ndesc=pre-sidecar interrupted task\nmax_retries=1\nretries=1\nnotify_board=0\n' \
+  > "$legacy/running/legacy.task"
+AGENT_RESUME_DIR="$legacy" XDG_RUNTIME_DIR="$TMP/runtime" PATH="$TMP/bin:$PATH" "$RUNNER"
+test -f "$legacy/failed/legacy.task"
+grep -q 'completion sentinel missing' "$legacy/log/legacy-recovery-"*.log
 
 echo "agent-resume runner regression checks passed"

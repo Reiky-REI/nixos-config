@@ -11,6 +11,7 @@ experience:
   - "systemd-run --wait 被 stop 后可能返回 0; task 文件仍在 running/ 也不能证明 payload 完成, 必须要有 payload 自己写入的完成证据。"
   - "队列命令默认启用严格错误处理, 避免末尾 echo 把中途失败覆盖成 0; --wake 在父 shell 捕获子 shell 退出码后仍可执行唤醒。"
   - "3.3GB 压缩的容器 tarball 展开约 16.4GB, 导入前必须核对展开尺寸和容器存储容量, 不能只看压缩文件大小。"
+  - "Home Manager activation 可中断 agent-resume.service 本身; 启动时必须回收 running/ 残留, 并区分仍 active 的 transient 与缺少完成 sentinel 的中断任务。"
 ---
 
 # agent-resume 假成功判定修复与容器导入复核
@@ -28,6 +29,10 @@ experience:
 - `queue-task.sh` 将任务命令包在 `set -Eeuo pipefail` 子 shell 中; `--wake` 在父 shell 获取子 shell 退出码后仍执行强制唤醒喵~
 - `agent-resume.service` 外层 timeout 改为 infinity; 每个 payload 的 `RuntimeMaxSec` 仍由 transient unit 独立限制, 多个任务串行时不会被统一的两小时上限截断喵~
 - 新增 runner 回归脚本, 覆盖正常完成、严格模式捕获失败、模拟 systemd-run 被 stop 却返回 0、以及 `--wake` payload 语法喵~
+- generation 234 部署时, HM activation 确实终止了正在执行 switch task 的旧 runner, task 留在 `running/` 且没有旧版 sentinel;
+  以 loader/current generation、服务健康和 live queue check 独立核验 switch 后, 留证并将任务状态更正为完成喵~
+- runner 现为每次尝试保存 transient unit/result/log sidecar, 重启扫描 `running/`: 已成功的 sentinel 收尾, active unit 等待,
+  不完整且 inactive 的任务按 retries 重新排队或失败喵~
 
 ## 容器导入容量
 
@@ -38,7 +43,7 @@ experience:
 
 ## 验证
 
-- `.agents/config/test-agent-resume-runner.sh` 通过三类 runner 状态回归与 wake payload 语法检查喵~
+- `.agents/config/test-agent-resume-runner.sh` 覆盖正常完成、失败码、stop 假成功、--wake 语法、残留完成收尾、active transient 防重复和中断重试喵~
 - `bash -n`、`git diff --check` 与 Alejandra 格式检查通过喵~
-- NixMEOW、NixMEOW-WSL、NixMEOW-CTR 三个 toplevel build 均通过; NixMEOW generation 将通过队列 switch 部署后,
-  再核对 live runner 与端到端队列结果喵~
+- NixMEOW、NixMEOW-WSL、NixMEOW-CTR 的前一版 toplevel build 均通过; generation 234 已部署 sentinel runner,
+  live queue task 已通过, 新增的 running recovery 将再 build 并部署验证喵~

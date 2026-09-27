@@ -83,7 +83,7 @@ printf 'id=<唯一id>\ndesc=<一句话说明>\nmax_retries=3\nnotify_board=1\npa
   超时是 systemd 直接杀掉整个 transient 单元, **放在最后的唤醒语句不会执行**,
   所以慢任务要显式给足时间喵~
 
-行为: 成功 → payload exit sentinel 确认为 0 后移入 done/ 并自动发消息板通报；失败或被中断 → 重试至 max_retries 后移入 failed/ 并发失败通报喵~ 日志在 `$D/log/`, 最新结果 `$D/state.json`喵~
+行为: 成功 → payload exit sentinel 确认为 0 后移入 done/ 并自动发消息板通报；失败或被中断 → 重试至 max_retries 后移入 failed/ 并发失败通报喵~ runner 启动会恢复遗留 `running/` 任务喵~ 日志在 `$D/log/`, 最新结果 `$D/state.json`喵~
 
 ### 使用纪律喵
 - 预计超过 5 分钟或不允许中断的任务（rebuild/switch、批量改造、大镜像导入、跨 AI 派活）一律走队列, 不裸跑后台 shell喵~

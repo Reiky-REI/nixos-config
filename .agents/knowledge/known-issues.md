@@ -884,3 +884,11 @@ runner 与 `agent-resume.{service,path,timer}` 原本是 `~/.local/state` 与 `~
 - Podman 官方文档确认 `podman import` 原生接受 XZ 压缩 tarball, 不需要先手动解压;
   参见 <https://docs.podman.io/en/latest/markdown/podman-import.1.html> 喵~
 - 重试前先核对 `xz -lv` 的 uncompressed size 与 `df` 可用容量; 确保留出解包和存储层的额外空间喵~
+
+### 坑 6: Home Manager 切换可中断正在消费队列的 runner
+- 现场: NixMEOW generation 234 已成功切换, 但被队列执行的 switch task 留在 `running/`;
+  HM activation 替换 `agent-resume.service` 时终止了旧 runner, 新 runner 只扫 `queue/` 因而没有收尾喵~
+- 修复: runner 启动时先扫描 `running/`; 有成功 sentinel 就归档完成, transient 仍 active 就保留等待,
+  transient 已结束但无 sentinel 则按重试策略重新入队或移入 `failed/` 喵~
+- 规避/验证: 新 runner 将 attempt unit、result sentinel、日志路径写入 sidecar;
+  回归脚本覆盖 runner reload 后恢复完成、重试中断任务、以及不重复启动仍 active 的 transient 喵~
