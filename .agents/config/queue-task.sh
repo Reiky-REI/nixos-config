@@ -8,8 +8,8 @@
 #   queue-task.sh --id <唯一id> --desc <一句话> --exec '<shell 命令>' [--wake] [--max-retries N] [--notify 0|1]
 #
 # 参数:
-#   --wake  任务结束后, 若当前没有交互式 opencode 会话, 就调用 wake-agent.sh
-#           在调用者 Wayland 会话里拉起 `opencode --continue` (真正"激活 AI")
+#   --wake  任务结束后调用 wake-agent.sh, 在调用者 Wayland 会话里拉起
+#           `opencode --continue` (即使已有会话也会新开一个 TUI)
 #   --notify 1 时 (默认) 由 runner 发消息板通报
 #
 # 说明: task 文件格式由 .agents/config/agent-resume-runner.sh 消费 (key=value, payload=base64 单行),
@@ -44,10 +44,10 @@ done
 [ -n "$id" ] || { echo "queue-task.sh: 缺少 --id" >&2; exit 2; }
 [ -n "$exec_cmd" ] || { echo "queue-task.sh: 缺少 --exec" >&2; exit 2; }
 
-payload="$exec_cmd"
+payload="( set -Eeuo pipefail; $exec_cmd )"
 if [ "$wake" = "1" ]; then
-  # 记录真实退出码 -> 强制唤醒 (WAKE_FORCE=1, 即使已有会话也开新 TUI) -> 再把退出码传回去
-  payload="{ $exec_cmd; }; rc=\$?; WAKE_FORCE=1 MODE=agent-resume RC=\$rc '$WAKE_AGENT' agent-resume \$rc || true; exit \$rc"
+  # 严格子 shell 的退出码保留给父 shell, 以便任务失败时仍执行强制唤醒。
+  payload="{ ( set -Eeuo pipefail; $exec_cmd ); rc=\$?; WAKE_FORCE=1 MODE=agent-resume RC=\$rc '$WAKE_AGENT' agent-resume \$rc || true; exit \$rc; }"
 fi
 
 mkdir -p "$BASE/queue" "$BASE/running" "$BASE/done" "$BASE/failed" "$BASE/log"

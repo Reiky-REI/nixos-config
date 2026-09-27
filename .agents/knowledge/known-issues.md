@@ -558,9 +558,11 @@ rm -f /tmp/src_hash.txt /tmp/dst_hash.txt /tmp/hash_diff.txt
 #### 复发 (2026-09-27, 已加固): `systemctl stop` 也会让 `systemd-run --wait` 返回 0
 - 现场: 手动 `systemctl --user stop aresume-<task>.service` 中断一个卡住的 run, runner 却把该任务
   标记 OK、移入 `done/` 并发出"成功"板报; 实际镜像根本没导入喵~
-- 根因: `systemd-run --wait` 对"被外部停止"也可能返回 0, runner 只看退出码喵~
-- 加固: 成功分支先检查 `running/<task>.task` 是否还在; 不在则记 `ANOMALY` 并拒绝报 OK喵~
-- 教训: 队列的成功判定不能只信退出码; 慢任务还要 `--runtime-max` 给足时间, 否则超时被杀同样收不到收尾语句喵~
+- 根因: `systemd-run --wait` 对"被外部停止"也可能返回 0; 此外 task 文件仍在 `running/` 并不能证明 payload 已完成喵~
+- 加固: runner 要求 payload EXIT trap 写入本次尝试的 exit sentinel, 缺标记或非零退出码一律失败/重试;
+  `queue-task.sh` 的命令默认在 `set -Eeuo pipefail` 子 shell 运行, 防止后续 `echo` 覆盖前序失败喵~
+- 教训: 成功判定要验证 payload 完成证据, 不能只信 systemd 客户端退出码或 task 文件位置;
+  每任务 `RuntimeMaxSec` 是唯一时限, 外层 runner service 不应再设一个更短的总超时喵~
 
 ### 坑 2: sudo 在 AI 沙箱/user 单元均不可用
 - `sudo: must be owned by uid 0 and have the setuid bit set` — AI 会话沙箱与 systemd user 单元都被剥 setuid 喵~
@@ -847,19 +849,19 @@ Docker rootfs/tarball 仍由 nixpkgs 的 `nixos/modules/virtualisation/docker-im
 `A definition for option home.packages."[definition ...]" is not of type package`喵~
 **规避**: 注册表/配置变量改名 (如 `codexCfg`), 或别用 `with pkgs;`喵~
 
-## agent-resume 队列的三类"看起来没反应" (2026-09-27)
+## agent-resume 队列常见失效模式 (2026-09-27)
 
 ### 坑 1: task 缺 `retries=` 行 → 无限重试, 永不失败通报
 runner 用 `sed -i "s/^retries=.*/retries=$ret/"` 累加计数; 若 task 文件里根本没有
 `retries=` 行, sed 静默不匹配, 计数每次从 0 变 1 → 永远到不了 `max_retries`,
-任务每 30 分钟重跑一次, 而 `failed/` 与失败通报永远不会出现喵~
+计数不会到达 `max_retries`, 队列会持续重试, `failed/` 与失败通报永远不会出现喵~
 **规避**: 入队时写入 `retries=0` (`queue-task.sh` 已修), runner 也补了防御性 append喵~
 
-### 坑 2: 默认 `RuntimeMaxSec=1800s` 对慢任务太短, 且超时会吞掉收尾语句
+### 坑 2: `RuntimeMaxSec` 对慢任务太短, 且超时会吞掉收尾语句
 `systemd-run --wait --property=RuntimeMaxSec=...` 超时会**杀掉整个 transient 单元**;
 task payload 末尾的"发通报/唤醒"语句根本没机会执行, 现场只剩一行 `FAIL rc=1`喵~
-本机 3.3G 容器镜像 `podman import` + 启动冒烟就超过了 30 分钟喵~
-**规避**: 入队时用 `--runtime-max` 给足时间 (runner 已支持按 task 读取)喵~
+runner 默认 `RuntimeMaxSec=3600s`; 本机 3.3G 压缩容器镜像展开约 16.4G, 首次导入任务在 5400s 上限后仍未完成喵~
+**规避**: 入队时用 `--runtime-max` 给足时间 (runner 已支持按 task 读取), 同时先核对展开尺寸与可用存储空间喵~
 
 ### 坑 3: 有交互式会话时 wake 只会通知, 真正"唤醒"需要会话已退出
 `wake-agent.sh` 检测到已有交互式 opencode 时不会重复拉起 TUI, 只弹通知喵~
@@ -872,3 +874,13 @@ runner 与 `agent-resume.{service,path,timer}` 原本是 `~/.local/state` 与 `~
 下的手写真实文件, 改了半天其实**不可复现**, 同一类坑会反复踩喵~
 **规避**: 已迁到 `home/Reiky-REI/tools/agent-resume.nix` + `.agents/config/agent-resume-runner.sh`;
 迁移时旧单元真实文件按铁律留了删除清单 (`~/.local/state/delete-manifests/`), 否则 HM 部署同路径会 clobber 报错喵~
+
+### 坑 5: 3.3G 压缩镜像展开约 16.4G, 不能按压缩尺寸估算导入空间
+- `xz -lv` 显示 NixMEOW-CTR tarball 压缩后约 3.3GB, 解压后约 16.4GB;
+  `podman import` 导入还需要容器存储空间, 可用空间不足时不可贸然重试喵~
+- 本次一次尝试达到 `RuntimeMaxSec=5400` 后失败, 另一次被人工 stop; 容器镜像未成功导入,
+  队列任务却因 stop 返回码与 payload 尾部 `echo` 被错误标为成功, 已修正 runner 判定并更正任务归档喵~
+- 该命令完全读取本地 tarball, 不经过网络代理; 代理不是 `podman import` 卡慢的解释喵~
+- Podman 官方文档确认 `podman import` 原生接受 XZ 压缩 tarball, 不需要先手动解压;
+  参见 <https://docs.podman.io/en/latest/markdown/podman-import.1.html> 喵~
+- 重试前先核对 `xz -lv` 的 uncompressed size 与 `df` 可用容量; 确保留出解包和存储层的额外空间喵~

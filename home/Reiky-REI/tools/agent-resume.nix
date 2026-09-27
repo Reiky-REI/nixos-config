@@ -19,7 +19,8 @@ in {
     Service = {
       Type = "oneshot";
       ExecStart = "${runner}";
-      TimeoutStartSec = "2h";
+      # 每个任务由 transient unit 的 RuntimeMaxSec 单独限时; runner 可串行消费多个任务。
+      TimeoutStartSec = "infinity";
     };
   };
 

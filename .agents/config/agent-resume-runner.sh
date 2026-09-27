@@ -6,13 +6,13 @@
 #   id / desc / max_retries / retries / runtime_max / notify_board / payload(base64单行)
 #
 # 行为: 成功 → done/ + 消息板通报; 失败 → 重试至 max_retries 后进 failed/ + 失败通报。
-# 防假 OK: 成功分支会确认 running/<task>.task 仍在 (systemctl stop 也让 systemd-run 返回 0)。
+# 防假 OK: 任务进程完成后写 per-attempt exit sentinel; 只凭 systemd-run 退出码或 task 文件存在不算成功。
 set -u
-BASE="$HOME/.local/state/agent-resume"
+BASE="${AGENT_RESUME_DIR:-$HOME/.local/state/agent-resume}"
 DIALOGUE="/etc/nixos/.agents/config/dialogue.sh"
 UID_=$(id -u)
 mkdir -p "$BASE"/{queue,running,done,failed,log}
-exec 9>"/run/user/$UID_/agent-resume.lock"
+exec 9>"${XDG_RUNTIME_DIR:-/run/user/$UID_}/agent-resume.lock"
 flock -n 9 || exit 0
 shopt -s nullglob
 results=()
@@ -32,14 +32,40 @@ for tf in "$BASE"/queue/*.task; do
   sed -i "s/^retries=.*/retries=$ret/" "$tf"
   mv "$tf" "$BASE/running/$name.task"
   rtf="$BASE/running/$name.task"
+  result_file="$BASE/running/$name-r$ret.exit"
+  rm -f "$result_file"
   log="$BASE/log/${name}-r${ret}-$(date +%m%d-%H%M%S).log"
   echo "[$(date -Is)] START $tid try=$ret/$maxr $desc" >"$log"
   if XDG_RUNTIME_DIR=/run/user/$UID_ systemd-run --user --quiet --collect \
       --unit="aresume-${tid}-r${ret}-$$" --wait \
       --setenv=PAYLOAD="$payload" \
+      --setenv=RESULT_FILE="$result_file" \
       --property=RuntimeMaxSec="$rtm" \
-      bash -c 'eval "$(echo "$PAYLOAD" | base64 -d)"' >>"$log" 2>&1; then
-    echo "[$(date -Is)] OK" >>"$log"
+      bash -c '
+        record_result() {
+          rc=$?
+          trap - EXIT
+          tmp="${RESULT_FILE}.tmp.$$"
+          printf "%s\n" "$rc" >"$tmp" && mv -f "$tmp" "$RESULT_FILE"
+          exit "$rc"
+        }
+        trap record_result EXIT
+        decoded=$(printf "%s" "$PAYLOAD" | base64 -d) || exit 126
+        eval "$decoded"
+      ' >>"$log" 2>&1; then
+    unit_rc=0
+  else
+    unit_rc=$?
+  fi
+
+  payload_rc="INCOMPLETE"
+  if [ -s "$result_file" ]; then
+    IFS= read -r payload_rc < "$result_file" || true
+  fi
+  rm -f "$result_file"
+
+  if [ "$payload_rc" = "0" ]; then
+    echo "[$(date -Is)] OK payload_rc=0 systemd_run_rc=$unit_rc" >>"$log"
     if [ -f "$rtf" ]; then
       mv "$rtf" "$BASE/done/"
       results+=("$tid|OK")
@@ -48,12 +74,13 @@ for tf in "$BASE"/queue/*.task; do
           | "$DIALOGUE" post -f watchdog -t opencode -T "agent-resume: 完成 $tid" >/dev/null 2>&1
       fi
     else
-      echo "[$(date -Is)] ANOMALY: task file missing from running/; systemd-run returned 0 but the run may have been interrupted, refusing to report OK" >>"$log"
+      echo "[$(date -Is)] ANOMALY: completion sentinel exists but task file is missing from running/; refusing to report OK" >>"$log"
       results+=("$tid|ANOMALY")
     fi
   else
-    rc=$?
-    echo "[$(date -Is)] FAIL rc=$rc" >>"$log"
+    rc="$payload_rc"
+    [ "$rc" = "INCOMPLETE" ] && rc=125
+    echo "[$(date -Is)] FAIL rc=$rc payload_rc=$payload_rc systemd_run_rc=$unit_rc" >>"$log"
     if [ "$ret" -lt "$maxr" ]; then
       mv "$rtf" "$BASE/queue/"
       results+=("$tid|RETRY($ret/$maxr)")

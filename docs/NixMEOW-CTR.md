@@ -32,6 +32,8 @@ docker 与 podman 都可以 (本机 podman 提供 docker 兼容命令):
 
 ```bash
 # 导入 (docker / podman 二选一)
+xz -lv ~/.local/share/nixmeow-ctr-docker/tarball/nixos-system-x86_64-linux.tar.xz | tail -2
+df -h /
 docker import ~/.local/share/nixmeow-ctr-docker/tarball/nixos-system-*.tar.xz nixmeow-ctr
 podman import ~/.local/share/nixmeow-ctr-docker/tarball/nixos-system-*.tar.xz localhost/nixmeow-ctr:latest
 
@@ -67,3 +69,7 @@ nix eval .#nixosConfigurations.NixMEOW-CTR.config.system.build.toplevel.drvPath
 - `boot.isContainer = true` 下 NixOS 会使用宿主 resolv.conf, 与 `systemd-resolved` 互斥,
   故本 host 关闭 resolved。
 - 容器内 `nix`/`nixos-rebuild` 不适用于重建自身; 镜像变更需在宿主侧重构并重新导入。
+- NixMEOW-CTR 镜像曾测得压缩约 3.3GB、xz 展开约 16.4GB; 不可只按压缩尺寸估算容量。
+  `podman import` 还会使用容器存储空间; 空间不足时先停止验证并释放/扩展存储, 不要连续重试耗尽根分区。
+- Podman 官方文档说明 `podman import` 原生支持 XZ 压缩 tarball, 无需先解压;
+  参见 <https://docs.podman.io/en/latest/markdown/podman-import.1.html>。
