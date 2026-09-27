@@ -17,7 +17,8 @@
 
   # systemd-resolved: 本地 DNS 缓存 + 多上游 failover
   # 当路由器 DNS (192.168.1.1) 不可用时自动 fallback 到公共 DNS
-  services.resolved = {
+  # 容器共享宿主 resolv.conf, 与 systemd-resolved 互斥, 故容器内不启用。
+  services.resolved = lib.mkIf (config.meow.kind != "container") {
     enable = true;
     settings.Resolve.FallbackDNS = [
       "1.1.1.1"

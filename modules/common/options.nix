@@ -9,9 +9,9 @@
 }: {
   options.meow = {
     kind = lib.mkOption {
-      type = lib.types.enum ["laptop" "desktop" "wsl" "vm"];
+      type = lib.types.enum ["laptop" "desktop" "wsl" "vm" "container"];
       default = "laptop";
-      description = "机器种类: laptop / desktop / wsl / vm";
+      description = "机器种类: laptop / desktop / wsl / vm / container";
     };
 
     roles = lib.mkOption {

@@ -63,3 +63,17 @@ Host、User、Agent 是三套独立的实体，彼此以多对多关系组合；
 
 阶段 C 产出 Docker systemd rootfs 镜像 (走 nixpkgs 内建 image 模块, 不引入已弃用的 nixos-generators)喵~
 阶段 D 整理共享 agent registry 与客户端适配器喵~
+
+## 阶段 C：Docker 容器 host
+
+- 新增 `kind = "container"`; `NixMEOW-CTR` 以 `roles = [ "server" ]` 注册, `features = []`喵~
+- 镜像复用 nixpkgs `virtualisation/docker-image.nix` 模块 (systemd PID 1), 不引入已弃用的 nixos-generators喵~
+- host 侧关掉 boot loader 与 nixpkgs channel 副本; 用户 shell 用 bash喵~
+- flake 暴露 `packages.<system>.<host>-docker` 作为镜像产物喵~
+- 文档模块与 `systemd-resolved` 改为容器内不启用 (容器共享宿主 resolv.conf, 与 resolved 互斥)喵~
+
+### 阶段 C 验证
+
+- `NixMEOW-CTR` 求值: `boot.isContainer = true`, niri/xwayland/zsh/文档包/systemd-resolved 均为关喵~
+- 镜像 tarball 构建成功喵~
+- NixMEOW 与 NixMEOW-WSL 的 toplevel drvPath 保持不变喵~

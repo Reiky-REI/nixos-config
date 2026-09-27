@@ -34,7 +34,8 @@ machines.nix (host → roles/features/users)
 ├── CLAUDE.md                       # Claude Code 工作指南
 ├── AGENTS.md                       # AI 辅助工作指南
 ├── docs/
-│   └── NixMEOW-WSL.md              # WSL 试验台的完整文档 (访问/网络/排障)
+│   ├── NixMEOW-WSL.md              # WSL 试验台的完整文档 (访问/网络/排障)
+│   └── NixMEOW-CTR.md              # Docker 容器镜像 (构建/导入/运行约束)
 ├── hosts/
 │   ├── NixMEOW/                    # 目录名 = 主机名 (machines.nix 的 key)
 │   │   ├── default.nix            # Composition root (仅 imports + host-specific)
@@ -42,6 +43,7 @@ machines.nix (host → roles/features/users)
 │   │   └── hardware-configuration.nix  # nixos-generate-config 生成，不动
 │   └── NixMEOW-WSL/                # Windows WSL2 试验台 (详见 docs/NixMEOW-WSL.md)
 │       └── default.nix
+│   └── NixMEOW-CTR/                # Docker systemd 容器镜像 (详见 docs/NixMEOW-CTR.md)
 ├── modules/
 │   ├── default.nix                # 聚合所有子模块
 │   ├── common/                    # 所有 host 通用的系统基础 + hardware profile + meow.* 选项
@@ -158,6 +160,8 @@ machines.nix (host → roles/features/users)
 - flake 级标签（`kernel-715` / `agenix-secrets`）由 `lib/mkHost.nix` 消费
 - `meow` 同样注入 home-manager (`extraSpecialArgs`)，`home/Reiky-REI/default.nix`
   按 role/能力分组自我屏蔽（如 server 角色不导入桌面与 GUI 应用组）
+- `kind=container` 的 host 会关闭 systemd-resolved 与文档包，镜像产物暴露为
+  `packages.<system>.<host>-docker`（见 `docs/NixMEOW-CTR.md`）
 
 ### 用户身份与 host 绑定
 

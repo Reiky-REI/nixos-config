@@ -88,6 +88,19 @@
     note = "Windows WSL2 试验台 — 无黑屏风险的 switch 场";
   };
 
+  "NixMEOW-CTR" = {
+    system = "x86_64-linux";
+    profile = "medium";
+    kind = "container";
+    roles = ["server"];
+    desktopEffects = "minimal";
+    users = ["reiky"];
+    primaryUser = "reiky";
+    # 无桌面、无本机硬件: 作为相同工具环境的 docker 容器镜像运行
+    features = [];
+    note = "Docker systemd 容器镜像 — 无图形、共享宿主内核";
+  };
+
   # 示例：低算力笔记本
   # "NixPentium" = {
   #   profile = "low";

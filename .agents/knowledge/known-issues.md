@@ -827,3 +827,9 @@ intel 微码与驱动、`modules/desktop` 的 xwayland, 曾对所有 host 无条
 (`config.system.build.images.<variant>`); 不要再为 Docker 镜像新增该 flake input喵~
 Docker rootfs/tarball 仍由 nixpkgs 的 `nixos/modules/virtualisation/docker-image.nix`
 提供, 采用 systemd 作为 PID 1, 运行需要容器特权喵~
+
+### 附: 容器内 `systemd-resolved` 与宿主 resolv.conf 互斥
+`boot.isContainer = true` 时 NixOS 使用宿主 resolv.conf; 若同时启用
+`services.resolved`, 求值会失败:
+`Failed assertions: Using host resolv.conf is not supported with systemd-resolved`喵~
+**规避**: 按 `meow.kind == "container"` 关闭 `services.resolved`, 容器走宿主 DNS喵~

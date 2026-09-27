@@ -100,6 +100,22 @@
 
     formatter.${defaultSystem} = nixpkgs.legacyPackages.${defaultSystem}.alejandra;
 
+    # 可交付产物: 带 docker tarball 的 host 暴露成 packages.<system>.<host>-docker
+    packages = nixpkgs.lib.genAttrs systems (
+      targetSystem:
+        nixpkgs.lib.listToAttrs (
+          builtins.concatMap (
+            hostName: let
+              host = self.nixosConfigurations.${hostName};
+              hostSystem = machines.${hostName}.system or defaultSystem;
+            in
+              nixpkgs.lib.optionals
+              (hostSystem == targetSystem && host.config.system.build ? tarball)
+              [(nixpkgs.lib.nameValuePair "${hostName}-docker" host.config.system.build.tarball)]
+          ) (builtins.attrNames machines)
+        )
+    );
+
     checks = builtins.listToAttrs (map (
         targetSystem: let
           hostNames =
