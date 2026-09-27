@@ -1,6 +1,6 @@
 ---
 date: 2026-09-27
-module: .agents/config/agent-resume-runner.sh, .agents/config/queue-task.sh, home/Reiky-REI/tools/agent-resume.nix
+module: README.md, .agents/config/agent-resume-runner.sh, .agents/config/queue-task.sh, home/Reiky-REI/tools/agent-resume.nix
 tags: [agent-resume, systemd, false-success, queue, container]
 layer: home
 severity: high
@@ -45,5 +45,6 @@ experience:
 
 - `.agents/config/test-agent-resume-runner.sh` 覆盖正常完成、失败码、stop 假成功、--wake 语法、残留完成收尾、active transient 防重复和中断重试喵~
 - `bash -n`、`git diff --check` 与 Alejandra 格式检查通过喵~
-- NixMEOW、NixMEOW-WSL、NixMEOW-CTR 的前一版 toplevel build 均通过; generation 234 已部署 sentinel runner,
-  live queue task 已通过, 新增的 running recovery 将再 build 并部署验证喵~
+- NixMEOW、NixMEOW-WSL、NixMEOW-CTR 在 sentinel 与 running recovery 两版改动后均 build 通过喵~
+- generation 235 已激活且 loader default 同步; live queue check 确认新 runner 带 sentinel/recovery、path/timer active,
+  switch 与验证 task 均已归档至 done/ 喵~ README 与容器专项文档也补齐操作入口和容量限制喵~

@@ -75,7 +75,7 @@ machines.nix (host → roles/features/users)
 ├── pkgs/
 │   └── cursors/                   # MikuCat 光标主题
 ├── secrets/                       # 加密密钥 (agenix)
-├── .agents/                       # AI 辅助工作目录 (约定/复盘/知识库)
+├── .agents/                       # AI 约定/知识库/复盘与 agent-resume 长任务队列
 ├── .claude/                       # Claude Code 项目配置
 └── .opencode/                     # OpenCode 项目配置
 ```
@@ -292,6 +292,25 @@ mkdir -p ~/.config/rebuild && touch ~/.config/rebuild/wake-agent
 
 实现见 `.agents/config/wake-agent.sh`（由 `rebuild.sh` 在 nixos-rebuild 结束后调用，
 成功/失败都会尝试）。
+
+### 不可中断长任务 (agent-resume)
+
+长任务通过用户级 systemd 队列执行喵, 与 OpenCode 会话生命周期解耦喵~
+
+- Home Manager 声明 `agent-resume.service/path/timer` 喵, 配置见 `home/Reiky-REI/tools/agent-resume.nix` 喵~
+- runner 唯一源码为 `.agents/config/agent-resume-runner.sh` 喵, 启动时会恢复遗留 `running/` 任务喵~
+- 推荐用 `.agents/config/queue-task.sh` 入队喵, 自动启用严格错误处理、重试计数与 payload 完成标记喵~
+
+```bash
+.agents/config/queue-task.sh \
+  --id rebuild-check-20260927 --desc '长任务说明' \
+  --exec 'nix build --no-link .#nixosConfigurations.NixMEOW.config.system.build.toplevel' \
+  --runtime-max 3600 --max-retries 3 --wake
+```
+
+`--wake` 会在任务结束后强制拉起 `opencode --continue` 喵, 即使已有交互会话也会新开窗口喵~
+任务状态、日志与使用纪律见 `.agents/AGENTS.md` 喵~ runner 回归测试为
+`bash .agents/config/test-agent-resume-runner.sh` 喵~
 
 ## 12. 排查配置归属错误
 
