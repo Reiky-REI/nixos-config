@@ -1,4 +1,8 @@
-{pkgs, ...}: let
+{
+  config,
+  pkgs,
+  ...
+}: let
   # opencode v2 数据库清理脚本 (声明式部署, 见 opencode-gc.py)
   opencodeGc = pkgs.writeScript "opencode-gc" (builtins.readFile ./opencode-gc.py);
 
@@ -45,8 +49,7 @@ in {
     Unit.Description = "Watch OpenCode plugin source and deployed plugin path";
     Path = {
       PathChanged = [
-        "/etc/nixos/home/Reiky-REI/tools/opencode-edit-backup.js"
-        "/home/Reiky-REI/.config/opencode/plugins"
+        "${config.home.homeDirectory}/.config/opencode/plugins"
       ];
       Unit = "opencode-plugin-restart.service";
     };

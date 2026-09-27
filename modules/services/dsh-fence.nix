@@ -18,12 +18,13 @@
   config,
   lib,
   pkgs,
+  primaryUser,
   username,
   ...
 }: let
   cfg = config.services.dsh-fence;
-  dshHome = "/home/${username}/.dsh";
-  fallbackWorkspace = "/home/${username}/WorkSpace";
+  dshHome = "${primaryUser.homeDirectory}/.dsh";
+  fallbackWorkspace = "${primaryUser.homeDirectory}/WorkSpace";
 in {
   options.services.dsh-fence = {
     enable = lib.mkEnableOption "hardened systemd service for the DeepSeek Harness (dsh) web app";

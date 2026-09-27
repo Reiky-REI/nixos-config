@@ -17,12 +17,15 @@
 - home-manager options (`home.packages`, `home.file`, `programs.waybar` 等) 放在 home 层
 - `environment.sessionVariables` 按语义拆分到对应模块
 
-## Host 与用户身份注册
-- host 在 `machines.nix` 注册 feature 和 user ID 绑定；用户身份在 `users.nix` 按稳定 ID 注册
-- `users.nix` 显式声明 login、homeDirectory、homeProfile；home profile 不从登录名推导
+## Host、用户身份与能力注册
+- host 在 `machines.nix` 注册 `features`、`roles`、`desktopEffects`、user ID 绑定与可选 `system`
+- `roles` 是用途组合 (workstation/devbox/server/embedded)，`features` 是能力开关，二者都由 `lib/` 下的清单校验
+- `desktopEffects` 只决定桌面效果档；构建并行度与视觉特效不再共用 `profile`
+- 用户身份在 `users.nix` 按稳定 ID 注册；`users.nix` 显式声明 login、homeDirectory、homeProfile
 - 一个用户可绑定多个 host，一个 host 可绑定多个用户；host-local 的 UID/组等差异保留在 host 配置
 - `primaryUser` 仅用于尚未迁移的 legacy system modules；新增模块应使用具体用户 ID 或 user registry
-- feature ID 集中在 `lib/features.nix`，禁止静默接受拼错的标签
+- home module 的 `imports` 与文件列表不得依赖 `config`；需要按用户计算的导入放 `lib/mkHost.nix`
+- 微码/固件属于设备事实，写在 `hosts/<host>/`
 - `config.nix` 是旧脚本兼容视图，不作为新配置入口
 - 详见 `architecture.md` 的信息流向
 

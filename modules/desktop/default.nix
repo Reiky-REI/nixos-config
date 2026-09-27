@@ -10,20 +10,16 @@
     ./tablet
   ];
 
-  programs.xwayland.enable = true;
+  programs.xwayland.enable = lib.mkIf (config.meow.enabled ? "compositor-niri") true;
 
   programs.niri.enable = lib.mkIf (config.meow.enabled ? "compositor-niri") true;
 
   services.xserver.enable = lib.mkIf (config.meow.enabled ? "display-manager-ly") true;
 
-  environment.sessionVariables = {
-    NIXOS_OZONE_WL = "1";
-  };
+  environment.sessionVariables.NIXOS_OZONE_WL = lib.mkIf (config.meow.enabled ? "compositor-niri") "1";
 
-  environment.systemPackages =
-    with pkgs; [
-      xwayland-satellite
-    ]
+  environment.systemPackages = with pkgs;
+    lib.optionals (config.meow.enabled ? "compositor-niri") [xwayland-satellite]
     # 屏幕背光控制 (niri / ly TTY 亮度键都需要)
     ++ lib.optionals (config.meow.enabled ? "backlight") [brightnessctl]
     # niri startup: nm-applet 需要在 PATH 中(此前未安装)

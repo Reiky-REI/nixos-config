@@ -11,9 +11,9 @@
 
   networking.networkmanager.enable =
     lib.mkIf (config.meow.enabled ? "networkmanager") true;
-  networking.firewall.allowedTCPPorts = [
-    5900
-  ];
+  networking.firewall.allowedTCPPorts = lib.mkIf (
+    builtins.any (role: builtins.elem role config.meow.roles) ["workstation" "devbox"]
+  ) [5900];
 
   # systemd-resolved: 本地 DNS 缓存 + 多上游 failover
   # 当路由器 DNS (192.168.1.1) 不可用时自动 fallback 到公共 DNS
@@ -34,5 +34,5 @@
   };
 
   services.openssh.enable = true;
-  services.openssh.settings.PermitRootLogin = "yes";
+  services.openssh.settings.PermitRootLogin = lib.mkIf (!(builtins.elem "server" config.meow.roles)) "yes";
 }

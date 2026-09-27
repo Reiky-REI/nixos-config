@@ -4,8 +4,10 @@
 # 特性标签见 machines.nix —— 目前只开 compositor-niri。
 {
   inputs,
+  config,
   pkgs,
   lib,
+  primaryUser,
   username,
   fullName,
   ...
@@ -20,6 +22,8 @@
   novncShare = "${pkgs.novnc}/share/webapps/novnc";
   websockifyPkg = pkgs.python3Packages.websockify;
   vncPass = "meow-8080-lan";
+  userUid = 1000;
+  runtimeDir = "/run/user/${toString userUid}";
 
   # WSL 内手工重建的包装 (声明式替代文档里的 tmpfs /root/nixrun.sh):
   #   - 强制走宿主 Clash 代理 (WSL2 NAT 下 GitHub 直连不稳)
@@ -114,9 +118,9 @@ in {
     after = ["browser-xvfb.service"];
     requires = ["browser-xvfb.service"];
     environment = {
-      HOME = "/home/${username}";
+      HOME = primaryUser.homeDirectory;
       DISPLAY = ":93";
-      XDG_RUNTIME_DIR = "/run/user/1000";
+      XDG_RUNTIME_DIR = runtimeDir;
       # 强制 X11 后端: WSL 可能向服务环境注入 WAYLAND_DISPLAY, 抢掉 Xvfb 的 DISPLAY
       WINIT_UNIX_BACKEND = "x11";
       # winit X11 后端运行时 dlopen libXcursor/libXrandr/libXi (非硬链接依赖)
@@ -163,11 +167,11 @@ in {
     };
   };
 
-  # logind 建用户 session 才会有 /run/user/1000 → niri socket PermissionDenied
+  # logind 建用户 session 才会有 runtimeDir → niri socket PermissionDenied
   # (2026-09-23 黑屏根因); tmpfiles 在服务启动前建好
   systemd.tmpfiles.rules = [
     "d /run/user 0755 root root -"
-    "d /run/user/1000 0700 Reiky-REI users -"
+    "d ${runtimeDir} 0700 ${username} ${config.users.users.${username}.group} -"
   ];
 
   systemd.services.browser-vnc = {
@@ -188,8 +192,8 @@ in {
     wantedBy = ["multi-user.target"];
     after = ["browser-vnc.service"];
     environment = {
-      HOME = "/home/${username}";
-      XDG_RUNTIME_DIR = "/run/user/1000";
+      HOME = primaryUser.homeDirectory;
+      XDG_RUNTIME_DIR = runtimeDir;
     };
     serviceConfig = {
       User = username;
@@ -208,8 +212,8 @@ in {
     wantedBy = ["multi-user.target"];
     after = ["browser-niri.service"];
     environment = {
-      HOME = "/home/${username}";
-      XDG_RUNTIME_DIR = "/run/user/1000";
+      HOME = primaryUser.homeDirectory;
+      XDG_RUNTIME_DIR = runtimeDir;
       QT_QUICK_BACKEND = "software";
     };
     serviceConfig = {
@@ -219,7 +223,7 @@ in {
       RestartSec = "3";
     };
     script = ''
-      SOCK=$(ls -t /run/user/1000/niri.*.sock 2>/dev/null | head -1)
+       SOCK=$(ls -t ${runtimeDir}/niri.*.sock 2>/dev/null | head -1)
       if [ -n "$SOCK" ]; then
         exec env WAYLAND_DISPLAY="$(basename "$SOCK")" /etc/profiles/per-user/${username}/bin/noctalia-shell
       fi
@@ -242,7 +246,8 @@ in {
   users.users.${username} = {
     description = fullName;
     isNormalUser = true;
-    home = "/home/${username}";
+    uid = userUid;
+    home = primaryUser.homeDirectory;
     shell = pkgs.zsh;
     ignoreShellProgramCheck = true;
     extraGroups = ["wheel" "audio" "video"];

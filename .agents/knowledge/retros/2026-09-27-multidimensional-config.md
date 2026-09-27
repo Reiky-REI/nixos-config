@@ -36,6 +36,30 @@ Host、User、Agent 是三套独立的实体，彼此以多对多关系组合；
 - 临时注入第二个用户的 eval 同时生成了 system account 与 Home Manager 用户喵~
 - 未知 user ID 与未知 feature 均在 eval 阶段失败喵~
 
+## 阶段 B：能力分层
+
+- 新增 `meow.roles` (`workstation`/`devbox`/`server`/`embedded`) 与 `lib/roles.nix` 校验, 与硬件档位 `profile` 解耦喵~
+- 新增 `meow.desktopEffects` (`full`/`minimal`), Niri 效果档不再借用 `isHighPerf`喵~
+- `modules/common` 中的字体、`programs.zsh`、sudo 免密与 polkit wheel 规则移入
+  `modules/roles/interactive.nix`, 按 role 生效喵~
+- 硬件层去掉无条件 `intel.updateMicrocode`、intel VA-API 驱动与 `enableAllFirmware`;
+  AMD 微码与固件改由 `hosts/NixMEOW/hardware.nix` 声明喵~
+- 桌面层 `programs.xwayland`、`NIXOS_OZONE_WL`、`xwayland-satellite` 按能力启用喵~
+- 网络层 5900 端口与 `PermitRootLogin` 按 role 收紧喵~
+- home 树按 role/能力分组: 桌面组、开发编辑器组、agent 工具组、worker 应用组分别按需导入,
+  取代原来的 `kind == "wsl"` 二元特判喵~
+- 服务模块的 `Reiky-REI` 硬编码路径改为 `primaryUser.homeDirectory`喵~
+- `mkHost` 支持 per-host `system`, `flake checks` 按架构分组生成喵~
+
+### 阶段 B 验证
+
+- NixMEOW 与 NixMEOW-WSL 均 build 通过喵~
+- NixMEOW 闭包 diff 仅含预期项: 移除 intel-media-driver/intel-vaapi-driver/intel-gmmlib
+  (约 111MiB)、initrd 缩小约 14.4MiB, 属修正 AMD 机器上的错误依赖喵~
+- server 角色合成求值: `niri`/`xwayland`/`zsh`/sudo 免密均为关, kitty/neovide/zed 不进入用户环境喵~
+- 合成多用户求值仍同时生成系统账号与 Home Manager 用户喵~
+
 ## 后续阶段
 
-阶段 B 按角色/平台/硬件拆分能力；阶段 C 产出 Docker systemd rootfs 镜像；阶段 D 整理共享 agent registry 与客户端适配器喵~
+阶段 C 产出 Docker systemd rootfs 镜像 (走 nixpkgs 内建 image 模块, 不引入已弃用的 nixos-generators)喵~
+阶段 D 整理共享 agent registry 与客户端适配器喵~

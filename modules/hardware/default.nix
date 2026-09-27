@@ -12,25 +12,14 @@
   hardware.bluetooth.enable = lib.mkIf (config.meow.enabled ? "bluetooth") true;
   services.blueman.enable = lib.mkIf (config.meow.enabled ? "bluetooth") true;
 
-  hardware.graphics = {
+  hardware.graphics = lib.mkIf (config.meow.enabled ? "compositor-niri") {
     enable = true;
     enable32Bit = true;
-    extraPackages = with pkgs; [
-      intel-media-driver
-      intel-vaapi-driver
-    ];
-    extraPackages32 = with pkgs.pkgsi686Linux; [
-      intel-media-driver
-      intel-vaapi-driver
-    ];
   };
 
-  hardware.enableAllFirmware = true;
-  hardware.cpu.intel.updateMicrocode = true;
-
-  environment.systemPackages =
-    with pkgs; [
-      pciutils
+  environment.systemPackages = with pkgs;
+    [pciutils]
+    ++ lib.optionals (config.meow.enabled ? "compositor-niri") [
       ffmpeg
       libva
       libva-utils

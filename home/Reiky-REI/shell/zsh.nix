@@ -1,11 +1,15 @@
 {
   pkgs,
+  config,
   meow,
   ...
 }: let
   # 真机 clash-verge 端口 7897; WSL 走宿主 clash = 7890
   # (WSL .wslconfig hostAddressLoopback=true, 127.0.0.1 直达 Windows, 已实测)
-  proxyPort = if meow.kind == "wsl" then "7890" else "7897";
+  proxyPort =
+    if meow.kind == "wsl"
+    then "7890"
+    else "7897";
 in {
   home.packages = with pkgs; [
     zsh-powerlevel10k
@@ -36,7 +40,7 @@ in {
       ff = "fastfetch";
       nlg = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
       ncg = "sudo nix-collect-garbage -d"; # 清理无用包
-      dsh-tui = "/home/Reiky-REI/WorkSpace/bin/dsh-tui";
+      dsh-tui = "${config.home.homeDirectory}/WorkSpace/bin/dsh-tui";
     };
     #    使用P10K打开下面以下注释
     initContent = ''

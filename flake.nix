@@ -74,10 +74,11 @@
     nixpkgs,
     ...
   } @ inputs: let
-    system = "x86_64-linux";
+    defaultSystem = "x86_64-linux";
 
     users = import ./users.nix;
     machines = import ./machines.nix;
+    systems = nixpkgs.lib.unique (map (machine: machine.system or defaultSystem) (builtins.attrValues machines));
     primaryUser = users.${machines.NixMEOW.primaryUser};
     opencodeConfig = import ./lib/opencode-config.nix {flakeRoot = self;};
     claudeConfig = import ./lib/claude-config.nix {
@@ -87,21 +88,37 @@
 
     # 机器由 machines.nix 注册表生成, 见 lib/mkHost.nix:
     # 加一台新机器 = machines.nix 注册 + hosts/<name>/default.nix, 本文件不用动
-    mkHost = import ./lib/mkHost.nix {inherit inputs system;};
+    mkHost = hostName: machine:
+      import ./lib/mkHost.nix {
+        inherit inputs;
+        system = machine.system or defaultSystem;
+      }
+      hostName
+      machine;
   in {
     inherit opencodeConfig claudeConfig;
 
-    formatter.${system} = nixpkgs.legacyPackages.${system}.alejandra;
+    formatter.${defaultSystem} = nixpkgs.legacyPackages.${defaultSystem}.alejandra;
 
-    checks.${system} =
-      nixpkgs.lib.mapAttrs' (
-        hostName: host:
-          nixpkgs.lib.nameValuePair "nixos-${hostName}" host.config.system.build.toplevel
+    checks = builtins.listToAttrs (map (
+        targetSystem: let
+          hostNames =
+            builtins.filter (
+              hostName: (machines.${hostName}.system or defaultSystem) == targetSystem
+            )
+            (builtins.attrNames machines);
+          hostChecks = nixpkgs.lib.mapAttrs' (
+            hostName: host:
+              nixpkgs.lib.nameValuePair "nixos-${hostName}" host.config.system.build.toplevel
+          ) (builtins.listToAttrs (map (hostName: nixpkgs.lib.nameValuePair hostName self.nixosConfigurations.${hostName}) hostNames));
+          compatibilityCheck =
+            if targetSystem == defaultSystem
+            then {nixos = self.nixosConfigurations.NixMEOW.config.system.build.toplevel;}
+            else {};
+        in
+          nixpkgs.lib.nameValuePair targetSystem (hostChecks // compatibilityCheck)
       )
-      self.nixosConfigurations
-      // {
-        nixos = self.nixosConfigurations.NixMEOW.config.system.build.toplevel;
-      };
+      systems);
 
     nixosConfigurations = builtins.mapAttrs mkHost machines;
   };

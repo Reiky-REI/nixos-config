@@ -1,6 +1,7 @@
 {
   imports = [
     ./common
+    ./roles
     ./hardware
     ./desktop
     ./networking

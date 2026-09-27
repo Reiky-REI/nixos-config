@@ -26,8 +26,11 @@
 # 这是故意的——防止意外在未适配的机器上部署。
 {
   "NixMEOW" = {
+    system = "x86_64-linux";
     profile = "high";
     kind = "laptop";
+    roles = ["workstation"];
+    desktopEffects = "full";
     users = ["reiky"];
     primaryUser = "reiky";
     features = [
@@ -71,8 +74,11 @@
   };
 
   "NixMEOW-WSL" = {
+    system = "x86_64-linux";
     profile = "medium";
     kind = "wsl";
+    roles = ["devbox"];
+    desktopEffects = "minimal";
     users = ["reiky"];
     primaryUser = "reiky";
     features = [

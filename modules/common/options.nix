@@ -14,6 +14,18 @@
       description = "机器种类: laptop / desktop / wsl / vm";
     };
 
+    roles = lib.mkOption {
+      type = lib.types.listOf (lib.types.enum (import ../../lib/roles.nix));
+      default = [];
+      description = "Host 用途标签, 与 user/agent 身份独立";
+    };
+
+    desktopEffects = lib.mkOption {
+      type = lib.types.enum ["full" "minimal"];
+      default = "minimal";
+      description = "桌面视觉效果档, 与硬件性能 profile 分离";
+    };
+
     features = lib.mkOption {
       type = lib.types.listOf (lib.types.enum (import ../../lib/features.nix));
       default = [];

@@ -9,8 +9,9 @@ machines.nix (host → features + user IDs)
 ```
 
 ## 各层职责
-- **modules/common/** — 全局基础设置 (nix, nixpkgs, time, i18n, fonts, shell 等)
-- **modules/hardware/** — CPU/GPU/蓝牙/音频设备相关策略
+- **modules/common/** — 所有 host 都适用的系统基础 (nix, nixpkgs, time, i18n, gc, nix-ld)
+- **modules/roles/** — 按 host 用途组合启用的能力 (交互 shell/管理权限/字体等)
+- **modules/hardware/** — CPU/GPU/蓝牙/音频等设备策略 (微码与固件放 host 本地)
 - **modules/desktop/** — Wayland/X11 会话栈、display manager、compositor、fcitx5、通知、空闲管理、xwayland-satellite
 - **modules/networking/** — 网络、代理、防火墙、SSH、VPN、Clash
 - **modules/services/** — 后台 daemon、系统能力服务 (管道/打印/MPD/Flatpak/polkit)
@@ -18,13 +19,17 @@ machines.nix (host → features + user IDs)
 - **home/{username}/** — 用户态配置
 
 ## Host 与 User 两个独立维度
-- `machines.nix` 注册 host，声明 `features`、`users` 和兼容用的 `primaryUser`
+- `machines.nix` 注册 host，声明 `features`、`roles`、`desktopEffects`、`users` 和兼容用的 `primaryUser`
+- `roles` 表示用途组合（`workstation`/`devbox`/`server`/`embedded`），决定交互与图形能力；`features` 表示可组合能力
+- `desktopEffects` 与硬件 `profile` 解耦：前者决定桌面效果档，后者决定性能档与构建并行度
 - `users.nix` 按稳定 user ID 注册 `username`、`fullName`、`homeDirectory`、`homeProfile` 等身份字段
 - 同一 user ID 可以绑定多个 host；一个 host 可以绑定多个 user ID
 - `home/{profile}/` 是可复用 Home Manager 配置集，由 `users.nix.homeProfile` 显式选择，不再从登录名推导
 - `lib/mkHost.nix` 为每个绑定用户生成 NixOS 用户与 Home Manager 用户；`primaryUser` 目前仅供尚未迁移的单用户 system modules 兼容
+- 可在 host 侧计算的用户私有 `~/.config/home-manager/services/*.nix` 由 `mkHost` 解析后注入，避免在 home module 的 `imports` 里读 `config`
+- 微码与固件属于设备事实，放 `hosts/<host>/`；不再由 `modules/hardware` 无条件开启
 - `config.nix` 保留为旧脚本兼容视图，新配置应直接使用 `users.nix`
-- 未知 user ID、重复绑定、重复登录名/home 路径及缺失 Home profile 会在求值时报错；feature ID 由 `lib/features.nix` 类型校验
+- 未知 user ID、重复绑定、重复登录名/home 路径及缺失 Home profile 会在求值时报错；feature 与 role ID 分别由 `lib/features.nix`、`lib/roles.nix` 类型校验
 
 ## 分类决策规则
 - daemon / 后台长期运行 → **services**

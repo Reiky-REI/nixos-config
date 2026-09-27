@@ -1,7 +1,5 @@
 {
-  isLowPerf,
-  isHighPerf,
-  isMediumPerf,
+  desktopEffects,
   lib,
   meow,
   ...
@@ -10,7 +8,10 @@
 
   # WSL 嵌套场景: Windows 键被宿主系统吃掉 (Win+D/E/L 全局快捷键轮不到嵌套 niri),
   # 改用 Alt 作 Mod; 真机 (kind != wsl) 保持 Mod = Super 原样
-  mod = if meow.kind == "wsl" then "Alt" else "Mod";
+  mod =
+    if meow.kind == "wsl"
+    then "Alt"
+    else "Mod";
 
   base = builtins.readFile (sectionDir + /base.kdl);
 
@@ -19,10 +20,8 @@
   # medium: 折衷配置（预留，当前复用 low）
   # low:  极简配置（无特效、无动画、仅功能）
   profileKdl =
-    if isHighPerf
+    if desktopEffects == "full"
     then builtins.readFile (sectionDir + /high.kdl)
-    else if isLowPerf
-    then builtins.readFile (sectionDir + /low.kdl)
     else builtins.readFile (sectionDir + /low.kdl);
 
   # mod 替换: 只动 "Mod+" / "Super+" 绑定 token (注释里的 "Mod-" 不受影响)。
@@ -40,15 +39,15 @@
       step1 = lib.replaceStrings ["Mod+" "Super+"] ["${mod}+" "${mod}+"] text;
     in
       lib.replaceStrings
-        [
-          "Alt+L hotkey-overlay-title=\"锁屏: hyprlock\" { spawn-sh \"hyprlock\"; }"
-          "Alt+Shift+V { switch-focus-between-floating-and-tiling; }"
-        ]
-        [
-          "// WSL: 锁屏无意义, 绑定已移除 (原 Super+L, 见本文件 withMod 注释)"
-          "Alt+Shift+G { switch-focus-between-floating-and-tiling; }"
-        ]
-        step1;
+      [
+        "Alt+L hotkey-overlay-title=\"锁屏: hyprlock\" { spawn-sh \"hyprlock\"; }"
+        "Alt+Shift+V { switch-focus-between-floating-and-tiling; }"
+      ]
+      [
+        "// WSL: 锁屏无意义, 绑定已移除 (原 Super+L, 见本文件 withMod 注释)"
+        "Alt+Shift+G { switch-focus-between-floating-and-tiling; }"
+      ]
+      step1;
 in {
   programs.fuzzel.enable = true;
 

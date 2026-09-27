@@ -7,6 +7,7 @@
   config,
   lib,
   pkgs,
+  primaryUser,
   username,
   ...
 }: let
@@ -21,7 +22,7 @@ in {
     };
     serverPy = lib.mkOption {
       type = lib.types.path;
-      default = "/home/Reiky-REI/WorkSpace/mcp-agents-bridge/server.py";
+      default = "${primaryUser.homeDirectory}/WorkSpace/mcp-agents-bridge/server.py";
       description = "Path to server.py.";
     };
   };
@@ -35,16 +36,16 @@ in {
       path = ["/run/current-system/sw"];
       serviceConfig = {
         Type = "simple";
-        User = "Reiky-REI";
+        User = primaryUser.username;
         Group = "users";
-        WorkingDirectory = "/home/Reiky-REI/WorkSpace/mcp-agents-bridge";
+        WorkingDirectory = "${primaryUser.homeDirectory}/WorkSpace/mcp-agents-bridge";
         Environment = [
           "ROOT_SERVE_URL=http://127.0.0.1:9502"
           "DSH_BRIDGE_URL=http://127.0.0.1:6185"
           "ASTRA_BOT_URL=http://127.0.0.1:6185"
-          "HOME=/home/Reiky-REI"
+          "HOME=${primaryUser.homeDirectory}"
         ];
-        ExecStart = "/home/Reiky-REI/WorkSpace/astrabot/.venv/bin/python /home/Reiky-REI/WorkSpace/mcp-agents-bridge/server.py";
+        ExecStart = "${primaryUser.homeDirectory}/WorkSpace/astrabot/.venv/bin/python ${cfg.serverPy}";
         Restart = "on-failure";
         RestartSec = "5s";
       };

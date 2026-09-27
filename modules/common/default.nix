@@ -2,7 +2,7 @@
   config,
   lib,
   pkgs,
-  username,
+  selectedUsers,
   ...
 }: {
   imports = [
@@ -11,7 +11,7 @@
   ];
 
   # users setting
-  nix.settings.trusted-users = ["root" username];
+  nix.settings.trusted-users = ["root"] ++ map (user: user.username) (builtins.attrValues selectedUsers);
   nixpkgs.config.allowUnfree = true;
   # 临时允许 EOL electron-39 (vscode 等传递依赖), 26.05 升级后自动解决
   nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10"];
@@ -53,38 +53,6 @@
     useXkbConfig = true; # use xkb.options in tty.
   };
 
-  fonts.packages = with pkgs; [
-    noto-fonts
-    noto-fonts-cjk-sans
-    noto-fonts-color-emoji
-    # 静态 TTF 中文字体, 兼容 Steam 等自带旧版 fontconfig/freetype 的程序
-    # (VF ttc 老库读不了, 见 known-issues.md "nix-shell 里跑 Steam 中文显示方块")
-    wqy_microhei
-
-    dejavu_fonts
-
-    nerd-fonts.fira-code
-    nerd-fonts.jetbrains-mono
-  ];
-
-  fonts = {
-    enableDefaultPackages = true;
-    fontconfig = {
-      enable = true;
-      # CJK 字族必须排在拉丁同名族**前面**: Noto Sans CJK SC 本身也覆盖拉丁,
-      # 但反过来拉丁 "Noto Sans" 无中文字形。若拉丁在前, fc-match sans-serif:lang=zh
-      # 仍返回拉丁 Noto Sans → 浏览器 chrome(标题栏/菜单)中文变豆腐块
-      # (网页正文按脚本逐字回退能找到 CJK, 唯独 UI 直接吃主字族)
-      defaultFonts = {
-        serif = ["Noto Serif CJK SC" "Noto Serif"];
-        sansSerif = ["Noto Sans CJK SC" "Noto Sans"];
-        # monospace 保持 Fira Code 在前(用户写代码的等宽默认, 含 nerd 字形),
-        # CJK 仅作回退; 终端类按字形回退能找到 CJK, 无需把 CJK 提到首位
-        monospace = ["Fira Code" "Noto Sans Mono CJK SC"];
-      };
-    };
-  };
-
   nix.optimise.automatic = true;
   nix.optimise.dates = ["04:00"];
 
@@ -101,19 +69,6 @@
   # 关机/重启加速: 缩短僵尸服务等待时间, 避免长时间卡在黑屏
   # 背景: nvme1 (Windows 盘) 关机时 I/O 超时 + NVIDIA GSP 异常曾导致关机耗时 4 分钟
   systemd.settings.Manager.DefaultTimeoutStopSec = "30s";
-
-  programs.zsh.enable = true;
-
-  security.sudo.wheelNeedsPassword = false;
-
-  # polkit: wheel 组用户免密执行 systemd-run / pkexec 等提权操作
-  security.polkit.extraConfig = ''
-    polkit.addRule(function(action, subject) {
-      if (subject.isInGroup("wheel")) {
-        return polkit.Result.YES;
-      }
-    });
-  '';
 
   environment.systemPackages = with pkgs; [
     vim

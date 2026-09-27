@@ -1,0 +1,6 @@
+[
+  "workstation"
+  "devbox"
+  "server"
+  "embedded"
+]

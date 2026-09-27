@@ -12,9 +12,9 @@
   config,
   lib,
   pkgs,
+  username,
   ...
 }: let
-  username = "Reiky-REI";
   user = config.users.users.${username};
   group = config.users.groups.${user.group};
   nasMac = "1c:83:41:e4:3c:d4"; # 极空间 Z4Pro 网卡 MAC (发现用)

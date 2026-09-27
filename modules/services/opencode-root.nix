@@ -18,6 +18,7 @@
   lib,
   pkgs,
   pkgs-unstable,
+  primaryUser,
   username,
   ...
 }: let
@@ -53,9 +54,9 @@ in {
       serviceConfig = {
         Type = "simple";
         User = "root";
-        WorkingDirectory = "/home/${username}";
+        WorkingDirectory = primaryUser.homeDirectory;
         Environment = [
-          "HOME=/home/${username}"
+          "HOME=${primaryUser.homeDirectory}"
           "PATH=/run/current-system/sw/bin:/usr/bin:/bin"
         ];
         ExecStart = "${cfg.package}/bin/opencode serve --port ${toString cfg.port} --hostname 127.0.0.1";

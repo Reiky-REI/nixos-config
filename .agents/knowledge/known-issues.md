@@ -797,3 +797,33 @@ peerDependencies, 期望宿主提供; 宿主 dsh 包**确实带了**这些包 (�
 ln -sfn "<dsh>/lib/node_modules/@deepseek-ai/dsh/node_modules/@deepseek-ai" \
         "$workspace/node_modules/@deepseek-ai"
 ```
+
+---
+
+## 多 host/user 注册表的三个 Nix 坑 (2026-09-27)
+
+### 坑 1: NixOS 会按登录名自动推导 `users.users.<name>.home`
+把 home 路径放进用户注册表并写入 `users.users.<name>.home` 时, 若用 `lib.mkDefault`,
+会和 NixOS 由 `isNormalUser` 派生的 `/home/<login>` 冲突:
+`conflicting definition values ... "/home/TestUser" 与 "/home/testuser"`喵~
+**规避**: 注册表是 home 路径的唯一来源时用 `lib.mkForce` (或反过来不要在注册表里写 home)喵~
+
+### 坑 2: HM `imports` / 文件列表求值阶段不能依赖 `config`
+在 home module 的 `imports` 或顶层 `let` 里读 `config.home.homeDirectory`、
+`config.users.users...`, 或裸用 `pkgs`/`config` 做条件, 会触发
+`infinite recursion encountered ... probably reference config in imports`喵~
+**规避**: 需要在求值期决定导入的文件列表时, 让它由 `mkHost` 在 host 侧算好, 再作为
+import 注入; home module 内部只保留纯 `meow`/`lib` 结构判断喵~
+
+### 坑 3: 无桌面 host 会默默继承桌面假设
+`modules/common` 里的字体/zsh/sudo 免密/polkit、`modules/hardware` 里的
+intel 微码与驱动、`modules/desktop` 的 xwayland, 曾对所有 host 无条件生效;
+在 AMD 主力机上还装着用不到的 Intel VA-API 驱动喵~
+**规避**: 交互/图形/硬件驱动能力按 host role 与 feature 自我屏蔽; 微码与固件放 host 本地喵~
+实测 NixMEOW 闭包因此减少约 111MiB (intel-media-driver 等) 且 initrd 缩小约 14.4MiB喵~
+
+### 附: `nixos-generators` 已弃用
+其 README 明说 NixOS 25.05 起镜像生成已上游到 `nixos-rebuild build-image`
+(`config.system.build.images.<variant>`); 不要再为 Docker 镜像新增该 flake input喵~
+Docker rootfs/tarball 仍由 nixpkgs 的 `nixos/modules/virtualisation/docker-image.nix`
+提供, 采用 systemd 作为 PID 1, 运行需要容器特权喵~

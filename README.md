@@ -8,13 +8,17 @@
 ## 2. 分层原则
 
 ```
-flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...}
-                                         → home/{username}/
+machines.nix (host → roles/features/users)
+  → flake.nix → lib/mkHost.nix → hosts/{HOST}/default.nix
+                                   → modules/{common,roles,hardware,desktop,...}
+  → users.nix (user ID → home/profile)
+                                   → home/{profile}/
 ```
 
 - **系统入口**：`flake.nix` 拼装输入输出 → `hosts/{HOST}/default.nix` 作为 composition root
 - **系统模块**：`modules/*` 存放 NixOS 系统级选项（daemon、kernel、硬件、桌面基础设施）
-- **用户模块**：`home/{username}/` 存放 home-manager 用户级选项（应用、shell、editor、WM 配置）
+- **角色模块**：`modules/roles/` 按 host 用途组合启用能力（交互 shell、管理权限、字体等）
+- **用户模块**：`home/{profile}/` 存放 home-manager 用户级选项（应用、shell、editor、WM 配置）
 
 ## 3. 目录树
 
@@ -22,7 +26,7 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 /etc/nixos/
 ├── users.nix                       # 用户身份注册表 (stable ID → login/home/profile)
 ├── config.nix                      # users.nix 的兼容视图，旧脚本过渡用
-├── machines.nix                    # host 注册表 (hostname → profile/kind/features/users)
+├── machines.nix                    # host 注册表 (hostname → profile/kind/roles/desktopEffects/features/users)
 ├── flake.nix                       # 入口：inputs + mkHost 装配 (由注册表驱动)
 ├── flake.lock                      # 锁定依赖版本
 ├── justfile                        # 常用命令
@@ -40,8 +44,9 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 │       └── default.nix
 ├── modules/
 │   ├── default.nix                # 聚合所有子模块
-│   ├── common/                    # 全局基础设置 + hardware profile + meow.* 标签选项
-│   ├── hardware/                  # CPU/GPU/蓝牙/设备策略
+│   ├── common/                    # 所有 host 通用的系统基础 + hardware profile + meow.* 选项
+│   ├── roles/                     # 按 host 用途组合启用能力 (交互 shell/管理权限/字体)
+│   ├── hardware/                  # CPU/GPU/蓝牙/设备策略 (微码与固件放 host 本地)
 │   ├── desktop/                   # 桌面会话栈 (niri, ly, fcitx5, tablet, backlight)
 │   ├── networking/                # 网络/代理/防火墙/SSH
 │   ├── services/                  # 后台 daemon / 系统服务 (PipeWire, MPD, Flatpak)
@@ -49,17 +54,18 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 │   └── virtualization/            # Podman, libvirtd
 ├── home/
 │   └── Reiky-REI/                 # 可复用 Home Manager 配置集，由 users.nix.homeProfile 绑定
-│       ├── default.nix            # 用户态入口 (按 meow.kind 分组自我屏蔽)
+│       ├── default.nix            # 用户态入口 (按 meow.roles / features 分组自我屏蔽)
 │       ├── desktop/               # 桌面态配置 (niri, noctalia, rofi, wallpaper)
 │       ├── shell/                 # Zsh
-│       ├── terminal/              # Kitty / Alacritty
-│       ├── editors/               # Neovim, VSCode, Zed 等
-│       ├── apps/                  # 浏览器、社交、媒体、办公 (wsl 跳过)
-│       ├── music/                 # 音乐播放器 (wsl 跳过)
-│       └── tools/                 # 系统工具、搜索、查看器
+│       ├── terminal/              # Kitty / Alacritty (仅桌面 host)
+│       ├── editors/               # Neovim 等; desktop.nix 放 GUI 编辑器
+│       ├── apps/                  # 浏览器、社交、媒体、办公 (workstation 专属)
+│       ├── music/                 # 音乐播放器 (workstation 专属)
+│       └── tools/                 # 系统工具、搜索、查看器; desktop.nix 放桌面专用工具
 ├── lib/
 │   ├── mkHost.nix                 # 由 machines.nix 注册表生成 nixosConfigurations
 │   ├── features.nix                # 已知 feature ID 清单，拼写错误在 eval 时失败
+│   ├── roles.nix                   # 已知 role ID 清单
 │   ├── claude-config.nix          # Claude Code 配置生成
 │   └── opencode-config.nix        # OpenCode 配置生成
 ├── pkgs/
@@ -74,14 +80,15 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 
 | 层 | 目录 | 放什么 | 不放什么 |
 |----|------|--------|----------|
-| 全局基础 | `modules/common/` | `nix.settings`, `nixpkgs.config`, `time`, `i18n`, `fonts`, `nix.gc`, `programs.zsh`, `security.sudo`, `hardware.profile` | 桌面策略、硬件驱动、daemon |
-| 硬件 | `modules/hardware/` | microcode、GPU 驱动、蓝牙、图形加速包 | 软件包、桌面、服务策略 |
+| 全局基础 | `modules/common/` | `nix.settings`, `nixpkgs.config`, `time`, `i18n`, `nix.gc`, `nix-ld`, `hardware.profile` | 交互 shell、桌面策略、硬件驱动、daemon |
+| 角色 | `modules/roles/` | 按 role 启用的交互能力（字体、`programs.zsh`、sudo 免密、polkit wheel 规则） | 具体设备或桌面实现 |
+| 硬件 | `modules/hardware/` | GPU 图形栈、蓝牙、通用硬件包（微码/固件放 host） | 软件包、桌面、服务策略 |
 | 桌面 | `modules/desktop/` | Niri 系统级启用、Ly display manager、XWayland、Steam、fcitx5、Wayland env vars | 用户态 WM 配置、主题文件 |
 | 网络 | `modules/networking/` | NetworkManager、代理、防火墙、SSH | 网络应用（浏览器等） |
 | 服务 | `modules/services/` | PipeWire、MPD、Flatpak、CUPS、udisks2、电源管理 | 用户交互应用 |
 | 开发 | `modules/development/` | wine 等 | 编辑器配置（放 home） |
 | 虚拟化 | `modules/virtualization/` | Docker、libvirtd、Waydroid | 容器内应用配置 |
-| 用户态 | `home/{username}/` | 应用、shell、编辑器、WM 配置文件、终端工具 | 系统 daemon、内核参数 |
+| 用户态 | `home/{profile}/` | 应用、shell、编辑器、WM 配置文件、终端工具 | 系统 daemon、内核参数 |
 
 ### 壁纸管理
 
@@ -113,16 +120,21 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 # machines.nix
 {
   "NixMEOW" = {
-    profile = "high";       # 硬件档位: high/medium/low (视觉特效/构建并行度)
-    kind = "laptop";        # 机器种类: laptop/desktop/wsl/vm
-    users = [ "reiky" ];    # users.nix 中的稳定身份 ID
-    primaryUser = "reiky";  # 尚未迁移的单用户 system module 的兼容身份
+    system = "x86_64-linux";   # 可省略, 默认 x86_64-linux
+    profile = "high";          # 硬件档位: high/medium/low (构建并行度)
+    kind = "laptop";           # 机器种类: laptop/desktop/wsl/vm
+    roles = [ "workstation" ]; # 用途组合: workstation/devbox/server/embedded
+    desktopEffects = "full";   # 桌面效果档: full/minimal
+    users = [ "reiky" ];       # users.nix 中的稳定身份 ID
+    primaryUser = "reiky";     # 尚未迁移的单用户 system module 的兼容身份
     features = [ "bluetooth" "gpu-nvidia" "compositor-niri" ... ];  # 特性标签
     note = "主力机 — RTX 4070 + AMD 核显";
   };
   "NixMEOW-WSL" = {
     profile = "medium";
     kind = "wsl";
+    roles = [ "devbox" ];
+    desktopEffects = "minimal";
     users = [ "reiky" ];
     primaryUser = "reiky";
     features = [ "compositor-niri" ];
@@ -131,17 +143,21 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 }
 ```
 
-**两种标签的用法完全不同**：
+**各组字段的用法不同**：
 
-| 标签 | 决定什么 | 消费方式 |
+| 字段 | 决定什么 | 消费方式 |
 |------|---------|---------|
-| **profile**（档位） | 视觉特效 / 构建并行度 | `hardware.profile` (`isHighPerf` 等，也传给了 home-manager) |
-| **kind / features**（多机部署） | 哪些模块在本机生效 | 各模块自己 `lib.mkIf (config.meow.enabled ? "tag")` **自我屏蔽** |
+| **profile** | 硬件性能档（构建并行度、性能布尔量） | `hardware.profile`（`isHighPerf` 等，也传给 home-manager） |
+| **roles** | 用途组合（是否要交互 shell、桌面、管理权限） | 各模块读 `config.meow.roles` 自我屏蔽 |
+| **desktopEffects** | 桌面效果档（full/minimal） | niri 选择 kdl 段等 |
+| **kind** | 设备形态/运行环境（laptop/desktop/wsl/vm） | 平台差异判断（如 WSL 代理端口、Mod 键） |
+| **features** | 可组合能力开关 | 各模块 `lib.mkIf (config.meow.enabled ? "tag")` 自我屏蔽 |
+| **users / primaryUser** | 该 host 部署哪些身份、legacy 单用户回退 | `lib/mkHost.nix` 生成系统账号与 Home Manager 用户 |
 
-- feature ID 清单集中在 `lib/features.nix`，未知标签会导致 eval 失败
+- feature / role ID 清单分别在 `lib/features.nix`、`lib/roles.nix`，未知标签会导致 eval 失败
 - flake 级标签（`kernel-715` / `agenix-secrets`）由 `lib/mkHost.nix` 消费
 - `meow` 同样注入 home-manager (`extraSpecialArgs`)，`home/Reiky-REI/default.nix`
-  按分组自我屏蔽（如 `kind=wsl` 时跳过 apps/music 组）
+  按 role/能力分组自我屏蔽（如 server 角色不导入桌面与 GUI 应用组）
 
 ### 用户身份与 host 绑定
 
@@ -154,7 +170,7 @@ flake.nix → hosts/{HOST}/default.nix  → modules/{common,hardware,desktop,...
 nixos-generate-config --root /mnt
 # 得到 /mnt/etc/nixos/hardware-configuration.nix
 
-# 2. 在 machines.nix 注册 (hostname + profile + kind + users + features)
+# 2. 在 machines.nix 注册 (hostname + profile + kind + roles + features + users)
 
 # 3. 创建 hosts/<hostname>/default.nix (imports ../../modules + 本机专属配置)
 #    ⚠ 目录名必须与 machines.nix 的 key 一致

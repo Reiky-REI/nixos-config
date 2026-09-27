@@ -1,4 +1,8 @@
-_: {
+{
+  lib,
+  meow,
+  ...
+}: {
   programs.eza = {
     enable = true;
     enableZshIntegration = true;
@@ -16,8 +20,6 @@ _: {
   };
 
   programs.jq.enable = true;
-
-  programs.imv.enable = true;
 
   programs.yazi = {
     enable = true;

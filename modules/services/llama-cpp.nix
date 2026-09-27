@@ -1,12 +1,19 @@
-{ config, lib, pkgs, username, ... }: let
+{
+  config,
+  lib,
+  pkgs,
+  primaryUser,
+  username,
+  ...
+}: let
   cfg = config.services.llama-cpp;
-  llamaPkg = pkgs.llama-cpp.override { cudaSupport = true; };
-  modelsDir = "/home/${username}/WorkSpace/models/llama-cpp";
+  llamaPkg = pkgs.llama-cpp.override {cudaSupport = true;};
+  modelsDir = "${primaryUser.homeDirectory}/WorkSpace/models/llama-cpp";
 in {
   # nixpkgs 26.05 把官方 llama-cpp 模块列为默认模块之一,但其设计
   # (DynamicUser + ProtectHome + 单实例) 无法满足 home 模型 + 多端口,
   # 这里用 disabledModules 替换为下方自定义多实例服务。
-  disabledModules = [ "services/misc/llama-cpp.nix" ];
+  disabledModules = ["services/misc/llama-cpp.nix"];
 
   options.services.llama-cpp = {
     enable = lib.mkEnableOption "local llama.cpp servers (chat + embedding + reranker)";
@@ -25,16 +32,16 @@ in {
     #   - Qwen3-8B-Q4_K_M.gguf                 聊天主模型,  8080, OpenAI 兼容 (默认关: chat.enable)
     #   - Qwen.Qwen3-VL-Embedding-2B.Q8_0.gguf embedding,  8081,--embeddings
     #   - reranker/Qwen3-VL-Reranker-2B.Q8_0.gguf rerank,  8082,--rerank
-    # User=Reiky-REI 直接读 home 模型。
+    # Primary user directly reads models from its registered home directory.
     # 显存注意: RTX 4070 Max-Q 只有 8G, 8B 全 GPU + 8192 ctx 会 OOM,
     #   故 chat 用 4096 ctx; embedding/rerank 2B 各 ~1.8G, 总共 ~3.6G, 放得进 8G VRAM。
     #   2026-09-09: --gpu-layers 0 改 99, 从 CPU 推理切到 GPU, 释放 CPU 负载。
 
     systemd.services.llama-cpp-chat = lib.mkIf cfg.chat.enable {
       description = "llama.cpp chat server (Qwen3-8B, OpenAI-compatible :8080)";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      path = [ "/run/current-system/sw" ];
+      after = ["network.target"];
+      wantedBy = ["multi-user.target"];
+      path = ["/run/current-system/sw"];
       serviceConfig = {
         User = username;
         Group = "users";
@@ -57,9 +64,9 @@ in {
 
     systemd.services.llama-cpp-embedding = {
       description = "llama.cpp embedding server (Qwen3-VL-Embedding-2B, :8081)";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      path = [ "/run/current-system/sw" ];
+      after = ["network.target"];
+      wantedBy = ["multi-user.target"];
+      path = ["/run/current-system/sw"];
       serviceConfig = {
         User = username;
         Group = "users";
@@ -90,9 +97,9 @@ in {
     # rerank 与 embedding 是互斥模式, 故独立进程 8082; 2B 各 ~1.8G 走 GPU。
     systemd.services.llama-cpp-reranker = {
       description = "llama.cpp reranker server (Qwen3-VL-Reranker-2B, :8082)";
-      after = [ "network.target" ];
-      wantedBy = [ "multi-user.target" ];
-      path = [ "/run/current-system/sw" ];
+      after = ["network.target"];
+      wantedBy = ["multi-user.target"];
+      path = ["/run/current-system/sw"];
       serviceConfig = {
         User = username;
         Group = "users";

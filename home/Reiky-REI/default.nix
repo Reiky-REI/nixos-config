@@ -11,56 +11,48 @@
     cp -r ${../../pkgs/cursors/MikuCat}/* $out/share/icons/MikuCat/
   '';
 
-  # 动态导入 ~/.config/home-manager/services/ 下的所有 .nix 文件
-  # 新增用户服务只需在该目录创建 .nix 文件, 无需修改此文件
-  userServicesDir = "/home/Reiky-REI/.config/home-manager/services";
-  userServices =
-    if builtins.pathExists userServicesDir
-    then let
-      entries = builtins.readDir userServicesDir;
-      nixFiles = builtins.filter (name: builtins.match ".*\\.nix" name != null) (builtins.attrNames entries);
-    in
-      map (f: "${userServicesDir}/${f}") nixFiles
-    else [];
+  hasDesktop = builtins.elem "compositor-niri" meow.features;
+  isWorkstation = builtins.elem "workstation" meow.roles;
+  isDeveloperHost = builtins.any (role: builtins.elem role meow.roles) ["workstation" "devbox" "server"];
+  hasBacklight = builtins.elem "backlight" meow.features;
 in {
-  # home 分组按机器标签自我屏蔽:
-  # apps/music 是最重的 GUI 组 (浏览器/KDE 全家桶/音乐播放器), WSL 试验台跳过
-  # (单次 closure 差 ~2-3G; NixMEOW kind=laptop 全量不变)
+  # User environment groups follow host role/capabilities, not a WSL-vs-laptop special case.
   imports =
     [
       ./shell
-      ./terminal
+      ./tools
+    ]
+    ++ lib.optionals isDeveloperHost [
       ./editors
       ./dev
-      ./tools
+    ]
+    ++ lib.optionals hasDesktop [
+      ./terminal
+      ./editors/desktop.nix
+      ./tools/desktop.nix
       ./desktop
     ]
-    ++ lib.optionals (meow.kind != "wsl") [
+    ++ lib.optionals isWorkstation [
       ./apps
       ./music
+      ./tools/mihomo.nix
     ]
-    ++ userServices;
+    ++ lib.optionals (isWorkstation && hasBacklight) [./tools/kbdlight.nix];
 
-  home.packages = with pkgs; [
-    libnotify
-  ];
+  home.packages = lib.optionals hasDesktop [pkgs.libnotify];
 
   # 自动创建截图文件夹
-  home.activation.ensureScreenshotDir = lib.hm.dag.entryAfter ["writeBoundary"] ''
+  home.activation.ensureScreenshotDir = lib.mkIf hasDesktop (lib.hm.dag.entryAfter ["writeBoundary"] ''
     mkdir -p "${config.home.homeDirectory}/screenshot"
-  '';
+  '');
 
   # 移除本地旧 fcitx5 config, 防止覆盖 NixOS 生成的 /etc/xdg/fcitx5/config
   # (fcitx5 优先级 ~/.config > /etc/xdg, 本地旧文件会导致快捷键等 NixOS 设置失效)
-  home.activation.cleanFcitx5Config = lib.hm.dag.entryAfter ["writeBoundary"] ''
-    rm -f "${config.home.homeDirectory}/.config/fcitx5/config"
-  '';
-
-  services.polkit-gnome.enable = true;
-  services.swaync.enable = true;
-  # 2026-09-01: idle 管理已由 noctalia-shell 内置 (settings.json idle.*), swayidle 未配任何 event
-  # → 空配置秒退 → start-limit-hit 崩溃循环, 纯日志噪声, 禁用喵~ (如需启用必须配 timeout 事件)
-  services.swayidle.enable = false;
+  home.activation.cleanFcitx5Config =
+    lib.mkIf (builtins.elem "fcitx5" meow.features)
+    (lib.hm.dag.entryAfter ["writeBoundary"] ''
+      rm -f "${config.home.homeDirectory}/.config/fcitx5/config"
+    '');
 
   # catppuccin.swaync = {
   #   enable = true;
@@ -74,8 +66,8 @@ in {
   #   flavor = "mocha";
   # };
 
-  xdg.mimeApps.enable = true;
-  xdg.mimeApps.defaultApplications = {
+  xdg.mimeApps.enable = lib.mkIf hasDesktop true;
+  xdg.mimeApps.defaultApplications = lib.mkIf hasDesktop {
     "image/png" = ["imv.desktop"];
     "image/jpeg" = ["imv.desktop"];
     "image/gif" = ["imv.desktop"];
@@ -85,22 +77,23 @@ in {
   };
 
   # 光标配置 - MikuCat
-  home.pointerCursor = {
+  home.pointerCursor = lib.mkIf hasDesktop {
     enable = true;
     package = micucat-cursor;
     name = "MikuCat";
     size = 32;
   };
 
-  home.sessionVariables = {
-    EDITOR = "nvim";
-    VISUAL = "nvim";
-    TERMINAL = "kitty";
-    PATH = "$HOME/.local/bin:$PATH";
-    LANG = "en_US.UTF-8";
-    LC_CTYPE = "zh_CN.UTF-8";
-    LC_MESSAGES = "en_US.UTF-8";
-  };
+  home.sessionVariables =
+    {
+      EDITOR = "nvim";
+      VISUAL = "nvim";
+      PATH = "$HOME/.local/bin:$PATH";
+      LANG = "en_US.UTF-8";
+      LC_CTYPE = "zh_CN.UTF-8";
+      LC_MESSAGES = "en_US.UTF-8";
+    }
+    // lib.optionalAttrs hasDesktop {TERMINAL = "kitty";};
 
   home.stateVersion = "25.11";
   home.enableNixpkgsReleaseCheck = true;

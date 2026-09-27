@@ -17,6 +17,10 @@
   # 注意 nixpkgs 26.05 无 linuxPackages_lts
   boot.kernelPackages = pkgs.linuxPackages_7_1;
 
+  # NixMEOW CPU is AMD; keep vendor microcode host-local rather than enabling Intel microcode globally.
+  hardware.cpu.amd.updateMicrocode = true;
+  hardware.enableAllFirmware = true;
+
   # COLORFIRE MEOW R16 键盘背光 (Clevo/Tongfang 模具, 用补丁版 tuxedo-drivers)
   # force_clevo_kb_backlight_type=6: 强制 1-zone RGB, 暴露 /sys/class/leds/rgb:kbdlight
   hardware.tuxedo-drivers.enable = true;

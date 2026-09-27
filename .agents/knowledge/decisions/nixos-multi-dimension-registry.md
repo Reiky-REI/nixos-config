@@ -23,7 +23,8 @@ Host、User、Agent 是三个独立维度，不是父子层级；三者之间通
 ## 阶段与兼容性
 
 - 阶段 A：引入 users registry、host-user bindings、feature ID 校验与全 host checks；现有 NixMEOW/WSL 输出保持不变喵~
-- 阶段 B：按 role/platform/hardware 拆能力组合，避免 headless server 或 embedded host 继承 workstation 默认值喵~
+- 阶段 B：新增 `roles` 表示用途组合、`desktopEffects` 表示桌面效果档，与硬件 `profile` 解耦；
+  交互/图形/硬件能力按 role 与 feature 自我屏蔽，微码与固件放 host 本地喵~
 - 阶段 C：使用 NixOS 内建 Docker rootfs/tarball module 产出 systemd PID 1 容器镜像；不引入已弃用的 nixos-generators flake 喵~
 - 阶段 D：定义 agent registry，并用 OpenCode/Claude/Codex 客户端适配器输出配置；共享定义不包含用户凭据喵~
 

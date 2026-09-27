@@ -18,11 +18,12 @@
   config,
   lib,
   pkgs,
+  primaryUser,
   username,
   ...
 }: let
   cfg = config.services.astrabot;
-  astraDir = "/home/${username}/WorkSpace/astrabot";
+  astraDir = "${primaryUser.homeDirectory}/WorkSpace/astrabot";
   venv = "${astraDir}/.venv";
   logFile = "${astraDir}/astrbot.log";
   libstdcppPath = pkgs.lib.makeLibraryPath [pkgs.stdenv.cc.cc.lib];

@@ -56,6 +56,15 @@ in
     homeUsers = builtins.listToAttrs (map (
         id: let
           user = selectedUsers.${id};
+          userServicesDir = "${user.homeDirectory}/.config/home-manager/services";
+          userServices =
+            if builtins.pathExists userServicesDir
+            then let
+              entries = builtins.readDir userServicesDir;
+              nixFiles = builtins.filter (file: builtins.match ".*\\.nix" file != null) (builtins.attrNames entries);
+            in
+              map (file: "${userServicesDir}/${file}") nixFiles
+            else [];
         in
           lib.nameValuePair user.username {
             _module.args = {
@@ -66,16 +75,18 @@ in
             };
             home.username = lib.mkDefault user.username;
             home.homeDirectory = lib.mkDefault user.homeDirectory;
-            imports = [
-              inputs.catppuccin.homeModules.catppuccin
-              inputs.agenix.homeManagerModules.default
-              inputs.noctalia.homeModules.default
-              ../home/${user.homeProfile}
-            ];
-            home.packages = [
-              pkgs-unstable.mpvpaper
-              inputs.CookNixvim.packages.${system}.default
-            ];
+            imports =
+              [
+                inputs.catppuccin.homeModules.catppuccin
+                inputs.agenix.homeManagerModules.default
+                inputs.noctalia.homeModules.default
+                ../home/${user.homeProfile}
+              ]
+              ++ userServices;
+            home.packages =
+              if builtins.hasAttr system inputs.CookNixvim.packages
+              then [inputs.CookNixvim.packages.${system}.default]
+              else [];
           }
       )
       userIds);
@@ -104,7 +115,8 @@ in
           # 机器标签 (来自注册表) —— 各模块据此自我屏蔽
           {
             meow = {
-              inherit (machine) kind features;
+              inherit (machine) kind features roles;
+              desktopEffects = machine.desktopEffects or "minimal";
             };
           }
 
@@ -178,9 +190,14 @@ in
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = {
               inherit inputs pkgs-unstable;
+              inherit system;
               inherit (config.hardware) profile isLowPerf isHighPerf isMediumPerf;
+              desktopEffects = machine.desktopEffects or "minimal";
               # 机器标签同样喂给 home-manager (home/ 树按 kind/features 自我屏蔽)
-              meow = {inherit (machine) kind features;};
+              meow = {
+                inherit (machine) kind features roles;
+                desktopEffects = machine.desktopEffects or "minimal";
+              };
             };
             home-manager.users = homeUsers;
           })
