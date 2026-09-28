@@ -1,0 +1,150 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "shell": "/run/current-system/sw/bin/bash",
+  "update": "disable",
+  "default_agent": "plan",
+  "instructions": [
+    ".agents/AGENTS.md",
+    ".agents/knowledge/INDEX.md",
+    ".agents/knowledge/conventions.md"
+  ],
+  "lsp": {
+    "nixd": {
+      "command": [
+        "nixd"
+      ],
+      "extensions": [
+        ".nix"
+      ]
+    },
+    "pyright": {
+      "command": [
+        "pyright-langserver",
+        "--stdio"
+      ],
+      "extensions": [
+        ".py"
+      ]
+    },
+    "rust-analyzer": {
+      "command": [
+        "rust-analyzer"
+      ],
+      "extensions": [
+        ".rs"
+      ]
+    },
+    "clangd": {
+      "command": [
+        "clangd"
+      ],
+      "extensions": [
+        ".c",
+        ".cpp",
+        ".h",
+        ".hpp",
+        ".cc",
+        ".cxx"
+      ]
+    },
+    "typescript": {
+      "command": [
+        "typescript-language-server",
+        "--stdio"
+      ],
+      "extensions": [
+        ".ts",
+        ".tsx",
+        ".js",
+        ".jsx"
+      ]
+    },
+    "gopls": {
+      "command": [
+        "gopls"
+      ],
+      "extensions": [
+        ".go"
+      ]
+    }
+  },
+  "permissions": [
+    {
+      "action": "external_directory",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "doom_loop",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "edit",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "webfetch",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "websearch",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "*",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git push",
+      "effect": "allow"
+    },
+    {
+      "action": "shell",
+      "resource": "git push --force",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -rf /",
+      "effect": "deny"
+    },
+    {
+      "action": "shell",
+      "resource": "rm -rf *",
+      "effect": "deny"
+    }
+  ],
+  "mcp": {
+    "servers": {
+      "obsidian-vault": {
+        "type": "local",
+        "command": [
+          "@HOME@/WorkSpace/tools/obsidian-mcp-server/result/bin/obsidian-mcp-server"
+        ],
+        "environment": {
+          "VAULT_PATH": "@HOME@/WorkSpace/notes"
+        },
+        "disabled": false
+      },
+      "kb": {
+        "type": "local",
+        "command": [
+          "/etc/profiles/per-user/Reiky-REI/bin/python3",
+          "/etc/nixos/.agents/tools/kb-mcp/server.py"
+        ],
+        "disabled": false
+      }
+    }
+  },
+  "agents": {
+    "plan": {
+      "system": "开工前检查:\n1. git status → 确认工作区干净，无未提交变更\n2. git branch → 确认不在 main 上（须在 feature branch）\n3. 查看 retros/ → 了解进行中的任务，避免冲突\n4. 查 known-issues.md → 避免已知踩坑\n改完后:\n5. 执行验证命令（config/env.sh 中的 VALIDATE_CMD）\n6. 写复盘到 .agents/knowledge/retros/<date>-<topic>.md\n7. 用 commit.sh 或 bot 身份提交 + 推送分支\n"
+    }
+  }
+}

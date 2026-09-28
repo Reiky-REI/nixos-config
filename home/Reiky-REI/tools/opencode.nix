@@ -1,8 +1,26 @@
 {
+  agentConfig,
   config,
+  lib,
   pkgs,
   ...
 }: let
+  settingsTemplate = builtins.fromJSON (builtins.readFile ./opencode-settings.json);
+  replaceHome = value:
+    if builtins.isAttrs value
+    then lib.mapAttrs (_: replaceHome) value
+    else if builtins.isList value
+    then map replaceHome value
+    else if builtins.isString value
+    then lib.replaceStrings ["@HOME@"] [config.home.homeDirectory] value
+    else value;
+  opencodeSettings = lib.recursiveUpdate (replaceHome settingsTemplate) {
+    default_agent = agentConfig.opencode.defaultAgent;
+    agents.plan.model = agentConfig.opencode.model;
+    agents.plan.system = agentConfig.opencode.planSystem;
+  };
+  opencodeSettingsFile = pkgs.writeText "opencode.jsonc" (builtins.toJSON opencodeSettings);
+
   # opencode v2 数据库清理脚本 (声明式部署, 见 opencode-gc.py)
   opencodeGc = pkgs.writeScript "opencode-gc" (builtins.readFile ./opencode-gc.py);
 
@@ -31,6 +49,9 @@
       "${opencodePluginDeferredRestart}"
   '';
 in {
+  home.file.".config/opencode/opencode.jsonc".source = opencodeSettingsFile;
+  home.file.".config/opencode/cli.json".source = ./opencode-cli.json;
+
   # 全局 edit 前自动快照插件; 放在 .opencode/plugins 外, 避免项目级与全局重复加载。
   home.file.".config/opencode/plugins/edit-backup.js".source = ./opencode-edit-backup.js;
 
@@ -46,10 +67,11 @@ in {
   };
 
   systemd.user.paths.opencode-plugin-restart = {
-    Unit.Description = "Watch OpenCode plugin source and deployed plugin path";
+    Unit.Description = "Watch OpenCode settings and plugin files for changes";
     Path = {
       PathChanged = [
         "${config.home.homeDirectory}/.config/opencode/plugins"
+        "${config.home.homeDirectory}/.config/opencode/opencode.jsonc"
       ];
       Unit = "opencode-plugin-restart.service";
     };

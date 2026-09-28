@@ -1,0 +1,8 @@
+[Unit]
+Description=kb-mcp index warmer (rebuild only roots whose corpus signature changed)
+
+[Service]
+Type=oneshot
+ExecStart=/etc/nixos/.agents/tools/kb-mcp/warm-all.sh
+Nice=10
+IOSchedulingClass=idle

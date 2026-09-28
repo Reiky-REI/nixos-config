@@ -6,10 +6,7 @@
   imports = [
     ./media
     ./dsh-fence.nix
-    ./astrabot.nix
     ./llama-cpp.nix
-    ./opencode-root.nix
-    ./mcp-agents-bridge.nix
     ./netease-cdn-bypass.nix
   ];
 
@@ -18,14 +15,7 @@
   services.dsh-fence.enable = lib.mkIf (config.meow.enabled ? "dsh-fence") true;
   services.dsh-fence.trustedHosts = ["nixmeow.miku-garibaldi.ts.net"];
 
-  # AstrBot 已弃用 (2026-09-20), 关闭服务 + watchdog
-  services.astrabot.enable = false;
-
   services.llama-cpp.enable = lib.mkIf (config.meow.enabled ? "llama-cpp") true;
-
-  services.opencode-root.enable = lib.mkIf (config.meow.enabled ? "opencode-root") true;
-
-  services.mcp-agents-bridge.enable = lib.mkIf (config.meow.enabled ? "mcp-agents-bridge") true;
 
   services.netease-cdn-bypass.enable = lib.mkIf (config.meow.enabled ? "netease-cdn-bypass") true;
 

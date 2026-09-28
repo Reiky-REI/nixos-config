@@ -29,6 +29,7 @@
   };
 
   programs.superfile.enable = true;
+  programs.superfile.settings = builtins.fromTOML (builtins.readFile ./superfile.toml);
 
   programs.zoxide = {
     enable = true;

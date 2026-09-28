@@ -11,6 +11,9 @@
 #              宿主不再挑选模块 (见 lib/mkHost.nix 与 modules/common/options.nix)。
 #              feature ID 由 modules/common/options.nix 对照 lib/features.nix 校验,
 #              标签拼错会直接 eval 失败。
+#   noctaliaMonitors — 此 host 上 Noctalia 小组件可用的显示器名称。
+#   backlightDevice — /sys/class/backlight 下供键盘背光同步使用的设备名称。
+#   kbCorpusProjects — 此 workstation 上需要监听 .agents 语料的 WorkSpace 项目。
 #   users    — 此 host 上部署哪些 users.nix 身份 ID。
 #   primaryUser — legacy system modules 使用的默认用户, 必须包含在 users 中。
 #   note     — 人类可读备注, 不参与任何逻辑。
@@ -31,6 +34,17 @@
     kind = "laptop";
     roles = ["workstation"];
     desktopEffects = "full";
+    noctaliaMonitors = ["eDP-1" "HDMI-A-1"];
+    backlightDevice = "amdgpu_bl1";
+    kbCorpusProjects = [
+      "blueprint-vm"
+      "DeepSec"
+      "dsh-deepsec-guard"
+      "dsh-https-proxy"
+      "dsh-routing-suite"
+      "notes"
+      "nxwatch"
+    ];
     users = ["reiky"];
     primaryUser = "reiky";
     features = [
@@ -50,8 +64,6 @@
       # --- services ---
       "dsh-fence"
       "llama-cpp"
-      "opencode-root"
-      "mcp-agents-bridge"
       "netease-cdn-bypass"
       "media-mpd"
       "audio"
@@ -79,6 +91,8 @@
     kind = "wsl";
     roles = ["devbox"];
     desktopEffects = "minimal";
+    noctaliaMonitors = [];
+    kbCorpusProjects = [];
     users = ["reiky"];
     primaryUser = "reiky";
     features = [
@@ -94,6 +108,7 @@
     kind = "container";
     roles = ["server"];
     desktopEffects = "minimal";
+    noctaliaMonitors = [];
     users = ["reiky"];
     primaryUser = "reiky";
     # 无桌面、无本机硬件: 作为相同工具环境的 docker 容器镜像运行

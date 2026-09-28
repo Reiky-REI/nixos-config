@@ -1,0 +1,32 @@
+# Your patch layer for this dsh profile, applied after every bundle layer:
+# a top-level YAML array of loader patch entries (id-targeted config
+# overrides, disables, and insert lists; `!!js` expressions allowed).
+
+# 「NixOS 守夜人」驾驶舱(nxwatch):
+# 宿主半注册 /plugins/nxwatch/* 元数据与壁纸资源路由;
+# 浏览器半在 conversation.composer.dock 注册状态条与展开面板,
+# 仅当当前会话预设为 nixos-guard 时渲染。
+# 插件包: ~/WorkSpace/nxwatch(profile 依赖 file: 安装)。
+- insert:
+    - id: nxwatch
+      name: 'nxwatch'
+
+# 统一 DeepSec 安全守卫(dsh-deepsec-guard):
+# 在 agent/pre-step(入站消息)与 tools/pre-execute(工具参数)调用 deepsec-guard,
+# 命中恶意提示词/高危则拦截。引擎统一为 DeepSec。
+# 插件包: ~/WorkSpace/dsh-deepsec-guard(profile 依赖 file: 安装)。
+- insert:
+    - id: dsh-deepsec-guard
+      name: 'dsh-deepsec-guard'
+      config:
+        enabled: true
+        toolNames:
+          - bash
+          - persistent-bash
+          - terminal-bash
+          - str-replace-editor
+          - edit
+        scanPreStep: true
+        scanPostExecute: false
+        allowOnError: true
+        timeoutMs: 12000

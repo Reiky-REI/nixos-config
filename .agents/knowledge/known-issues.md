@@ -268,6 +268,8 @@ nixpkgs 中 `swww` 包改名为 `awww`, 二进制从 `swww`/`swww-daemon` 改为
 
 ## AstrBot 开机自启 (2026-08-16)
 
+> 2026-09-28 已退役喵~ AstrBot、NapCat 与相关 bridge 按用户要求停止喵,原运行数据已加密归档喵,服务模块移至 `docs/archive/retired-integrations/` 喵~
+
 ### 问题
 AstrBot 6185 之前手动启动, 重启后不自动运行。
 
@@ -702,7 +704,9 @@ v2 的 `opencode serve` 启动打印随机 `server password`，无鉴权请求�
 无任何关闭鉴权的开关（v1 是完全无鉴权的）喵~ 因此依赖 v1 server API 的调用方
 （`mcp-agents-bridge` → `POST /session`、`POST /session/{id}/shell`）不能直接跟着升级喵~
 
-**当前对策**：系统 CLI 用 v2，`services.opencode-root` 通过 `package` 选项 pin `pkgs-unstable.opencode`（v1）喵~
+**历史对策**：系统 CLI 用 v2，`services.opencode-root` 通过 `package` 选项 pin `pkgs-unstable.opencode`（v1）喵~
+
+> 2026-09-28 已退役喵~ mcp-agents-bridge 与专用 opencode-root 通道均已停止喵,此处保留历史兼容性说明喵~
 
 ### 排障速查
 - 单文件二进制行为异常（变成解释器本体）→ 先查是否被 patchelf/strip 动过喵~

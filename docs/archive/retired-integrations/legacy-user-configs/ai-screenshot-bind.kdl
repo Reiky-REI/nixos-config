@@ -1,0 +1,5 @@
+# AI 截图分析快捷键
+# 将以下内容添加到 ~/.config/niri/config.kdl 的 binds {} 中
+
+// AI 截图分析
+Mod+Shift+A hotkey-overlay-title="AI 截图分析" { spawn "ai-screenshot"; }

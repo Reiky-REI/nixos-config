@@ -24,7 +24,7 @@
 - 用户身份在 `users.nix` 按稳定 ID 注册；`users.nix` 显式声明 login、homeDirectory、homeProfile
 - 一个用户可绑定多个 host，一个 host 可绑定多个用户；host-local 的 UID/组等差异保留在 host 配置
 - `primaryUser` 仅用于尚未迁移的 legacy system modules；新增模块应使用具体用户 ID 或 user registry
-- home module 的 `imports` 与文件列表不得依赖 `config`；需要按用户计算的导入放 `lib/mkHost.nix`
+- Home Manager 的 `imports` 与文件列表必须来自 `/etc/nixos` 喵,`mkHost` 只按注册表选择 profile 喵,不扫描 home 或 WorkSpace 导入外部 Nix 文件喵~
 - 微码/固件属于设备事实，写在 `hosts/<host>/`
 - AI agent 在 `agents.nix` 注册；`lib/agents.nix` 负责校验与 `(agent,user,host)` 求交
 - agent 作用域: `hosts` 默认全部、`users` 必须显式、`privileged` 必须写非空 `hosts.allow`

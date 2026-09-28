@@ -188,7 +188,7 @@ wsl -l -v
 2. Xvfb 无 GPU 软渲染 — 桌面慢, 小组件动画低帧; noctalia 的额外效果会卡
 3. `xwyland-satellite` spawn 失败 → X11 应用无论 Xvfb 还是 WSLg 均处理不了;
    WSL native 桌面只有 Wayland 应用 (alacritty ✓)
-4. `dsh-fence`/`astrabot` 等真机服务不在试验台 (特性标签未全部开启)
+4. `dsh-fence` 等真机服务不在试验台 (特性标签未全部开启) 喵~ AstrBot、NapCat 与其 bridge 已退役喵~
 5. squash: 夜里 6 小时未动手 wsl VM 会退出 (keepalive 脚本已做 但可能失效)
 
 ## 8. 迭代手册 (改配置 → build → switch)

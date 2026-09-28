@@ -1,4 +1,5 @@
 {
+  backlightDevice,
   pkgs,
   config,
   ...
@@ -69,7 +70,7 @@
 
     LED = "/sys/class/leds/rgb:kbdlight"
     COLORS = os.path.expanduser("~/.config/noctalia/colors.json")
-    SCREEN_BL = "/sys/class/backlight/amdgpu_bl2"
+    SCREEN_BL = "/sys/class/backlight/${backlightDevice}"
     OFF_MARKER = "/tmp/kbdlight-off"
 
     def read_int(path):
@@ -159,9 +160,11 @@
 
         # 并行: (1) inotify 监听文件变化 (2) niri 事件流检测唤醒恢复
         (
+          brightness_path="/sys/class/backlight/${backlightDevice}/brightness"
+          watch_paths=("${config.home.homeDirectory}/.config/noctalia/colors.json")
+          [ -e "$brightness_path" ] && watch_paths+=("$brightness_path")
           ${pkgs.inotify-tools}/bin/inotifywait -m -e modify --format '%w' \
-            "${config.home.homeDirectory}/.config/noctalia/colors.json" \
-            /sys/class/backlight/amdgpu_bl2/brightness \
+            "''${watch_paths[@]}" \
             | while read -r changed; do
                 # 若在熄屏状态(有 off 标记), 仅更新颜色, 不恢复亮度
                 if [ -e /tmp/kbdlight-off ]; then
@@ -175,12 +178,14 @@
         # (2) niri 事件流: 检测到窗口/工作区变化视为"用户回来了", 移除 off 标记并恢复
         (
           while true; do
-            if timeout 120 niri msg event-stream 2>/dev/null | grep -m1 -qE "Windows changed|Workspaces changed|Outputs changed"; then
-              if [ -e /tmp/kbdlight-off ]; then
-                rm -f /tmp/kbdlight-off
-                python3 "$sync_py" || true
-              fi
-            fi
+            niri msg event-stream 2>/dev/null |
+              while IFS= read -r event; do
+                if [[ "$event" =~ Windows\ changed|Workspaces\ changed|Outputs\ changed ]] && [ -e /tmp/kbdlight-off ]; then
+                  rm -f /tmp/kbdlight-off
+                  python3 "$sync_py" || true
+                fi
+              done
+            sleep 2
           done
         ) &
 

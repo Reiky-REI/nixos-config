@@ -1,6 +1,5 @@
 {pkgs, ...}: {
-  # 桌面微信/QQ 已移除(2026-08):改用 AstrBot 扫码接入(weixin_oc),无需 wine 模拟。
-  # 2026/09/07QQ又添加了
+  # QQ 由 Nix 提供；AstrBot 与 NapCat 已于 2026-09-28 退役喵~
   home.packages = with pkgs; [
     qq
   ];

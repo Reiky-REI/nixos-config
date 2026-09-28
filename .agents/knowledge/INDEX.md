@@ -38,6 +38,7 @@ Agent 每次启动时，按以下顺序加载知识：
 ## 决策索引
 | 文件 | 标签 | 日期 |
 |------|------|------|
+| [config-reproducibility-and-retirement.md](decisions/config-reproducibility-and-retirement.md) | nixos, home-manager, reproducibility, multi-host, secrets, systemd, retirement | 2026-09-28 |
 | [niri-focus-ring-transparent-overlay.md](decisions/niri-focus-ring-transparent-overlay.md) | niri, focus-ring, transparent, opacity, overlay, electron | 2026-05-27 |
 | [nixos-26.05-upgrade-plan.md](decisions/nixos-26.05-upgrade-plan.md) | upgrade, nixos-26.05, waydroid, gbinder, niri | 2026-05-27 |
 | [nixos-multi-dimension-registry.md](decisions/nixos-multi-dimension-registry.md) | nixos, multi-host, multi-user, multi-agent, architecture | 2026-09-27 |
@@ -75,4 +76,4 @@ Agent 每次启动时，按以下顺序加载知识：
 | **pkill -f 不要用** | AGENTS.md 纪律7 | 误杀自身进程 |
 
 ## 复盘索引
-完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 80 篇）
+完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 81 篇）

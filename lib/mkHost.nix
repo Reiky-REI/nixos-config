@@ -33,6 +33,11 @@ in
     unknownUserIds = builtins.filter (id: !(builtins.hasAttr id userRegistry)) userIds;
     selectedUsers = builtins.listToAttrs (map (id: lib.nameValuePair id userRegistry.${id}) userIds);
     primaryUserId = machine.primaryUser or "";
+    noctaliaMonitors = machine.noctaliaMonitors or [];
+    kbCorpusProjects = machine.kbCorpusProjects or [];
+    backlightDevice = machine.backlightDevice or null;
+    invalidNoctaliaMonitors = !(builtins.isList noctaliaMonitors && builtins.all builtins.isString noctaliaMonitors);
+    invalidKbCorpusProjects = !(builtins.isList kbCorpusProjects && builtins.all builtins.isString kbCorpusProjects);
     hasPrimaryUser = builtins.elem primaryUserId userIds;
     usernames = map (id: selectedUsers.${id}.username) userIds;
     homeDirectories = map (id: selectedUsers.${id}.homeDirectory) userIds;
@@ -68,15 +73,6 @@ in
     homeUsers = builtins.listToAttrs (map (
         id: let
           user = selectedUsers.${id};
-          userServicesDir = "${user.homeDirectory}/.config/home-manager/services";
-          userServices =
-            if builtins.pathExists userServicesDir
-            then let
-              entries = builtins.readDir userServicesDir;
-              nixFiles = builtins.filter (file: builtins.match ".*\\.nix" file != null) (builtins.attrNames entries);
-            in
-              map (file: "${userServicesDir}/${file}") nixFiles
-            else [];
         in
           lib.nameValuePair user.username {
             _module.args = {
@@ -87,14 +83,12 @@ in
             };
             home.username = lib.mkDefault user.username;
             home.homeDirectory = lib.mkDefault user.homeDirectory;
-            imports =
-              [
-                inputs.catppuccin.homeModules.catppuccin
-                inputs.agenix.homeManagerModules.default
-                inputs.noctalia.homeModules.default
-                ../home/${user.homeProfile}
-              ]
-              ++ userServices;
+            imports = [
+              inputs.catppuccin.homeModules.catppuccin
+              inputs.agenix.homeManagerModules.default
+              inputs.noctalia.homeModules.default
+              ../home/${user.homeProfile}
+            ];
             home.packages =
               if builtins.hasAttr system inputs.CookNixvim.packages
               then [inputs.CookNixvim.packages.${system}.default]
@@ -110,6 +104,9 @@ in
     assert unknownUserIds == [] || throw "Host '${name}' references unknown user IDs: ${builtins.concatStringsSep ", " unknownUserIds}";
     assert builtins.length userIds == builtins.length (lib.unique userIds) || throw "Host '${name}' has duplicate user IDs";
     assert hasPrimaryUser || throw "Host '${name}' primaryUser '${primaryUserId}' must appear in users";
+    assert !invalidNoctaliaMonitors || throw "Host '${name}' noctaliaMonitors must be a list of strings";
+    assert !invalidKbCorpusProjects || throw "Host '${name}' kbCorpusProjects must be a list of strings";
+    assert !(builtins.elem "backlight" machine.features) || (builtins.isString backlightDevice && backlightDevice != "") || throw "Host '${name}' enables backlight but has no backlightDevice";
     assert builtins.length usernames == builtins.length (lib.unique usernames) || throw "Host '${name}' assigns the same login name more than once";
     assert builtins.length homeDirectories == builtins.length (lib.unique homeDirectories) || throw "Host '${name}' assigns the same home directory more than once";
     assert missingHomeProfiles == [] || throw "Host '${name}' references missing home profiles for user IDs: ${builtins.concatStringsSep ", " missingHomeProfiles}";
@@ -200,11 +197,15 @@ in
           ({config, ...}: {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "hm-backup";
             home-manager.extraSpecialArgs = {
               inherit inputs pkgs-unstable;
               inherit system agentConfig;
               inherit (config.hardware) profile isLowPerf isHighPerf isMediumPerf;
               desktopEffects = machine.desktopEffects or "minimal";
+              inherit noctaliaMonitors;
+              inherit kbCorpusProjects;
+              inherit backlightDevice;
               # 机器标签同样喂给 home-manager (home/ 树按 kind/features 自我屏蔽)
               meow = {
                 inherit (machine) kind features roles;

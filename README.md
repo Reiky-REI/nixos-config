@@ -27,7 +27,7 @@ machines.nix (host → roles/features/users)
 ├── users.nix                       # 用户身份注册表 (stable ID → login/home/profile)
 ├── agents.nix                      # AI agent 注册表 (client/model/system/hosts/users)
 ├── config.nix                      # users.nix 的兼容视图，旧脚本过渡用
-├── machines.nix                    # host 注册表 (hostname → profile/kind/roles/desktopEffects/features/users)
+├── machines.nix                    # host 注册表 (hostname → roles/features/users/桌面设备映射)
 ├── flake.nix                       # 入口：inputs + mkHost 装配 (由注册表驱动)
 ├── flake.lock                      # 锁定依赖版本
 ├── justfile                        # 常用命令
@@ -35,6 +35,8 @@ machines.nix (host → roles/features/users)
 ├── CLAUDE.md                       # Claude Code 工作指南
 ├── AGENTS.md                       # AI 辅助工作指南
 ├── docs/
+│   ├── config-reproducibility.md    # 配置来源、可变状态与密钥边界
+│   ├── archive/retired-integrations/ # 已退役服务与加密数据归档记录
 │   ├── NixMEOW-WSL.md              # WSL 试验台的完整文档 (访问/网络/排障)
 │   └── NixMEOW-CTR.md              # Docker 容器镜像 (构建/导入/运行约束)
 ├── hosts/

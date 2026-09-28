@@ -16,6 +16,17 @@ import time
 RETENTION_DAYS = 7
 DATA_DIR = os.path.join(os.path.expanduser("~"), ".local", "share", "opencode")
 DB_PATH = os.path.join(DATA_DIR, "opencode.db")  # v2 实际使用的库 (v1 是 opencode-stable.db, 不动)
+V2_DELETE_QUERIES = {
+    "session_message": "delete from session_message where session_id in (select id from session_v2 where time_updated < ?)",
+    "session_inbox": "delete from session_inbox where session_id in (select id from session_v2 where time_updated < ?)",
+    "session_pending": "delete from session_pending where session_id in (select id from session_v2 where time_updated < ?)",
+    "todo": "delete from todo where session_id in (select id from session_v2 where time_updated < ?)",
+}
+V1_DELETE_QUERIES = {
+    "part": "delete from part where session_id in (select id from session where time_updated < ?)",
+    "message": "delete from message where session_id in (select id from session where time_updated < ?)",
+    "todo": "delete from todo where session_id in (select id from session where time_updated < ?)",
+}
 
 
 def log(msg: str) -> None:
@@ -57,20 +68,18 @@ def main() -> int:
             removed = 0
             # ── v2 结构 ──
             if "session_v2" in T:
-                sub = "select id from session_v2 where time_updated < ?"
-                for t in ("session_message", "session_inbox", "session_pending", "todo"):
+                for t, query in V2_DELETE_QUERIES.items():
                     if t in T:
-                        cur = con.execute(f"delete from {t} where session_id in ({sub})", (cutoff,))
+                        cur = con.execute(query, (cutoff,))
                         removed += cur.rowcount or 0
                 cur = con.execute("delete from session_v2 where time_updated < ?", (cutoff,))
                 removed += cur.rowcount or 0
                 log(f"  v2: session_v2 及相关行删除 {removed} 行")
             # ── 兼容残留的 v1 表 (若仍在同一库) ──
             if "session" in T:
-                sub = "select id from session where time_updated < ?"
-                for t in ("part", "message", "todo"):
+                for t, query in V1_DELETE_QUERIES.items():
                     if t in T:
-                        con.execute(f"delete from {t} where session_id in ({sub})", (cutoff,))
+                        con.execute(query, (cutoff,))
                 con.execute("delete from session where time_updated < ?", (cutoff,))
                 log("  v1 残留表已清理")
 

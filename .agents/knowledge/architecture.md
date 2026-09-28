@@ -16,17 +16,17 @@ machines.nix (host → features + user IDs)
 - **modules/networking/** — 网络、代理、防火墙、SSH、VPN、Clash
 - **modules/services/** — 后台 daemon、系统能力服务 (管道/打印/MPD/Flatpak/polkit)
 - **modules/development/** — 系统级开发工具链和平台支持
-- **home/{username}/** — 用户态配置
+- **home/{profile}/** — Home Manager 可复用用户配置
 
 ## Host 与 User 两个独立维度
-- `machines.nix` 注册 host，声明 `features`、`roles`、`desktopEffects`、`users` 和兼容用的 `primaryUser`
+- `machines.nix` 注册 host，声明 `features`、`roles`、`desktopEffects`、Noctalia monitors、backlight device、KB corpus roots、`users` 和兼容用的 `primaryUser`
 - `roles` 表示用途组合（`workstation`/`devbox`/`server`/`embedded`），决定交互与图形能力；`features` 表示可组合能力
 - `desktopEffects` 与硬件 `profile` 解耦：前者决定桌面效果档，后者决定性能档与构建并行度
 - `users.nix` 按稳定 user ID 注册 `username`、`fullName`、`homeDirectory`、`homeProfile` 等身份字段
 - 同一 user ID 可以绑定多个 host；一个 host 可以绑定多个 user ID
 - `home/{profile}/` 是可复用 Home Manager 配置集，由 `users.nix.homeProfile` 显式选择，不再从登录名推导
 - `lib/mkHost.nix` 为每个绑定用户生成 NixOS 用户与 Home Manager 用户；`primaryUser` 目前仅供尚未迁移的单用户 system modules 兼容
-- 可在 host 侧计算的用户私有 `~/.config/home-manager/services/*.nix` 由 `mkHost` 解析后注入，避免在 home module 的 `imports` 里读 `config`
+- Home Manager 服务模块与用户配置一起放在 `home/<profile>` 喵,`mkHost` 不扫描 `~/.config` 或其他工作区路径导入 Nix 文件喵~
 - 微码与固件属于设备事实，放 `hosts/<host>/`；不再由 `modules/hardware` 无条件开启
 - `config.nix` 保留为旧脚本兼容视图，新配置应直接使用 `users.nix`
 - 未知 user ID、重复绑定、重复登录名/home 路径及缺失 Home profile 会在求值时报错；feature 与 role ID 分别由 `lib/features.nix`、`lib/roles.nix` 类型校验

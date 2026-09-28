@@ -1,0 +1,53 @@
+{
+  "project_panel": {
+    "dock": "left"
+  },
+  "outline_panel": {
+    "dock": "left"
+  },
+  "collaboration_panel": {
+    "dock": "left"
+  },
+  "git_panel": {
+    "dock": "left"
+  },
+  "vim_mode": true,
+  "language_models": {
+    "openai_compatible": {
+      "Xiaomi-Mimo": {
+        "api_url": "https://api.xiaomimimo.com/v1",
+        "available_models": [
+          {
+            "name": "mimo-v2.5",
+            "max_tokens": 1000000,
+            "max_output_tokens": 128000,
+            "max_completion_tokens": 128000,
+            "capabilities": {
+              "tools": true,
+              "images": true,
+              "parallel_tool_calls": true,
+              "prompt_cache_key": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  "agent": {
+    "dock": "right",
+    "default_model": {
+      "provider": "Xiaomi-Mimo",
+      "model": "mimo-v2.5"
+    },
+    "play_sound_when_agent_done": true,
+    "always_allow_tool_actions": true,
+    "model_parameters": []
+  },
+  "ui_font_size": 16,
+  "buffer_font_size": 15,
+  "theme": {
+    "mode": "dark",
+    "light": "One Light",
+    "dark": "One Dark"
+  }
+}
