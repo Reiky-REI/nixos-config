@@ -39,7 +39,8 @@ experience:
 - AstrBot、NapCat、mcp-agents-bridge 与 opencode-root 服务已停止喵,DSH AstrBot plugin 从 Cordis/package/lock 删除喵~
 - DSH fence 在无 established clients 时重启喵,`/plugins/astrabot/health` 返回 404 喵~
 - 运行目录已使用 SSH recipient age 加密归档到 NAS 喵,主 archive 与逐文件 hash manifest 均通过验证喵~
-- 由于 shell permission gate 拒绝原目录删除喵,WorkSpace、NapCat session、node_modules plugin 与 user unit 源文件仍保留在本机喵~
+- 初始 OpenCode `rm -rf *` deny 阻止了删除且没有弹出审批喵~ 用户同意改为 ask 后喵,新规则构建并部署成功喵~ 当前 shell 调用没有显示独立审批弹窗喵,命令执行至文件系统时遇到 AstrBot 中 root-owned 工作区文件喵~ 归档核验后对该目录执行定向 sudo 清理喵,其余 bot data、NapCat session、node_modules plugin、旧 bot units 与历史 profile backups 已清理喵~
+- 验证 KB watcher 的 Home Manager unit 链接未受清理影响且仍 active 喵~
 
 ## 凭据边界
 

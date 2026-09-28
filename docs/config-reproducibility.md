@@ -46,6 +46,6 @@
 - 退役应用的数据库、登录态和源码只用于归档恢复喵,不属于新 host 的初始化依赖喵~
 - `systemd.user.paths` 与服务声明在 `home/Reiky-REI/tools/` 中统一定义喵,Agent KB 路径来自 host 的 `kbCorpusProjects` 显式列表喵~
 - AstrBot/NapCat user units 已停止并禁用喵,mcp-agents-bridge 与 opencode-root 也已停止喵~
-- 归档已验证喵,本地源目录删除被 shell permission gate 拒绝喵,待清路径见 `docs/archive/retired-integrations/README.md` 喵~
+- 归档已验证喵,bot 相关本机源目录、登录态、旧 user units 与 DSH bridge 备份已清理喵,KB watcher 活动 unit 保留喵~ 其他已归档但保留的用户文件见 `docs/archive/retired-integrations/README.md` 喵~
 - 初次切换曾因 HM 发现未管理的同名配置而中止用户配置激活喵~ 配置 `home-manager.backupFileExtension = "hm-backup"` 后重试成功喵,原配置已备份且 Home Manager 新链接已落地喵~
 - NixMEOW 当前 generation 已切换喵,退役的 system services 已从 systemd unit graph 移除喵~

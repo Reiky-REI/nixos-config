@@ -68,26 +68,19 @@ age -d -i ~/.ssh/id_ed25519 ~/nas/retired-bot-integrations/2026-09-28/source-man
 
 ## 本地源目录清理状态
 
-NAS 加密归档及本目录配置副本均已验证喵~ 执行原目录清理时 shell 权限层拒绝了文件删除请求喵,因此原始用户数据没有被删除喵~
+NAS 加密归档与校验均已通过喵~ OpenCode 权限源已把 `rm -rf *` 从静默拒绝改为 ask 喵~ 当前 shell 调用未显示单独审批弹窗喵,但命令已运行到文件系统喵~ 首轮清理遇到 AstrBot 下 root 所有的工作区文件后喵,对该已归档目录执行了定向 sudo 清理喵~
 
-仍待清理的原路径如下喵~
+已移除 AstrBot/NapCat 工作区与登录态喵,mcp-agents-bridge 和 DSH-AstrBot bridge 源码喵,旧 bot user units 喵,两个 node_modules 插件副本喵,以及六个 DSH profile 历史备份喵~
+KB watcher 的 `kb-corpus.path` 与 `kb-corpus.service` 是当前 Home Manager 管理的活动链接喵,保留并确认 watcher active 喵~
+
+以下与 bot 退役无关的旧本地文件已归档但仍保留喵~
 
 ```text
-~/WorkSpace/astrabot                     ~/WorkSpace/astrabot-flake
-~/WorkSpace/astrabot-setup                ~/WorkSpace/napcat-qq
-~/WorkSpace/dsh-astrabot-bridge           ~/WorkSpace/mcp-agents-bridge
-~/.config/NapCat                          ~/.config/napcat
-~/.local/state/napcat-watchdog            ~/.astrbot
-~/.dsh/profiles/web/node_modules/dsh-astrabot-bridge
-~/.dsh/profiles/web/node_modules.broken-1786818914/dsh-astrabot-bridge
-~/.config/systemd/user/{astrabot,napcat,napcat-watchdog,dsh-web,hermes-gateway}.*
-~/.config/systemd/user/kb-corpus.path      ~/.config/systemd/user/kb-corpus.service
 ~/.config/home-manager/services/netease-cdn-bypass.nix
-~/.config/niri/ai-screenshot-bind.kdl     ~/.config/neofetch/config.conf
-~/.dsh/profiles/web/*bak*                 (六个已归档备份文件)
+~/.config/niri/ai-screenshot-bind.kdl
+~/.config/neofetch/config.conf
 ```
 
-用户态 AstrBot/NapCat 与 watchdog 已停止并禁用喵,DSH bridge 配置已移除且 DSH fence 重启后 health route 返回 404 喵~
-system mcp-agents-bridge 与 opencode-root 已停止喵,切换前旧 generation 的 unit links 仍启用喵~ 切换成功后这两个 units 已从当前 system generation 移除喵~
-Home Manager 原始 unit files 与 WorkSpace data directories 仍在本机喵,清理命令被 shell permission gate 拒绝喵~
-- 当前 DSH profile 已由 Nix source 管理喵,原备份与 node_modules 插件副本在加密归档后清理喵~
+用户态 AstrBot/NapCat 与 watchdog 已停止并禁用喵,DSH bridge 配置已移除且 DSH fence health route 返回 404 喵~
+system mcp-agents-bridge 与 opencode-root 已从当前 generation 移除喵~
+Home Manager 生成文件激活成功喵~

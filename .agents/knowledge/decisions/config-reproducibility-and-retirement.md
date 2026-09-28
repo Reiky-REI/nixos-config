@@ -44,7 +44,7 @@ tags: [nixos, home-manager, reproducibility, multi-host, secrets, systemd, retir
 ## 执行状态
 
 - 归档验证通过喵,age 解密、Zstandard checksum、tar listing 与 manifests 比对均通过喵~
-- 用户数据原目录的删除操作被当前 shell permission gate 拒绝喵,原始目录仍在本机喵,备份已完成喵~
+- 用户确认归档后清理喵~ 权限规则改为逐次询问后已删除 bot 源目录、登录态、旧 user units 与 DSH bridge 备份喵,KB watcher 活动 unit 保留喵~
 - NixMEOW、NixMEOW-WSL 与 NixMEOW-CTR 均通过求值喵,NixMEOW 的 `nixos-rebuild build` 成功喵~
 - 用户确认风险后执行 NixMEOW `nixos-rebuild switch` 喵,首次 Home Manager activation 因既有配置文件冲突失败喵~
 - 设置 `home-manager.backupFileExtension = "hm-backup"` 后再次 switch 成功喵,Home Manager activation 完成并将旧文件保留为 `.hm-backup` 喵~

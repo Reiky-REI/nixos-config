@@ -17,7 +17,7 @@
 #- 2026-09-01 [claude-code] 黑屏三连定案+修复: noctalia idle.suspendTimeout=1800 闲置自动挂起 × amdgpu S3 唤醒必坏; settings.json 掐触发源 + AllowSuspend=no + Super+L 纯锁屏 + swayidle off; 新坑: agent-resume 假 OK(输出进 journal + 管道吃退出码) / sudo setuid 全域不可用(正解=系统级 systemd-run) #noctalia-idle-suspend-blackscreen
 - 2026-09-01 [claude-code] git 历史修复: 8-29 手搓对象致 push 被远端 fsck 拒收 (畸形树+4错名blob+空default.nix潜伏雷); 12 提交链重建, repack 收编 alternates, fsck exit=0, push 成功; starship scan_timeout 150 #git-corrupt-history-repair#
 - 2026-09-01 [claude-code] noctalia 亮度失灵修复: 凌晨裸环境实例缺会话环境所致; niri msg action spawn 正规拉起 + brightnessctl 实测背光无损; pgrep -f 自匹配/截断双坑记录在案 #noctalia-idle-suspend-blackscreen
-- 2026-09-28 [opencode] 配置复现治理喵~ 移除 mkHost 外部 Home Manager 导入喵,静态 app 配置与 user units 纳入 Home Manager喵~ AstrBot/NapCat/MCP bridge 与 root 通道退役喵,归档已验证喵~ NixMEOW/WSL/CTR eval 与 NixMEOW build 通过喵~ 用户确认风险后 switch 成功喵,hm-backup 解决旧配置冲突且 activation 成功喵~ 源目录删除仍被 shell permission gate 阻断喵,见 `retros/2026-09-28-config-reproducibility-and-bot-retirement.md` #config-reproducibility-retirement
+- 2026-09-28 [opencode] 配置复现治理与 bot 退役喵~ NixMEOW/WSL/CTR eval 及 NixMEOW build/switch 均成功喵~ HM activation 用 hm-backup 保留旧配置喵~ bot 数据加密归档后已清理本机源目录喵,KB watcher 保持 active 喵~ OpenCode `rm -rf *` 改为 ask 且根目录精确 deny 保留喵,见 `retros/2026-09-28-config-reproducibility-and-bot-retirement.md` #config-reproducibility-retirement
 - 2026-09-28 [opencode] 按用户许可修正 OpenCode shell 权限喵~ 将 `rm -rf *` 从 deny 改为 ask 喵,根路径精确 deny 保留喵~ 已构建并切换 NixMEOW喵,运行配置确认新规则生效喵~
 
 ---
