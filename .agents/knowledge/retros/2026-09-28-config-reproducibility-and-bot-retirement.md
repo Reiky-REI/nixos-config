@@ -53,4 +53,5 @@ experience:
 - NixMEOW `nixos-rebuild build` 与用户确认风险后的 `nixos-rebuild switch` 均成功喵~
 - 首次 switch 的 HM activation 曾因旧配置冲突失败喵,启用 `hm-backup` 策略后重试成功喵~
 - `dsh-fence`、polkit、NetworkManager、Netease service active 喵~ mcp-agents-bridge/opencode-root 为 not-found 喵~
+- OpenCode 全局权限原有 `rm -rf *` deny 规则导致无确权弹窗喵~ 已改为 ask 并保留根路径 deny 喵,Home Manager 重部署后运行配置校验通过喵~
 - JSON/TOML/YAML、Bash 与 Nix syntax、DeepSec 目标目录扫描及 `git diff --check` 均通过喵~
