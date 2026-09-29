@@ -26,6 +26,12 @@
     ];
   };
 
+  services.avahi = lib.mkIf (config.meow.enabled ? "networkmanager") {
+    enable = true;
+    nssmdns4 = true;
+    openFirewall = true;
+  };
+
   # 系统级代理环境变量跟 clash 走 (clash 起在本机 7897)
   networking.proxy = lib.mkIf (config.meow.enabled ? "clash") {
     default = "http://127.0.0.1:7897";
