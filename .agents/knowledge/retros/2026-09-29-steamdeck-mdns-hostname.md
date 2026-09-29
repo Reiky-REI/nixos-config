@@ -28,4 +28,5 @@ experience:
 
 - `nixos-rebuild build --flake /etc/nixos#NixMEOW` 通过喵~
 - 构建后的 `nsswitch.conf` 包含 `mdns4_minimal [NOTFOUND=return]` 喵~
-- 运行时主机名解析需在激活该 generation 后验证喵~
+- NixOS build 与用户授权的 switch 均成功喵~
+- `resolvectl query steamdeck.local` 经 mDNS/IPv4 解析到当前 DHCP 地址，`ssh steamdeck` 公钥登录验证通过喵~
