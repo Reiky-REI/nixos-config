@@ -8,6 +8,7 @@
 }: {
   imports = [
     ./hardware.nix
+    ./stage1-boot.nix
     ../../modules
   ];
 
