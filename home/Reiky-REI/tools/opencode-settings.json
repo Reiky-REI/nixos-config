@@ -66,6 +66,17 @@
       "extensions": [
         ".go"
       ]
+    },
+    "bash": {
+      "command": [
+        "bash-language-server",
+        "start"
+      ],
+      "extensions": [
+        ".sh",
+        ".zsh",
+        ".bash"
+      ]
     }
   },
   "permissions": [
