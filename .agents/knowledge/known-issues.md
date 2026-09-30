@@ -913,3 +913,10 @@ runner 与 `agent-resume.{service,path,timer}` 原本是 `~/.local/state` 与 `~
 ### 坑 3: flake 工作树差异会让所有 host 的 drvPath 变化 — 不能当隔离判据
 flake 源快照会嵌进每个 host 的配置喵; 只要工作树内容变了 (哪怕只是另一个 host 的文件), 所有 host 的 toplevel drvPath 都会变喵~
 **规避**: 验证 host 隔离要 diff 关键命名空间 (如 `systemd.services`/`systemd.paths`/`boot.loader`) 喵, 不要拿 drvPath 相等当证据喵~
+
+### 坑 4: `systemd-run` 里跑 `nixos-rebuild` (ng 版) 需要 PATH 里有 coreutils
+26.05 起 `nixos-rebuild` 是 Python 版 **nixos-rebuild-ng** 喵; switch 阶段它会用裸命令 `test` 检查
+`/run/systemd/system` 喵~ 而系统级 `systemd-run` 起的 transient 单元 PATH 不含 coreutils,
+直接报 `[Errno 2] No such file or directory: 'test'` 并在激活前中止 (profile 没动, 无半切换)喵~
+**规避**: `systemd-run --setenv=PATH=/run/current-system/sw/bin:/run/wrappers/bin -- nixos-rebuild switch ...` 喵~
+(用户自己终端里跑不受影响, 因为登录环境 PATH 本来就有 coreutils)喵~
