@@ -18,8 +18,12 @@ check-fmt:
 lint:
     statix check .
 
-# 完整验证：格式化检查 + 静态分析 + flake 构建 + 系统验证
-check: check-fmt lint
+# 检查 README 引用的仓库路径是否仍存在 (防重命名/删除后文档漂移)
+check-docs:
+    .agents/config/check-docs.sh
+
+# 完整验证：格式化检查 + 静态分析 + 文档路径检查 + flake 构建 + 系统验证
+check: check-fmt lint check-docs
     nix flake check
 
 # 验证配置（验证通过后记得写复盘）
