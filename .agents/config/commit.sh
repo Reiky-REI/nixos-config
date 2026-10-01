@@ -28,6 +28,6 @@ git -c user.name="opencode[bot]" \
     -c user.email="opencode[bot]@users.noreply.github.com" \
     commit "$@"
 
-git push \
+git -c credential.helper= push \
   https://oauth2:"${BOT_TOKEN}"@github.com/"${REPO}".git \
   "HEAD:refs/heads/${CURRENT_BRANCH}"
