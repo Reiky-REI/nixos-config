@@ -4,7 +4,7 @@
 
 ## Map
 - **AGENTS.md** — 根规则 + 工作流
-- **INDEX.md** — 知识入口（开工先读）
+- **knowledge/INDEX.md** — 知识入口（开工先读）
 - **REQUEST_TEMPLATE.md** — 系统变更申请模板（其他 AI 提需求时使用）
 - **requests/** — 系统变更申请队列（pending → archive）
 - **knowledge/** — 静态参考文档（conventions, architecture, secrets, known-issues）
@@ -29,9 +29,9 @@
 
 ## 知识体系
 AI 工作纪律：
-1. **instructions** 始终在 context: AGENTS.md + INDEX.md + conventions.md
-2. 先读 **INDEX.md** → 按需读知识文件
-3. 读 **INDEX.md** 中的 skill 清单 → 需要时加载 skill
+1. **instructions** 始终在 context: AGENTS.md + knowledge/INDEX.md + knowledge/conventions.md
+2. 先读 **knowledge/INDEX.md** → 按需读知识文件
+3. 读 **knowledge/INDEX.md** 中的 skill 清单 → 需要时加载 skill
 4. **任务完成后写复盘**（仅非平凡变更 —— 一行改动不写）
 5. **坑出现 2 次 → 提炼到 known-issues.md**
 6. **遇到问题先上网搜同类报告** — 收集完现场情况(日志/版本/症状/触发条件)后, 立即 web 搜索社区是否有同类报错/已知回归/修复版本, 往往直接命中根因或规避方案 (案例: 2026-08-18 内核 7.1.6 amdgpu 伪影回归, 本地排查两轮未果, 搜到 Fedora/lemmy/openSUSE 同批报告直接定案)

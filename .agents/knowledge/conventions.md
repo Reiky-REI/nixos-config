@@ -83,7 +83,7 @@ experience:
 - 轻量级变更（一行改动/git typo）不写复盘
 
 ## AI 工作流约定
-- 开工前先读 INDEX.md → 按上下文加载指南逐步加载知识
+- 开工前先读 knowledge/INDEX.md → 按上下文加载指南逐步加载知识
 - 遇到报错先查 known-issues.md
 - 非平凡变更必须写复盘，复盘和代码在同一 commit
 - 复盘使用上述 frontmatter 格式填写所有字段
