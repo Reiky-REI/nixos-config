@@ -8,7 +8,7 @@
 }: {
   imports = [
     ./hardware.nix
-    ./stage1-boot.nix
+    ./boot-menu.nix
     ../../modules
   ];
 

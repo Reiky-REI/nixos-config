@@ -1,16 +1,20 @@
-# ===== 第一级启动菜单: 独立 GRUB (OS 选择器) =====
+# ===== 第一级启动菜单: MEOW Boot Menu (独立 GRUB, OS 选择器) =====
+# 命名: 这层按功能叫 "Boot Menu" (固件启动项也叫 MEOW Boot Menu)喵; 第二层是
+#       systemd-boot 的 NixOS 世代菜单喵~ 刻意不用 "stage1/stage2", 避免与 GRUB
+#       历史的 stage1/stage2 内部概念混淆喵~
+#
 # 启动链: UEFI -> [MEOW Boot Menu (本模块构建的 GRUB)]
 #                -> NixOS:   chainload /EFI/systemd/systemd-bootx64.efi (第二级: 选 NixOS 世代)
 #                -> Windows: chainload /EFI/Microsoft/Boot/bootmgfw.efi
 #
 # 为什么自装 GRUB 而不是 boot.loader.grub:
 #   NixOS 的 system.build.installBootLoader 是 types.unique (只允许一个引导器)喵,
-#   与 systemd-boot 同时启用会 eval 冲突喵~ 所以第一级 GRUB 由本模块自行构建并部署,
+#   与 systemd-boot 同时启用会 eval 冲突喵~ 所以本模块自行构建并部署启动菜单,
 #   systemd-boot 保持 NixOS 托管 (世代菜单照常更新)喵~
 #
 # 背景图与可复现性:
 #   仓库内嵌 Catppuccin 官方背景 (MIT, 已加 50% 黑遮罩) 作兜底喵; 本机实际背景由
-#   meow-stage1-background.service 在运行时生成两张写进 ESP:
+#   meow-boot-menu-wallpaper.service 在运行时生成两张写进 ESP:
 #     boot-background-nixos.png   (Noctalia 当前壁纸)
 #     boot-background-windows.png (Windows TranscodedWallpaper)
 #   GRUB 按 grubenv 的 saved_entry 决定用哪张 ("上次启动的系统"的桌面壁纸)喵~
@@ -29,7 +33,7 @@
   userHome = config.users.users.${username}.home;
 
   espMount = config.boot.loader.efi.efiSysMountPoint;
-  espStageDir = "${espMount}/EFI/MEOW-OS";
+  espBootMenuDir = "${espMount}/EFI/MEOW-OS";
   nixosEspUuid = "75D8-3A38";
   windowsEspUuid = "2630-98EC";
   nixosDiskByEui = "/dev/disk/by-id/nvme-eui.1849474406090001001b444a446f13ec";
@@ -99,7 +103,7 @@
 
   # 第一级菜单 (内嵌进 EFI, 纯文本可审计)
   # 注意: GRUB 脚本不支持 `||`, 条件用 `if ! cmd ; then ... fi`
-  menuCfg = pkgs.writeText "meow-stage1-grub.cfg" ''
+  menuCfg = pkgs.writeText "meow-boot-menu-grub.cfg" ''
     set timeout=5
     set timeout_style=menu
 
@@ -121,7 +125,7 @@
       search --no-floppy --file /EFI/systemd/systemd-bootx64.efi --set=root
     fi
 
-    # 记忆上次选择的系统 (grubenv 由 meow-stage1-boot.service 创建, rebuild 不重置)
+    # 记忆上次选择的系统 (grubenv 由 meow-boot-menu.service 创建, rebuild 不重置)
     if [ -f /EFI/MEOW-OS/grubenv ]; then
       load_env -f /EFI/MEOW-OS/grubenv saved_entry
     fi
@@ -172,8 +176,8 @@
   '';
 
   # 单文件 EFI: 配置 + 全部模块 + 主题 (含图标/字体) 内嵌进 memdisk
-  stage1Efi =
-    pkgs.runCommand "meow-stage1-grubx64.efi" {
+  bootMenuEfi =
+    pkgs.runCommand "meow-boot-menu-grubx64.efi" {
       nativeBuildInputs = [grub];
     } ''
       cd ${theme}
@@ -193,12 +197,12 @@
 in {
   # 经 systemd-boot builder 拷进 ESP (每次 switch 自动刷新, 原子替换整个镜像)
   boot.loader.systemd-boot.extraFiles = {
-    "EFI/MEOW-OS/grubx64.efi" = stage1Efi;
+    "EFI/MEOW-OS/grubx64.efi" = bootMenuEfi;
   };
 
   # grubenv 初始化 + UEFI 启动项注册: best-effort, 失败不影响启动/切换
-  systemd.services.meow-stage1-boot = {
-    description = "MEOW stage-1 GRUB: ensure grubenv and UEFI boot entry";
+  systemd.services.meow-boot-menu = {
+    description = "MEOW Boot Menu: ensure grubenv and UEFI boot entry";
     wantedBy = ["multi-user.target"];
     after = ["local-fs.target"];
     unitConfig.RequiresMountsFor = espMount;
@@ -210,30 +214,30 @@ in {
     path = [pkgs.coreutils pkgs.efibootmgr pkgs.gawk pkgs.gnugrep pkgs.gnused grub];
     script = ''
       set -u
-      ESP_DIR=${espStageDir}
+      ESP_DIR=${espBootMenuDir}
       LABEL='MEOW Boot Menu'
       LOADER='\EFI\MEOW-OS\grubx64.efi'
 
       if [ ! -f "$ESP_DIR/grubx64.efi" ]; then
-        echo "meow-stage1-boot: stage-1 image missing, skip" >&2
+        echo "meow-boot-menu: boot menu image missing, skip" >&2
         exit 0
       fi
 
       # grubenv 只在缺失时创建, 保留"上次选择的系统"记忆
       if [ ! -s "$ESP_DIR/grubenv" ]; then
-        grub-editenv "$ESP_DIR/grubenv" create || echo "meow-stage1-boot: grub-editenv create failed" >&2
+        grub-editenv "$ESP_DIR/grubenv" create || echo "meow-boot-menu: grub-editenv create failed" >&2
         grub-editenv "$ESP_DIR/grubenv" set saved_entry=meow-nixos || true
       fi
 
       DISK="$(readlink -f ${nixosDiskByEui} 2>/dev/null)"
       if [ -z "$DISK" ]; then
-        echo "meow-stage1-boot: cannot resolve NixOS disk" >&2
+        echo "meow-boot-menu: cannot resolve NixOS disk" >&2
         exit 0
       fi
 
-      out="$(LANG=C efibootmgr 2>/dev/null)"
+      out="$(LANG=C efibootmgr -v 2>/dev/null)"
       if [ -z "$out" ]; then
-        echo "meow-stage1-boot: efibootmgr unavailable" >&2
+        echo "meow-boot-menu: efibootmgr unavailable" >&2
         exit 0
       fi
 
@@ -253,13 +257,19 @@ in {
       num="$(find_num "$out")"
       if [ -z "$num" ]; then
         LANG=C efibootmgr -q -c -d "$DISK" -p 1 -L "$LABEL" -l "$LOADER" >/dev/null 2>&1 || true
-        out="$(LANG=C efibootmgr 2>/dev/null)"
+        out="$(LANG=C efibootmgr -v 2>/dev/null)"
         num="$(find_num "$out")"
       fi
 
       if [ -z "$num" ]; then
-        echo "meow-stage1-boot: failed to register UEFI entry" >&2
+        echo "meow-boot-menu: failed to register UEFI entry" >&2
         exit 0
+      fi
+
+      # 启动项自愈: 同名项若还指向旧路径, 就地更新 (文件重命名/迁移后仍能启动)
+      entry_line="$(printf '%s\n' "$out" | awk -v prefix="Boot$num" 'index($0, prefix) == 1 { print; exit }')"
+      if [ -n "$entry_line" ] && ! printf '%s' "$entry_line" | grep -qF "$LOADER"; then
+        LANG=C efibootmgr -q -b "$num" -l "$LOADER" >/dev/null 2>&1 || echo "meow-boot-menu: failed to update UEFI entry path" >&2
       fi
 
       order="$(printf '%s\n' "$out" | sed -n 's/^BootOrder:[[:space:]]*//p' | tr -d ' \r')"
@@ -273,7 +283,7 @@ in {
       done
       unset IFS
       if [ "$new" != "$order" ]; then
-        LANG=C efibootmgr -q -o "$new" >/dev/null 2>&1 || echo "meow-stage1-boot: failed to reorder BootOrder" >&2
+        LANG=C efibootmgr -q -o "$new" >/dev/null 2>&1 || echo "meow-boot-menu: failed to reorder BootOrder" >&2
       fi
     '';
   };
@@ -282,8 +292,8 @@ in {
   #   boot-background-nixos.png   = 覆盖文件 > Noctalia 当前壁纸
   #   boot-background-windows.png = Windows TranscodedWallpaper > 缓存图 > 图片目录最新
   # 统一 50% 黑遮罩保证文字可读; GRUB 按 grubenv saved_entry 选对应主题
-  systemd.services.meow-stage1-background = {
-    description = "MEOW stage-1 GRUB: refresh NixOS/Windows wallpaper backgrounds";
+  systemd.services.meow-boot-menu-wallpaper = {
+    description = "MEOW Boot Menu: refresh NixOS/Windows wallpaper backgrounds";
     wantedBy = ["multi-user.target"];
     after = ["local-fs.target"];
     unitConfig.RequiresMountsFor = espMount;
@@ -294,11 +304,11 @@ in {
     path = [pkgs.coreutils pkgs.imagemagick pkgs.jq pkgs.file pkgs.findutils pkgs.gnugrep pkgs.gnused];
     script = ''
       set -u
-      STAGE_DIR=${espStageDir}
+      ESP_DIR=${espBootMenuDir}
       OVERRIDE=${userHome}/.config/meow-boot/background
       NOCTALIA=${userHome}/.cache/noctalia/wallpapers.json
       WIN_HOME=/mnt/windows/Users/reiky
-      STATE_DIR=/var/lib/meow-stage1-background
+      STATE_DIR=/var/lib/meow-boot-menu-wallpaper
       mkdir -p "$STATE_DIR"
 
       # 居中裁剪 2560x1600 + 50% 黑遮罩 + 去 alpha; 指纹未变则跳过
@@ -311,11 +321,11 @@ in {
         if [ -f "$p_dst" ] && [ -f "$p_stamp" ] && [ "$(cat "$p_stamp")" = "$p_fp" ]; then
           return 0
         fi
-        p_tmp="$(mktemp /var/tmp/meow-stage1-bg.XXXXXX.png)" || return 0
+        p_tmp="$(mktemp /var/tmp/meow-boot-menu-bg.XXXXXX.png)" || return 0
         if magick "$p_src" -auto-orient -resize '2560x1600^' -gravity center -extent 2560x1600 -fill black -colorize 50% -strip "PNG24:$p_tmp" 2>/dev/null; then
           install -D -m 0644 "$p_tmp" "$p_dst" && printf '%s' "$p_fp" > "$p_stamp"
         else
-          echo "meow-stage1-background: conversion failed: $p_src" >&2
+          echo "meow-boot-menu-wallpaper: conversion failed: $p_src" >&2
         fi
         rm -f "$p_tmp"
       }
@@ -333,9 +343,9 @@ in {
         src="$(jq -r '.wallpapers["eDP-1"].dark // .wallpapers["eDP-1"].light // (.wallpapers | to_entries | map(.value.dark // .value.light) | map(select(. != null)) | first) // .defaultWallpaper // empty' "$NOCTALIA" 2>/dev/null)"
       fi
       if [ -n "$src" ] && [ -f "$src" ]; then
-        prepare "$src" "$STAGE_DIR/boot-background-nixos.png" "nixos|v2|$src|$(stat -c '%s|%Y' "$src" 2>/dev/null)"
+        prepare "$src" "$ESP_DIR/boot-background-nixos.png" "nixos|v2|$src|$(stat -c '%s|%Y' "$src" 2>/dev/null)"
       else
-        echo "meow-stage1-background: no usable NixOS wallpaper" >&2
+        echo "meow-boot-menu-wallpaper: no usable NixOS wallpaper" >&2
       fi
 
       # ---- Windows 侧: 只读挂载, 访问时按需 automount ----
@@ -344,18 +354,18 @@ in {
         win_src="$(find "$WIN_HOME/AppData/Roaming/Microsoft/Windows/Themes/CachedFiles" "$WIN_HOME/Pictures/desktop_background" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -n 1 | cut -d' ' -f2-)"
       fi
       if [ -n "$win_src" ] && [ -f "$win_src" ]; then
-        prepare "$win_src" "$STAGE_DIR/boot-background-windows.png" "windows|v2|$win_src|$(stat -c '%s|%Y' "$win_src" 2>/dev/null)"
+        prepare "$win_src" "$ESP_DIR/boot-background-windows.png" "windows|v2|$win_src|$(stat -c '%s|%Y' "$win_src" 2>/dev/null)"
       else
-        echo "meow-stage1-background: no usable Windows wallpaper" >&2
+        echo "meow-boot-menu-wallpaper: no usable Windows wallpaper" >&2
       fi
 
       # 清理旧版单背景文件
-      rm -f "$STAGE_DIR/boot-background.png"
+      rm -f "$ESP_DIR/boot-background.png"
     '';
   };
 
   # 壁纸/指定文件变化时即时刷新 (无须等下次开机)
-  systemd.paths.meow-stage1-background = {
+  systemd.paths.meow-boot-menu-wallpaper = {
     wantedBy = ["multi-user.target"];
     startLimitIntervalSec = 0;
     pathConfig = {

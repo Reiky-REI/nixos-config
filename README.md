@@ -105,6 +105,21 @@ machines.nix (host → roles/features/users)
 - 切换快捷键 `Mod+Shift+W` → `~/.config/wallpaper/script/wallpaper-rofi.sh`（rofi 选图，经 `noctalia-shell ipc call wallpaper set` 设置）
 - 配置位置：`home/Reiky-REI/desktop/wallpaper/`
 
+### 双系统启动菜单 (MEOW Boot Menu, 仅 NixMEOW)
+
+UEFI 启动链是两级的：固件 → **MEOW Boot Menu**（自建 GRUB，选系统）→ 选 NixOS 时再进 systemd-boot 选世代。
+
+- 模块：`hosts/NixMEOW/boot-menu.nix`（host 本地设备事实；无 Windows 的 host 不 import）
+  - 单文件 EFI `grubx64.efi`（grub-mkstandalone 内嵌 Catppuccin Mocha 主题 / 28px 字体 / 图标 / 全部模块），经 systemd-boot 的 `extraFiles` 部署到 `/EFI/MEOW-OS/`
+  - 默认项 = 上次选择的系统（`grubenv` 的 `saved_entry`，`meow-boot-menu.service` 幂等维护 + 启动项路径自愈）
+  - Windows 项 chainload `bootmgfw.efi`；不删除任何原有启动项（F12 → Linux Boot Manager 永远兜底）
+- 背景（运行期生成，统一 50% 黑遮罩；第三方图不入 git）：
+  - `boot-background-nixos.png` ← Noctalia 当前壁纸（或 `~/.config/meow-boot/background` 软链/一行路径指定）
+  - `boot-background-windows.png` ← Windows `TranscodedWallpaper`
+  - 二者缺失时回退内嵌的 Catppuccin 官方背景（`meow-boot-menu-wallpaper.{service,path}` 负责刷新）
+- 调整：字体大小 / 遮罩强度 / 主题模板都在 `boot-menu.nix`；背景切换优先级见上
+- 详见复盘 `retros/2026-10-01-stage1-grub-os-selector.md`（文件名保留历史命名）与决策 `decisions/two-stage-boot-grub-systemd-boot.md`
+
 ## 5. 职责边界
 
 | 角色 | 职责 |

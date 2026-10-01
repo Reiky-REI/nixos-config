@@ -93,6 +93,10 @@ NixOS 的 `system.build.installBootLoader` 是 `types.unique` (只允许一个�
   - GRUB 读取 grubenv 的 `saved_entry` 选 `theme-nixos.txt` / `theme-windows.txt`, 都没有才用内嵌兜底
     (两套背景都在 NixOS 运行时生成, 所以 Windows 里换壁纸后要等下一次进 NixOS 才会刷新)喵~
 - 旧的单背景文件 `boot-background.png` 由服务自动清理喵~
+- **命名迭代 (2026-10-01 晚)**: 标识符由 `stage1-*` 统一改为 `boot-menu-*` 喵
+  (模块 `hosts/NixMEOW/boot-menu.nix`, 单元 `meow-boot-menu{,-wallpaper}`)喵;
+  避免与 GRUB 历史的 stage1/stage2 概念混淆喵~ 固件项 "MEOW Boot Menu" 与 ESP 目录
+  `/EFI/MEOW-OS` 保持不变喵; 本复盘正文保留当时的旧命名作为历史记录喵~
 
 ## 验收 (第二轮, 2026-10-01 通过)
 

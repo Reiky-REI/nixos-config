@@ -11,6 +11,7 @@
 - 目录下 default.nix 作为入口
 - 文件名小写 + 连字符: `fcitx5.nix`, `go-musicfox.nix`
 - 与 NixOS 选项名一致: `mdp.nix` → `mpd.nix` 因为选项是 `services.mpd`
+- host 专属设备设施按功能命名 (例: `hosts/<host>/boot-menu.nix` → 单元 `meow-boot-menu*`)；避免借用其他工具的专有概念 (如 GRUB 历史的 stage1/stage2)喵~
 
 ## 分层规则
 - 系统层模块只放 NixOS options (`services.*`, `programs.*`, `hardware.*`, `boot.*` 等)
