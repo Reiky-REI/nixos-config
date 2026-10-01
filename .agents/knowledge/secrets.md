@@ -8,7 +8,7 @@
 secrets/ai-api-key-<user>.age (age 加密，可安全进 git)
   ↓ rebuild 时 agenix 用 SSH 私钥解密
 /run/agenix/ai-api-key-<user> (明文)
-  ↓ zsh 启动时 source /run/agenix/ai-api-key-*
+  ↓ zsh 启动时 source /run/agenix/ai-api-key-<userId> (按用户精确路径)
 shell 环境变量 (DEEPSEEK_API_KEY_<USER>, NIX_ACCESS_TOKEN 等)
 ```
 
@@ -98,9 +98,11 @@ age.identityPaths = [ "${primaryUser.homeDirectory}/.ssh/id_ed25519" ];
 ### zsh 中的自动加载（home/Reiky-REI/shell/zsh.nix）
 
 ```nix
-for file in /run/agenix/ai-api-key-*; do
-  [ -f "$file" ] && source "$file"
-done
+# 注意: /run/agenix 目录不可列 (只有 x 权限), 不能用 glob;
+# 按 user ID 拼精确路径 (HM 的 _module.args.userId)
+if [ -f /run/agenix/ai-api-key-${userId} ]; then
+  source /run/agenix/ai-api-key-${userId}
+fi
 ```
 
 ### 构建环境（.agents/config/env.sh）
