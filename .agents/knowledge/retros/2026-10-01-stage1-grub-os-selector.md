@@ -68,14 +68,15 @@ NixOS 的 `system.build.installBootLoader` 是 `types.unique` (只允许一个�
 - theme-stock/theme-esp 的 `desktop-image` 行正确喵; 生成的 EFI (5.6MB) 内嵌 `theme-esp.txt`/`bootmgfw`/`meow-nixos`/`gfxmenu` 标记喵~
 - host 隔离: NixMEOW-WSL / NixMEOW-CTR 的关键命名空间 diff 为空喵 (只有 NixMEOW 增加 1 个 extraFile + 1 个 path + 2 个 service)喵~
 
-## 待验收 (重启清单)
+## 验收 (第一轮, 2026-10-01 通过)
 
-- [ ] 开机出现 GRUB「MEOW Boot Menu」, 背景是当前壁纸, 预选=NixOS (首次)喵
-- [ ] 选 NixOS → systemd-boot 世代菜单 → 正常进系统喵
-- [ ] 选 Windows → 正常进入 Windows喵; 再重启时 GRUB 预选=Windows 喵
-- [ ] 从 Windows 回来选 NixOS, 下次预选=NixOS 喵
-- [ ] F12 固件菜单仍能看到「Linux Boot Manager」(systemd-boot 直启兜底)喵
-- [ ] 换桌面壁纸后, 下次 (或即时) GRUB 背景跟随更新喵
+- [x] 开机出现 GRUB「MEOW Boot Menu」, 预选=NixOS喵
+- [x] 选 NixOS → systemd-boot 世代菜单 → 正常进系统喵
+- [x] 选 Windows → 正常进入 Windows喵; 再重启时 GRUB 预选=Windows 喵
+- [x] 从 Windows 回来选 NixOS, 下次预选=NixOS 喵
+- [ ] F12 固件菜单「Linux Boot Manager」(systemd-boot 直启兜底) — 未单独实测, EFI 项保留未动喵
+- [x] 换桌面壁纸后, 下次 (或即时) GRUB 背景跟随更新喵
+- 用户实测结论: 功能全部正常, 仅提出"文字偏小/logo 多余/背景对比度"三条改进 (见下)喵~
 
 ## 迭代 (2026-10-01 用户实测反馈后)
 
@@ -93,8 +94,9 @@ NixOS 的 `system.build.installBootLoader` 是 `types.unique` (只允许一个�
     (两套背景都在 NixOS 运行时生成, 所以 Windows 里换壁纸后要等下一次进 NixOS 才会刷新)喵~
 - 旧的单背景文件 `boot-background.png` 由服务自动清理喵~
 
-## 验收 (第二轮)
+## 验收 (第二轮, 2026-10-01 通过)
 
-- [ ] GRUB 菜单文字明显变大、在遮罩背景上清晰可读, 中间无 logo喵
-- [ ] 上次启动 NixOS → 菜单背景 = NixOS 壁纸; 上次启动 Windows → 菜单背景 = Windows 壁纸喵
-- [ ] 切换系统各重启一次, 确认背景跟随 `saved_entry` 变换喵
+- [x] GRUB 菜单文字明显变大、在遮罩背景上清晰可读, 中间无 logo喵
+- [x] 上次启动 NixOS → 菜单背景 = NixOS 壁纸; 上次启动 Windows → 菜单背景 = Windows 壁纸喵
+- [x] 切换系统各重启一次, 确认背景跟随 `saved_entry` 变换喵
+- 用户实测结论: 「好得不得了, 满意得不得了」喵~ 功能与视觉全部验收通过喵~
