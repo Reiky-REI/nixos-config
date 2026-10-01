@@ -58,11 +58,13 @@ status: "pending"
 删除主仓 `pkgs/`：按铁律先生成删除清单（目录树 + 文件列表 + SHA256 + 描述），
 存档到 `~/.local/state/delete-manifests/` 或仓库 `artifacts/`。
 
-### 协作注意
+### 协作注意（2026-10-01 侦察已核实）
 
-- 私源本地克隆 `~/Reiky-nixpkgs` 当前 `main` **领先 `origin/master` 6 个提交**，
-  执行前先与用户确认 `main`/`master` 分支对齐与推送凭据（HTTPS token 或 SSH key）
-- 私源推送与主仓 PR/合并分两步做，避免跨仓半成品
+- 远程默认分支是 **`main`**（`origin/HEAD → origin/main`）；`master` 为历史遗留分支
+- 工作克隆：`~/WorkSpace/Reiky-nixpkgs`（与 `origin/main` 完全同步、工作区干净）✅
+- `~/Reiky-nixpkgs` 克隆只是久未 fetch（那 6 个 zen 提交早已在远程；fetch 后仅落后 2 个提交），可留作备份，不作为本单工作克隆
+- 推送凭据已验证：`ssh -T git@github.com` 认证成功（`Hi Reiky-REI!`）→ 可直接 SSH 推送，无需额外提供凭据
+- 私源推送与主仓合并在两步完成，避免跨仓半成品
 
 ## 预期影响
 
@@ -84,6 +86,7 @@ status: "pending"
 | 日期 | 操作 | 说明 |
 |------|------|------|
 | 2026-10-01 | 提交 | `pending` → 等待审批 |
+| 2026-10-01 | 侦察 | 私源分支/克隆/凭据已核实（远程默认 `main`，SSH 可用）→ 具备执行条件 |
 | | 审批 | `approved` / `rejected` + 理由 |
 | | 执行(build) | ✅/❌ + 构建结果 |
 | | 复盘 | `retros/{日期}-{主题}.md` |
