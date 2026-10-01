@@ -13,7 +13,7 @@
 #   --notify 1 时 (默认) 由 runner 发消息板通报
 #
 # 说明: task 文件格式由 .agents/config/agent-resume-runner.sh 消费 (key=value, payload=base64 单行),
-# 该 runner 由 home/Reiky-REI/tools/agent-resume.nix 声明式部署为 agent-resume.service。
+# 该 runner 由 home/reiky/tools/agent-resume.nix 声明式部署为 agent-resume.service。
 set -euo pipefail
 
 BASE="${AGENT_RESUME_DIR:-$HOME/.local/state/agent-resume}"

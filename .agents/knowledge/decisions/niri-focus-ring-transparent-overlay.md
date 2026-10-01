@@ -1,6 +1,6 @@
 ---
 date: 2026-05-27
-module: home/Reiky-REI/desktop/niri/config.kdl
+module: home/reiky/desktop/niri/config.kdl
 tags: [niri, focus-ring, transparent, opacity, overlay, electron]
 related: []
 ---

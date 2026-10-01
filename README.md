@@ -62,7 +62,7 @@ machines.nix (host → roles/features/users)
 │   ├── documentation/              # man 手册等文档工具 (按 role 启用)
 │   └── virtualization/            # Podman, libvirtd
 ├── home/
-│   └── Reiky-REI/                 # 可复用 Home Manager 配置集，由 users.nix.homeProfile 绑定
+│   └── reiky/                     # 可复用 Home Manager 配置集，由 users.nix.homeProfile 绑定
 │       ├── default.nix            # 用户态入口 (按 meow.roles / features 分组自我屏蔽)
 │       ├── desktop/               # 桌面态配置 (niri, noctalia, rofi, wallpaper)
 │       ├── shell/                 # Zsh
@@ -111,7 +111,7 @@ machines.nix (host → roles/features/users)
 - 静态壁纸：`~/Pictures/Wallpapers/static/`（用户自管，不经 nix 部署）
 - 视频壁纸：`~/Pictures/Wallpapers/videos/`（暂用 mpvpaper；受 Noctalia 顶层背景限制，待迁移到 Noctalia video-wallpaper 插件）
 - 切换快捷键 `Mod+Shift+W` → `~/.config/wallpaper/script/wallpaper-rofi.sh`（rofi 选图，经 `noctalia-shell ipc call wallpaper set` 设置）
-- 配置位置：`home/Reiky-REI/desktop/wallpaper/`
+- 配置位置：`home/reiky/desktop/wallpaper/`
 
 ### 双系统启动菜单 (MEOW Boot Menu, 仅 NixMEOW)
 
@@ -185,14 +185,14 @@ UEFI 启动链是两级的：固件 → **MEOW Boot Menu**（自建 GRUB，选�
 
 - feature / role ID 清单分别在 `lib/features.nix`、`lib/roles.nix`，未知标签会导致 eval 失败
 - flake 级标签（`kernel-715` / `agenix-secrets`）由 `lib/mk-host.nix` 消费
-- `meow` 同样注入 home-manager (`extraSpecialArgs`)，`home/Reiky-REI/default.nix`
+- `meow` 同样注入 home-manager (`extraSpecialArgs`)，`home/reiky/default.nix`
   按 role/能力分组自我屏蔽（如 server 角色不导入桌面与 GUI 应用组）
 - `kind=container` 的 host 会关闭 systemd-resolved 与文档包，镜像产物暴露为
   `packages.<system>.<host>-docker`（见 `docs/NixMEOW-CTR.md`）
 
 ### 用户身份与 host 绑定
 
-`users.nix` 使用稳定 ID 注册登录名、home 路径和可复用 Home Manager profile；每个 host 通过 `machines.nix.users` 显式绑定一个或多个身份喵~ 当前 NixMEOW 与 WSL 都绑定 `reiky`，原 `home/Reiky-REI/` 目录继续使用；`config.nix` 暂时保留为兼容视图喵~ `primaryUser` 仅供仍采用单一默认用户的系统模块兼容使用，新代码应使用 host 的 user 列表或具体 user 身份喵~
+`users.nix` 使用稳定 ID 注册登录名、home 路径和可复用 Home Manager profile；每个 host 通过 `machines.nix.users` 显式绑定一个或多个身份喵~ 当前 NixMEOW 与 WSL 都绑定 `reiky`，原 `home/reiky/` 目录继续使用；`config.nix` 暂时保留为兼容视图喵~ `primaryUser` 仅供仍采用单一默认用户的系统模块兼容使用，新代码应使用 host 的 user 列表或具体 user 身份喵~
 
 ### AI agent 注册 (`agents.nix`)
 
@@ -241,7 +241,7 @@ touch modules/<category>/<module-name>/default.nix
 
 ## 8. 如何新增一个 home module
 
-> `{profile}` 是 `users.nix` 的 `homeProfile` 字段，当前为 `Reiky-REI`，不要求和登录名相同。
+> `{profile}` 是 `users.nix` 的 `homeProfile` 字段，当前为 `reiky`（与登录名一致），字段保留以支持多身份/多用户复用。
 
 ```bash
 # 1. 创建模块目录
@@ -322,7 +322,7 @@ mkdir -p ~/.config/rebuild && touch ~/.config/rebuild/wake-agent
 
 长任务通过用户级 systemd 队列执行喵, 与 OpenCode 会话生命周期解耦喵~
 
-- Home Manager 声明 `agent-resume.service/path/timer` 喵, 配置见 `home/Reiky-REI/tools/agent-resume.nix` 喵~
+- Home Manager 声明 `agent-resume.service/path/timer` 喵, 配置见 `home/reiky/tools/agent-resume.nix` 喵~
 - runner 唯一源码为 `.agents/config/agent-resume-runner.sh` 喵, 启动时会恢复遗留 `running/` 任务喵~
 - 推荐用 `.agents/config/queue-task.sh` 入队喵, 自动启用严格错误处理、重试计数与 payload 完成标记喵~
 

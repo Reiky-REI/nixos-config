@@ -21,7 +21,7 @@ shell 环境变量 (DEEPSEEK_API_KEY_<USER>, NIX_ACCESS_TOKEN 等)
 | 模板 | `ai-api-key.age.template` / `template.nix` | — | — |
 
 - agenix 的 `age.secrets.<键>` 的**键名**就是 `/run/agenix/` 下的文件名（`modules/age.nix` 的 `name` 选项，普通字符串），**允许连字符**，没有 `[a-zA-Z0-9_-]` 这种限制喵~（旧文档里"连字符要换下划线"的说法已作废）。
-- 密钥内容里的环境变量名不受文件名约束，以消费方配置引用的名字为准（如 `DEEPSEEK_API_KEY_REIKY_REI`）。
+- 密钥内容里的环境变量名不受文件名约束，以消费方配置引用的名字为准（如 `DEEPSEEK_API_KEY_REIKY`）。
 
 ## 工作目录
 
@@ -86,7 +86,7 @@ agenix -e ai-api-key-foo.age -i ~/.ssh/id_ed25519   # 粘贴 export ... 内容
 ### 定义位置（lib/mk-host.nix）
 
 ```nix
-# users.nix 中定义身份: reiky = { username = "Reiky-REI"; ... };
+# users.nix 中定义身份: reiky = { username = "reiky"; ... };
 # mk-host.nix 里由 users.nix 与 machines.nix 解析 primaryUser
 age.secrets."ai-api-key-reiky" = {
   file = ../secrets/ai-api-key-reiky.age;
@@ -95,7 +95,7 @@ age.secrets."ai-api-key-reiky" = {
 age.identityPaths = [ "${primaryUser.homeDirectory}/.ssh/id_ed25519" ];
 ```
 
-### zsh 中的自动加载（home/Reiky-REI/shell/zsh.nix）
+### zsh 中的自动加载（home/reiky/shell/zsh.nix）
 
 ```nix
 # 注意: /run/agenix 目录不可列 (只有 x 权限), 不能用 glob;
@@ -118,7 +118,7 @@ fi
 
 | 文件 | 运行时路径 | 用途 / 环境变量 |
 |------|-----------|-----------------|
-| `ai-api-key-reiky.age` | `/run/agenix/ai-api-key-reiky` | `DEEPSEEK_API_KEY_REIKY_REI`, `NIX_ACCESS_TOKEN`, `XIAOMI_API_KEY`, `XIAOMI_API_ENDPOINT` |
+| `ai-api-key-reiky.age` | `/run/agenix/ai-api-key-reiky` | `DEEPSEEK_API_KEY_REIKY`, `NIX_ACCESS_TOKEN`, `XIAOMI_API_KEY`, `XIAOMI_API_ENDPOINT` |
 | `nas-smb-credentials.age` | `/run/agenix/nas-smb-credentials` | NAS SMB 挂载凭据 (root only) |
 
 ## 故障排查

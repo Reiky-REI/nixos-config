@@ -66,7 +66,7 @@ clash-verge (mihomo) 退出后, 系统全局 proxy env (`networking.proxy` → `
 ### 双开/控制器坑 (2026-08-16 实锤, 已加固 headless unit)
 - headless unit 与 Clash Verge GUI 双开 → 抢 unix socket (`-ext-ctl-unix`) → `address already in use` 喵~
 - 合并配置 `clash-verge.yaml` 里 `external-controller: ''` 被清空 (verge.yaml `enable_external_controller: false`) → 核心无 TCP 控制器喵~
-- 解法 (已在 `home/Reiky-REI/tools/mihomo.nix` 落地):
+- 解法 (已在 `home/reiky/tools/mihomo.nix` 落地):
   - unit 用 `-ext-ctl 127.0.0.1:9097` 强制 TCP 控制器, 弃用 unix socket 喵~
   - `ExecStartPre` 清理遗留 socket + 建 runtime 目录喵~
   - `StartLimitIntervalSec = 0` 放宽 crash-loop 限制 (双开抢端口时持续重试) 喵~
@@ -130,10 +130,10 @@ clash-verge (mihomo) 退出后, 系统全局 proxy env (`networking.proxy` → `
 - 验证: 新模块 strings 应含 COLORFIRE 喵~ 
 
 ### ⚠️ 核心坑 2: kbdlight.nix 从未被 import (2026-08-14 踩)
-- opencode 8/5 创建 `home/Reiky-REI/tools/kbdlight.nix` 但 `tools/default.nix` imports **漏了 `./kbdlight.nix`** 喵~ 
+- opencode 8/5 创建 `home/reiky/tools/kbdlight.nix` 但 `tools/default.nix` imports **漏了 `./kbdlight.nix`** 喵~ 
 - 后果: kbdlight 命令/kbdlight-sync 服务/kbdlight-niri-off.sh 全部未生成 喵~ Mod+Shift+P 黑屏失效 喵~ 
 - 教训: 写文件 ≠ 接线, 新增 home 模块必须检查 imports 喵~ 
-- 验证: `nix eval .#nixosConfigurations.NixMEOW.config.home-manager.users.Reiky-REI.home.file` 应含 kbdlight 脚本 喵~ 
+- 验证: `nix eval .#nixosConfigurations.NixMEOW.config.home-manager.users.reiky.home.file` 应含 kbdlight 脚本 喵~ 
 
 ### ⚠️ 核心坑 3: ly 亮度键 acpid handler 不能用 seat0 判断 (2026-08-14 踩)
 - `loginctl list-sessions | grep seat0` 在 ly 登录界面 (TTY) 也会匹配 喵~ (logind 给 tty1 挂 seat0)
@@ -372,13 +372,13 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 ## .agents 复盘文件 root 属主 — 其他 AI 不可读 (2026-08-20)
 - 现象: knowledge/retros/2026-08-17-full-dsh-astrbot-blocks-acd.md 属主 root 权限 600, 非 root 会话读不到喵~
 - 根因: 复盘在 sudo 流程内写入, 属主继承自 root喵~
-- 规避: 写复盘避免经 sudo 执行; 修复: sudo chown Reiky-REI:users 文件 && sudo chmod 644 文件喵~
+- 规避: 写复盘避免经 sudo 执行; 修复: sudo chown reiky:users 文件 && sudo chmod 644 文件喵~
 - 防回归: gen-index.sh 把不可读文件列在索引尾部 ⚠️ 清单, 出现即按上行命令处理喵~
 
 ## root 身份运行 git 导致 .git/objects 大量 root 属主对象 (2026-08-23)
-- 现象: 提交报「权限不足, 无法在仓库对象库 .git/objects 中添加对象」, find .git -not -user Reiky-REI 多达 208 个喵~
+- 现象: 提交报「权限不足, 无法在仓库对象库 .git/objects 中添加对象」, find .git -not -user reiky 多达 208 个喵~
 - 根因: 历史上某次以 root 执行 git 操作, 松散对象与其 fanout 子目录属主变 root喵~
-- 修复: chown -R Reiky-REI:users /etc/nixos/.git 喵~
+- 修复: chown -R reiky:users /etc/nixos/.git 喵~
 - 规避: git 操作一律普通用户执行; AI 会话严禁在 root 窗口跑 commit/apply喵~
 
 - **llama.cpp rerank "input too large / physical batch size 512"** (2026-08-24): rerank 编码受 `--ubatch-size` 限制而不是 `-b/--batch-size`; 只调 batch-size 无效, 必须把 ubatch 提到 ≥ 单文档 token 数(本机 2048), 否则 /v1/rerank 对长文档一律 HTTP 500
@@ -876,7 +876,7 @@ runner 默认 `RuntimeMaxSec=3600s`; 本机 3.3G 压缩容器镜像展开约 16.
 ### 坑 4: resume 基础设施曾不在仓库里 (2026-09-27, 已声明式化)
 runner 与 `agent-resume.{service,path,timer}` 原本是 `~/.local/state` 与 `~/.config/systemd/user`
 下的手写真实文件, 改了半天其实**不可复现**, 同一类坑会反复踩喵~
-**规避**: 已迁到 `home/Reiky-REI/tools/agent-resume.nix` + `.agents/config/agent-resume-runner.sh`;
+**规避**: 已迁到 `home/reiky/tools/agent-resume.nix` + `.agents/config/agent-resume-runner.sh`;
 迁移时旧单元真实文件按铁律留了删除清单 (`~/.local/state/delete-manifests/`), 否则 HM 部署同路径会 clobber 报错喵~
 
 ### 坑 5: 3.3G 压缩镜像展开约 16.4G, 不能按压缩尺寸估算导入空间

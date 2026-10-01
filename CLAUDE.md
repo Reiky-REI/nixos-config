@@ -55,7 +55,7 @@ just generate-all       # 全部生成
 
 ## 持久化记忆
 
-Claude Code 的记忆系统位于 `/home/Reiky-REI/.claude/projects/-etc-nixos/memory/`，用于跨会话保留项目上下文。
+Claude Code 的记忆系统位于 `/home/reiky/.claude/projects/-etc-nixos/memory/`，用于跨会话保留项目上下文。
 
 **每次会话必须执行：**
 - **开工** → 先读 `MEMORY.md` 回顾上次上下文

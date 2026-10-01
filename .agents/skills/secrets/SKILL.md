@@ -18,7 +18,7 @@ agenix -e ai-api-key-reiky.age -i ~/.ssh/id_ed25519
 
 文件中变量名包含用户名：
 ```bash
-export DEEPSEEK_API_KEY_REIKY_REI="sk-..."
+export DEEPSEEK_API_KEY_REIKY="sk-..."
 export NIX_ACCESS_TOKEN="ghp_..."
 ```
 

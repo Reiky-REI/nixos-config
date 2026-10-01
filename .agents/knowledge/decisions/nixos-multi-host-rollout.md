@@ -80,7 +80,7 @@ btmtk-fix (内部双重条件: bluetooth 标签 + 内核 < 6.12.93)。
 ## 6. home/ 树的标签化 (2026-09-22 追加)
 
 home-manager 同样吃 meow 标签 (mkHost 把 `meow = { kind, features }` 加进
-extraSpecialArgs), `home/Reiky-REI/default.nix` 按组自我屏蔽:
+extraSpecialArgs), `home/reiky/default.nix` 按组自我屏蔽:
 `apps` / `music` 是最重的 GUI 组, `kind == "wsl"` 时跳过 (closure 差 ~2-3G,
 也绕开 krita/dolphin 等大包 substitute 不稳的问题); NixMEOW (kind=laptop) 全量不变。
 

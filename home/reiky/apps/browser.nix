@@ -13,6 +13,6 @@
   #   原 privacy.donttrackheader.enabled 是 Firefox 136 起已废弃的 DNT 遗留项, 无需保留。
   # - 书签已从 ~/.mozilla/firefox 迁移到 ~/.zen (见复盘), 语言包按需在设置界面装。
   # - 自动更新由包内 distribution/policies.json 禁用, 升级一律走 nix。
-  # - 默认浏览器仍为 google-chrome (见 home/Reiky-REI/default.nix 的 xdg.mimeApps),
+  # - 默认浏览器仍为 google-chrome (见 home/reiky/default.nix 的 xdg.mimeApps),
   #   zen 通过 niri 快捷键 Mod+Shift+B (spawn "zen") 启动。
 }

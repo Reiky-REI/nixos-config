@@ -32,7 +32,7 @@ wsl --install --from-file <nixos.wsl> --name NixMEOW-WSL --location C:\WSL\NixME
 
 ```powershell
 # 先拉原始仓库 (私有 git 通过 token, 或在 Windows 侧 clone 后走 UNC 拷贝)
-wsl -d NixMEOW-WSL -- nix-shell -p git --run "git clone https://github.com/Reiky-REI/nixos-config.git ~/nixos-config"
+wsl -d NixMEOW-WSL -- nix-shell -p git --run "git clone https://github.com/reiky/nixos-config.git ~/nixos-config"
 ```
 
 ## 3. 网络 — 三条路，全在宿主 Clash
@@ -83,11 +83,11 @@ WSL2 NAT 模式下, WSL 里的 127.0.0.1 就是 Windows 的 127.0.0.1 (.wslconfi
 | `browser-novnc` | websockify (python3Packages) 静态 noVNC 页面 + ws 桥 |
 | `browser-noctalia` | noctalia-shell 壳层, `QT_QUICK_BACKEND=software` 软渲, **不依赖** niri spawn-at-startup (那个走 systemd-run --user, 时机不稳) — 脚本自己找最新的 niri socket (`ls -t /run/user/1000/niri.*.sock \| head -1`) |
 
-全部 `Restart = "always"` + `RestartSec = "3"` + `User = Reiky-REI` — 崩了自动复活。
+全部 `Restart = "always"` + `RestartSec = "3"` + `User = reiky` — 崩了自动复活。
 
-### 为什么必须 `loginctl enable-linger Reiky-REI`
+### 为什么必须 `loginctl enable-linger reiky`
 
-logind 的 `RemoveIPC` 默认 yes —— 最后一个 Reiky-REI 会话结束时:
+logind 的 `RemoveIPC` 默认 yes —— 最后一个 reiky 会话结束时:
 `/run/user/1000` 被删除 + user systemd manager 被关闭 →
 niri 的 IPC socket 落盘失败 → PermissionDenied 崩溃循环 → VNC 黑屏。
 这是 whole-browser-* 组 "vnc 通但黑屏"的根因 (2026-09-23)。已 linger 持久化。
@@ -125,14 +125,14 @@ http://<宿主机局域网IP>:8080/vnc.html             其他设备
 ### 5.2 WSLg 原生 (更快)
 
 ```powershell
-wsl -d NixMEOW-WSL -u Reiky-REI -- niri
+wsl -d NixMEOW-WSL -u reiky -- niri
 ```
 同一个配置文件, 但走 Windows 原生窗口 (WSLg) — 到目前这种方式更流畅, 剪切板也直接通。
 
 ### 5.3 终端/opencode
 
 ```powershell
-wsl -d NixMEOW-WSL -u Reiky-REI
+wsl -d NixMEOW-WSL -u reiky
 opencode   # 配置+auth 已从真机同步
 ```
 
@@ -141,7 +141,7 @@ opencode   # 配置+auth 已从真机同步
 | WSL 内 | 来自真机 | 用途 |
 |--------|---------|------|
 | `~/.config/niri/config.kdl` | HM 自动生成 ✓ (替换 Mod→Alt) | 不用管 |
-| `~/.config/noctalia/` (18M) | `/mnt/wsl/PHYSICALDRIVE1p2/home/Reiky-REI/.config/noctalia` | 主题/小组件 |
+| `~/.config/noctalia/` (18M) | `/mnt/wsl/PHYSICALDRIVE1p2/home/reiky/.config/noctalia` | 主题/小组件 |
 | `~/.cache/cliphist/` (26M) | 同上 `.cache/cliphist` | 剪切板历史 |
 | `~/.zsh_history` | 同上 | 终端自动补全的"燃料" |
 | `~/.local/share/opencode/{auth.json}` + `~/.config/opencode/` | 真机 | opencode 登录态 |
@@ -156,10 +156,10 @@ opencode   # 配置+auth 已从真机同步
 
 ```bash
 # WSL / Windows 侧首次:
-git clone git@github.com:Reiky-REI/agents-knowledge.git ~/.agents
+git clone git@github.com:reiky/agents-knowledge.git ~/.agents
 
 # 已有旧本地仓 → 接上远端:
-git -C ~/.agents remote add origin git@github.com:Reiky-REI/agents-knowledge.git
+git -C ~/.agents remote add origin git@github.com:reiky/agents-knowledge.git
 git -C ~/.agents fetch origin && git -C ~/.agents reset --hard origin/main
 ```
 
