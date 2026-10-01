@@ -8,7 +8,8 @@ Agent 每次启动时，按以下顺序加载知识：
 2. **读 architecture.md** → 理解系统结构和模块边界
 3. **读 conventions.md** → 确认编码规范和工作流
 4. **按需读 known-issues.md** → 排查当前任务相关的问题
-5. **按需读 retros/ 或 decisions/** → 检索历史复盘和决策记录
+5. **模糊语义问题先 `kb_search`** → 排障/查历史先例/问"为什么这么设计"时用 kb-mcp 语义检索
+6. **按需读 retros/ 或 decisions/** → 检索历史复盘和决策记录
 
 任务完成后：
 - 有新发现 → 写复盘到 `retros/`
@@ -16,7 +17,7 @@ Agent 每次启动时，按以下顺序加载知识：
 - 有新约定 → 更新 `conventions.md`
 - 代码变更 → `git commit`
 
-> 未来当知识查询效率遇到瓶颈时，可评估引入 SQLite（结构化查询）、向量数据库（语义检索）或 RAG 工具（上下文增强）。
+> ✅ 语义检索已落地: kb-mcp `kb_search`（本机 Qwen3-VL-Embedding + Reranker）覆盖 retros/decisions/known-issues 全量索引喵~ 模糊语义问题（为什么/怎么办/有没有先例）优先用它, 已知精确字符串才用 grep 喵~ 详见 AGENTS.md「知识库语义检索 MCP（kb-mcp）」喵~
 
 ## 知识文件
 | 文件 | 标签 | 读它的时机 |
