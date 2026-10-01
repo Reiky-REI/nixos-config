@@ -23,6 +23,7 @@
 - `roles` 是用途组合 (workstation/devbox/server/embedded)，`features` 是能力开关，二者都由 `lib/` 下的清单校验
 - `desktopEffects` 只决定桌面效果档；构建并行度与视觉特效不再共用 `profile`
 - 用户身份在 `users.nix` 按稳定 ID 注册；`users.nix` 显式声明 login、homeDirectory、homeProfile
+- 用户标识统一小写：user ID = 登录名 = homeDirectory 尾段 = homeProfile = 密钥名（如 `reiky`）；`githubHandle` 保留外部账号原名
 - 一个用户可绑定多个 host，一个 host 可绑定多个用户；host-local 的 UID/组等差异保留在 host 配置
 - `primaryUser` 仅用于尚未迁移的 legacy system modules；新增模块应使用具体用户 ID 或 user registry
 - Home Manager 的 `imports` 与文件列表必须来自 `/etc/nixos` 喵,`mkHost` 只按注册表选择 profile 喵,不扫描 home 或 WorkSpace 导入外部 Nix 文件喵~

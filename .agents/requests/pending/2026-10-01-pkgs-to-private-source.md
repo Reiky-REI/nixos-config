@@ -50,7 +50,7 @@ status: "pending"
 #   netease-cdn-bypass = final.callPackage ../pkgs/netease-cdn-bypass {};
 #   改成使用私源 overlay 提供的 pkgs.netease-cdn-bypass
 
-# home/Reiky-REI/default.nix L11
+# home/reiky/default.nix L11
 #   cp -r ${../../pkgs/cursors/MikuCat}/* $out/share/icons/MikuCat/
 #   改成 ${pkgs.mikucat-cursors}/share/icons/MikuCat/... (按私源输出结构调整)
 ```

@@ -44,7 +44,7 @@
     model = "deepseek-chat";
     providerName = "DeepSeek";
     baseUrl = "https://api.deepseek.com/v1";
-    envKey = "DEEPSEEK_API_KEY_REIKY_REI";
+    envKey = "DEEPSEEK_API_KEY_REIKY";
     users = ["reiky"];
     hosts = {all = true;};
   };

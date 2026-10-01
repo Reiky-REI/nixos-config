@@ -42,7 +42,7 @@ tailscaled (监听 100.126.4.97:3080/443)
   ↓ proxy
 localhost:3080
   ↑ 监听
-dsh-fence.service (systemd, User=Reiky-REI)
+dsh-fence.service (systemd, User=reiky)
 ```
 
 ## 服务管理

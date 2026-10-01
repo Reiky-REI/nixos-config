@@ -1,4 +1,4 @@
-#!/etc/profiles/per-user/Reiky-REI/bin/python3
+#!/etc/profiles/per-user/reiky/bin/python3
 # -*- coding: utf-8 -*-
 """kb-mcp -- NixMEOW 知识库语义检索 MCP server (stdio, 纯标准库)
 后端: llama.cpp Qwen3-VL-Embedding-2B (:8081/v1/embeddings)

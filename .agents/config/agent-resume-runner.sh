@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # agent-resume runner -- 无人值守续命任务队列消费者 (声明式部署见
-# home/Reiky-REI/tools/agent-resume.nix, 本文件是唯一真相)
+# home/reiky/tools/agent-resume.nix, 本文件是唯一真相)
 #
 # task 文件格式(key=value):
 #   id / desc / max_retries / retries / runtime_max / notify_board / payload(base64单行)

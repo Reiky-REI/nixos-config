@@ -40,7 +40,7 @@ top12 -> 返回 top-k。索引缓存按源文件 size+mtime 签名自动失效�
 ## 启动与触发链路（运维视角）
 
 开机自启链路喵~
-1. NixOS 启动 → **linger** 让 Reiky-REI 的 systemd 用户管理器免登录自启（`loginctl show-user Reiky-REI -p Linger` = yes）喵~
+1. NixOS 启动 → **linger** 让 reiky 的 systemd 用户管理器免登录自启（`loginctl show-user reiky -p Linger` = yes）喵~
 2. 用户管理器达 default.target → `kb-corpus.path`（已 enable）挂载全部监视路径，进入监听态喵~
 3. 各根索引缓存持久化于 `<根>/.agents/tools/kb-mcp/index/index.json`，重启不丢；钩子若缺席，客户端首调的懒重建兜底仍生效喵~
 

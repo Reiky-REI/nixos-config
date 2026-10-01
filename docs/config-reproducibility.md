@@ -22,13 +22,13 @@
 
 | 应用 | 管理方式 |
 |---|---|
-| Noctalia | 静态设置与插件来源存于 `home/Reiky-REI/desktop/` 喵,运行时通过深度合并保留 API key、生成的颜色与插件状态喵~ |
+| Noctalia | 静态设置与插件来源存于 `home/reiky/desktop/` 喵,运行时通过深度合并保留 API key、生成的颜色与插件状态喵~ |
 | Zed | `userSettings` 由 Nix 管理喵,GitHub MCP `context_servers` 保留在本地运行文件以隔离 PAT 喵~ |
 | OpenCode | `opencode.jsonc` 与 `cli.json` 由 Home Manager 生成喵,模型、默认 agent 与 plan prompt 来自 `agents.nix` 喵,`service.json` 认证状态保留本地喵~ |
 | SPlayer 与 YouTube Music | 静态偏好深度合并喵,窗口几何、缓存路径与迁移状态由应用维护喵~ |
 | Cava 与 Fcitx5 | 用户设置、shader/theme 资产和 Fcitx profile 由 Home Manager 管理喵,`cached_layouts` 保留为生成状态喵~ |
 | btop、Zellij、Superfile、GitHub CLI 与 Pigma | 配置由 Home Manager option 或仓库内原始文件生成喵~ |
-| DSH profile | package manifest、lockfile 与 `cordis.patch.yml` 存在 `home/Reiky-REI/tools/dsh-profile/` 喵,插件 node_modules 仍是运行时安装状态喵~ |
+| DSH profile | package manifest、lockfile 与 `cordis.patch.yml` 存在 `home/reiky/tools/dsh-profile/` 喵,插件 node_modules 仍是运行时安装状态喵~ |
 
 ## 凭据排除项
 
@@ -44,7 +44,7 @@
 - AstrBot、NapCat、DSH-AstrBot bridge、mcp-agents-bridge 与专用 opencode-root 通道已退役喵,历史源码与运行数据见 `docs/archive/retired-integrations/` 喵~
 - DSH 通用服务 `dsh-fence` 保留喵,AstrBot bridge 插件已从受管 DSH profile 中移除喵~
 - 退役应用的数据库、登录态和源码只用于归档恢复喵,不属于新 host 的初始化依赖喵~
-- `systemd.user.paths` 与服务声明在 `home/Reiky-REI/tools/` 中统一定义喵,Agent KB 路径来自 host 的 `kbCorpusProjects` 显式列表喵~
+- `systemd.user.paths` 与服务声明在 `home/reiky/tools/` 中统一定义喵,Agent KB 路径来自 host 的 `kbCorpusProjects` 显式列表喵~
 - AstrBot/NapCat user units 已停止并禁用喵,mcp-agents-bridge 与 opencode-root 也已停止喵~
 - 归档已验证喵,bot 相关本机源目录、登录态、旧 user units 与 DSH bridge 备份已清理喵,KB watcher 活动 unit 保留喵~ 其他已归档但保留的用户文件见 `docs/archive/retired-integrations/README.md` 喵~
 - 初次切换曾因 HM 发现未管理的同名配置而中止用户配置激活喵~ 配置 `home-manager.backupFileExtension = "hm-backup"` 后重试成功喵,原配置已备份且 Home Manager 新链接已落地喵~

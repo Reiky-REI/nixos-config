@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # kb-index-warm: 语料变更自动重建各根索引(签名短路, 只对变更根做全量重嵌入)
 set -u
-PY=/etc/profiles/per-user/Reiky-REI/bin/python3
+PY=/etc/profiles/per-user/reiky/bin/python3
 SRV=/etc/nixos/.agents/tools/kb-mcp/server.py
 LOG=$HOME/.cache/kb-warm.log
 mkdir -p "$(dirname "$LOG")" /run/user/$(id -u)

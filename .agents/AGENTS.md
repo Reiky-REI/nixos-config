@@ -93,7 +93,7 @@ printf 'id=<唯一id>\ndesc=<一句话说明>\nmax_retries=3\nnotify_board=1\npa
 - 需要拉起其他 AI 时也走队列（payload 里执行对应启动命令, 或用 `queue-task.sh --wake`）喵~
 
 ### 声明式部署喵~
-runner 与三个单元已纳入 Home Manager, 见 `home/Reiky-REI/tools/agent-resume.nix` 喵~
+runner 与三个单元已纳入 Home Manager, 见 `home/reiky/tools/agent-resume.nix` 喵~
 - 唯一真相: `.agents/config/agent-resume-runner.sh` (HM 用 `writeShellScript` 包装)
 - 单元: `agent-resume.path` (queue 出现 task 秒触发) + `agent-resume.timer` (每 2 分钟兜底) +
   `agent-resume.service` (oneshot, 消费队列)
