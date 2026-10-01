@@ -47,7 +47,7 @@ status: "approved"
 5. reboot → 用 reiky 登录
 ```
 
-脚本内容：停 `nas-mount` 并卸载 `~/nas`（CIFS 挂载点必须先卸，否则家目录无法整体改名）→ `usermod -l reiky -d /home/reiky -m` → subuid/subgid 迁移 → linger 迁移 → `nixos-rebuild switch` → home 内非声明式文件绝对路径修正（保留属主）→ Claude 项目目录改名 + memory 链接重建。
+脚本内容：停 `nas-mount` 并卸载 `~/nas`（CIFS 挂载点必须先卸）→ 直改账户库 `/etc/passwd|shadow|group|gshadow` + `mv` 家目录（**绕过 `usermod` 的 busy 检查**：linger 的 `systemd --user` 与用户服务会让 usermod 拒绝，见处理记录）→ subuid/subgid 迁移 → linger 迁移 → `nixos-rebuild switch` → home 内非声明式文件绝对路径修正（保留属主）→ Claude 项目目录改名 + memory 链接重建。
 
 ### Phase 3 — NixMEOW-WSL（之后有空再做）
 
@@ -83,6 +83,7 @@ status: "approved"
 |------|------|------|
 | 2026-10-01 | 提交 | 用户选定「连系统账户一起改」方向 → `approved` |
 | 2026-10-01 | 执行(repo) | Phase 1 完成：users.nix / git mv / 全仓引用 / envKey 重加密 / 迁移脚本 |
+| 2026-10-01 | 修正 | `usermod` 被 linger 服务占用拒绝（process 1415 = `systemd --user`）→ 脚本改为直改账户库 + `mv`（uid 不变，幂等可重跑） |
 | | 执行(build) | ⬜ 等待 Phase 2 离线迁移 |
 | | 复盘 | `retros/{日期}-{主题}.md` |
 | | 归档 | `archive/` |
