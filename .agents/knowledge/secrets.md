@@ -97,7 +97,7 @@ agenix -r -i ~/.ssh/id_ed25519
 # users.nix 中定义
 reiky = { username = "Reiky-REI"; ... };
 
-# lib/mkHost.nix 中由 users.nix 与 machines.nix 解析
+# lib/mk-host.nix 中由 users.nix 与 machines.nix 解析
 age.secrets.ai_api_key_REIKY_REI = {
   file = ./secrets/ai_api_key_REIKY_REI.age;
   owner = primaryUser.username;

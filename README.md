@@ -9,7 +9,7 @@
 
 ```
 machines.nix (host → roles/features/users)
-  → flake.nix → lib/mkHost.nix → hosts/{HOST}/default.nix
+  → flake.nix → lib/mk-host.nix → hosts/{HOST}/default.nix
                                    → modules/{common,roles,hardware,desktop,...}
   → users.nix (user ID → home/profile)
                                    → home/{profile}/
@@ -42,11 +42,13 @@ machines.nix (host → roles/features/users)
 ├── hosts/
 │   ├── NixMEOW/                    # 目录名 = 主机名 (machines.nix 的 key)
 │   │   ├── default.nix            # Composition root (仅 imports + host-specific)
+│   │   ├── boot-menu.nix          # 第一级启动菜单 (双系统 OS 选择, 仅本机 import)
 │   │   ├── hardware.nix           # Host-specific 硬件策略（内核参数等）
 │   │   └── hardware-configuration.nix  # nixos-generate-config 生成，不动
-│   └── NixMEOW-WSL/                # Windows WSL2 试验台 (详见 docs/NixMEOW-WSL.md)
-│       └── default.nix
+│   ├── NixMEOW-WSL/                # Windows WSL2 试验台 (详见 docs/NixMEOW-WSL.md)
+│   │   └── default.nix
 │   └── NixMEOW-CTR/                # Docker systemd 容器镜像 (详见 docs/NixMEOW-CTR.md)
+│       └── default.nix
 ├── modules/
 │   ├── default.nix                # 聚合所有子模块
 │   ├── common/                    # 所有 host 通用的系统基础 + hardware profile + meow.* 选项
@@ -56,6 +58,8 @@ machines.nix (host → roles/features/users)
 │   ├── networking/                # 网络/代理/防火墙/SSH
 │   ├── services/                  # 后台 daemon / 系统服务 (PipeWire, MPD, Flatpak)
 │   ├── development/               # 开发工具链 (opencode 等)
+│   ├── storage/                    # 存储与远程挂载 (NAS/SMB/NTFS 等)
+│   ├── documentation/              # man 手册等文档工具 (按 role 启用)
 │   └── virtualization/            # Podman, libvirtd
 ├── home/
 │   └── Reiky-REI/                 # 可复用 Home Manager 配置集，由 users.nix.homeProfile 绑定
@@ -66,9 +70,11 @@ machines.nix (host → roles/features/users)
 │       ├── editors/               # Neovim 等; desktop.nix 放 GUI 编辑器
 │       ├── apps/                  # 浏览器、社交、媒体、办公 (workstation 专属)
 │       ├── music/                 # 音乐播放器 (workstation 专属)
+│       ├── dev/                   # AI CLI 工具 (claude-code / codex)
+│       ├── lib/                   # JSON 合并激活辅助 (merge-json-activation.nix)
 │       └── tools/                 # 系统工具、搜索、查看器; desktop.nix 放桌面专用工具
 ├── lib/
-│   ├── mkHost.nix                 # 由 machines.nix 注册表生成 nixosConfigurations
+│   ├── mk-host.nix                 # 由 machines.nix 注册表生成 nixosConfigurations
 │   ├── features.nix                # 已知 feature ID 清单，拼写错误在 eval 时失败
 │   ├── roles.nix                   # 已知 role ID 清单
 │   ├── agents.nix                  # agent 注册表解析/校验/按 host+user 求交
@@ -93,6 +99,8 @@ machines.nix (host → roles/features/users)
 | 网络 | `modules/networking/` | NetworkManager、代理、防火墙、SSH | 网络应用（浏览器等） |
 | 服务 | `modules/services/` | PipeWire、MPD、Flatpak、CUPS、udisks2、电源管理 | 用户交互应用 |
 | 开发 | `modules/development/` | wine 等 | 编辑器配置（放 home） |
+| 存储 | `modules/storage/` | NAS/SMB 挂载等存储配置 | 用户数据、备份策略 |
+| 文档 | `modules/documentation/` | man 手册等文档工具（按 workstation/devbox role 启用） | 知识库内容（放 `.agents/`） |
 | 虚拟化 | `modules/virtualization/` | Docker、libvirtd、Waydroid | 容器内应用配置 |
 | 用户态 | `home/{profile}/` | 应用、shell、编辑器、WM 配置文件、终端工具 | 系统 daemon、内核参数 |
 
@@ -173,10 +181,10 @@ UEFI 启动链是两级的：固件 → **MEOW Boot Menu**（自建 GRUB，选�
 | **desktopEffects** | 桌面效果档（full/minimal） | niri 选择 kdl 段等 |
 | **kind** | 设备形态/运行环境（laptop/desktop/wsl/vm） | 平台差异判断（如 WSL 代理端口、Mod 键） |
 | **features** | 可组合能力开关 | 各模块 `lib.mkIf (config.meow.enabled ? "tag")` 自我屏蔽 |
-| **users / primaryUser** | 该 host 部署哪些身份、legacy 单用户回退 | `lib/mkHost.nix` 生成系统账号与 Home Manager 用户 |
+| **users / primaryUser** | 该 host 部署哪些身份、legacy 单用户回退 | `lib/mk-host.nix` 生成系统账号与 Home Manager 用户 |
 
 - feature / role ID 清单分别在 `lib/features.nix`、`lib/roles.nix`，未知标签会导致 eval 失败
-- flake 级标签（`kernel-715` / `agenix-secrets`）由 `lib/mkHost.nix` 消费
+- flake 级标签（`kernel-715` / `agenix-secrets`）由 `lib/mk-host.nix` 消费
 - `meow` 同样注入 home-manager (`extraSpecialArgs`)，`home/Reiky-REI/default.nix`
   按 role/能力分组自我屏蔽（如 server 角色不导入桌面与 GUI 应用组）
 - `kind=container` 的 host 会关闭 systemd-resolved 与文档包，镜像产物暴露为
@@ -212,7 +220,7 @@ nixos-generate-config --root /mnt
 nixos-rebuild build --flake /etc/nixos#<hostname>
 ```
 
-`nixosConfigurations` 由 `lib/mkHost.nix` 依据 machines.nix 自动生成 —— 新增机器 =
+`nixosConfigurations` 由 `lib/mk-host.nix` 依据 machines.nix 自动生成 —— 新增机器 =
 **machines.nix 写一行 + hosts/<hostname>/ 建一个目录**，不复贴 flake.nix。
 
 **注意**：未在 `machines.nix` 注册的 hostname 会直接 `abort` 报错退出，防止意外部署。

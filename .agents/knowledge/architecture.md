@@ -3,7 +3,7 @@
 ## 分层结构
 ```
 machines.nix (host → features + user IDs)
-  ├→ lib/mkHost.nix → hosts/{hostname}/default.nix + modules/{common,hardware,desktop,...}
+  ├→ lib/mk-host.nix → hosts/{hostname}/default.nix + modules/{common,hardware,desktop,...}
   └→ users.nix (stable user ID → login/home/profile)
        └→ Home Manager: home/{profile}/
 ```
@@ -15,6 +15,8 @@ machines.nix (host → features + user IDs)
 - **modules/desktop/** — Wayland/X11 会话栈、display manager、compositor、fcitx5、通知、空闲管理、xwayland-satellite
 - **modules/networking/** — 网络、代理、防火墙、SSH、VPN、Clash
 - **modules/services/** — 后台 daemon、系统能力服务 (管道/打印/MPD/Flatpak/polkit)
+- **modules/storage/** — 存储与远程挂载 (NAS/SMB/NTFS 等)
+- **modules/documentation/** — 手册/文档工具 (man 等, 按 role 启用)
 - **modules/development/** — 系统级开发工具链和平台支持
 - **home/{profile}/** — Home Manager 可复用用户配置
 
@@ -25,7 +27,7 @@ machines.nix (host → features + user IDs)
 - `users.nix` 按稳定 user ID 注册 `username`、`fullName`、`homeDirectory`、`homeProfile` 等身份字段
 - 同一 user ID 可以绑定多个 host；一个 host 可以绑定多个 user ID
 - `home/{profile}/` 是可复用 Home Manager 配置集，由 `users.nix.homeProfile` 显式选择，不再从登录名推导
-- `lib/mkHost.nix` 为每个绑定用户生成 NixOS 用户与 Home Manager 用户；`primaryUser` 目前仅供尚未迁移的单用户 system modules 兼容
+- `lib/mk-host.nix` 为每个绑定用户生成 NixOS 用户与 Home Manager 用户；`primaryUser` 目前仅供尚未迁移的单用户 system modules 兼容
 - Home Manager 服务模块与用户配置一起放在 `home/<profile>` 喵,`mkHost` 不扫描 `~/.config` 或其他工作区路径导入 Nix 文件喵~
 - 微码与固件属于设备事实，放 `hosts/<host>/`；不再由 `modules/hardware` 无条件开启
 - 双系统启动菜单（第一级 GRUB，`hosts/<host>/boot-menu.nix`，单元 `meow-boot-menu*`）也是设备事实，host-local；只有双系统 host import 它，systemd-boot 世代菜单保持 NixOS 托管
