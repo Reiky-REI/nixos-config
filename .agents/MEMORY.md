@@ -20,6 +20,7 @@
 - 2026-09-28 [opencode] 配置复现治理与 bot 退役喵~ NixMEOW/WSL/CTR eval 及 NixMEOW build/switch 均成功喵~ HM activation 用 hm-backup 保留旧配置喵~ bot 数据加密归档后已清理本机源目录喵,KB watcher 保持 active 喵~ OpenCode `rm -rf *` 改为 ask 且根目录精确 deny 保留喵,见 `retros/2026-09-28-config-reproducibility-and-bot-retirement.md` #config-reproducibility-retirement
 - 2026-09-28 [opencode] 按用户许可修正 OpenCode shell 权限喵~ 将 `rm -rf *` 从 deny 改为 ask 喵,根路径精确 deny 保留喵~ 已构建并切换 NixMEOW喵,运行配置确认新规则生效喵~
 - 2026-09-29 [opencode] 修复 NixMEOW 到 Steam Deck 的动态主机名连接喵~ Avahi/NSS mDNS 已 build/switch，`ssh steamdeck` 解析并公钥登录成功喵~ Wi-Fi 音频 tmux 也已改用稳定 SSH alias 喵,见 `knowledge/retros/2026-09-29-steamdeck-mdns-hostname.md` #steamdeck-mdns
+- 2026-10-01 [opencode] 更新 Git 工作流为验证门禁喵~ 依赖或原子可复用改动分阶段验证与 commit喵,未验证暂停时 stash 本任务文件且无须授权喵~ #validation-gated-stash-workflow
 
 ---
 

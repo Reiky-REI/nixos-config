@@ -42,14 +42,19 @@
 
 ## Git 工作流 (多 AI 协作)
 - 提交信息语言不限，与仓库历史风格一致即可
-- 每次验证通过后提交一个步骤
-- **始终在 feature branch 上工作**，禁止直接在 main 上修改
-- 开工前执行 `git status` + `git branch` 确认工作区干净
-- **复盘先写再提交**: 配置变更完成后先写复盘，复盘和代码在同一个 commit 里
-- **OpenCode 提交**使用 `.agents/config/commit.sh`（bot 身份）
-- **Claude Code 提交**用 `git -c user.name="claude-code[bot]" -c user.email="claude-code[bot]@users.noreply.github.com" commit`（bot 身份）
-- 提交并验证通过后，**自己合并回 main**（除非标注需要 review）
-- **合并后立即删分支**: `git branch -d <分支名>` + `git push origin --delete <分支名>`
+- 只有必需 build/test 验证通过的改动才能 commit 喵~
+- 后续修改依赖前一步结果时喵,或单项改动是可独立复用的原子单元时喵,分别验证并分别 commit 喵~ 其他情况可整批验证通过后提交一个逻辑完整的 commit 喵~
+- 验证优先由 AI 完成喵~ 无法修复、被阻塞或需要暂停时 stash 本任务未验证改动喵,不得 commit 喵~
+- stash 无需额外用户授权喵~ 使用 `git stash push -u -m "unverified: <task/module>" -- <task-paths...>` 只暂存本任务文件喵,不要包含无关改动或 ignored files 喵~
+- 恢复使用 `git stash apply` 而非 `pop` 喵~ 验证通过并 commit 后再清理对应 stash entry 喵~
+- commit message 与非显然代码注释应记录目标、原因、约束与取舍喵,方便未来回溯喵~
+- **始终在 feature branch 上工作**喵,禁止直接在 main 上修改喵~
+- 开工前执行 `git status` + `git branch` 确认改动归属喵,不要混入他人改动喵~
+- **复盘先写再提交**喵~ 配置变更完成后先写复盘喵,复盘和代码在同一个 commit 里喵~
+- **OpenCode 提交**使用 `.agents/config/commit.sh`（bot 身份）喵~ commit helper 按当前 branch 显式推送喵~
+- **Claude Code 提交**用 `git -c user.name="claude-code[bot]" -c user.email="claude-code[bot]@users.noreply.github.com" commit`（bot 身份）喵~
+- 验证通过并 commit 后喵,**自己合并回 main**（除非标注需要 review）喵~
+- **合并后立即删分支**喵~ `git branch -d <分支名>` + `git push origin --delete <分支名>`
 
 ## 复盘格式
 复盘强制使用以下 frontmatter 格式（AI 写复盘时自动生成）：

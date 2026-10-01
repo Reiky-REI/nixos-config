@@ -920,3 +920,21 @@ flake 源快照会嵌进每个 host 的配置喵; 只要工作树内容变了 (�
 直接报 `[Errno 2] No such file or directory: 'test'` 并在激活前中止 (profile 没动, 无半切换)喵~
 **规避**: `systemd-run --setenv=PATH=/run/current-system/sw/bin:/run/wrappers/bin -- nixos-rebuild switch ...` 喵~
 (用户自己终端里跑不受影响, 因为登录环境 PATH 本来就有 coreutils)喵~
+
+---
+
+## 用户家目录迁移后首次重启仍进入旧 generation (2026-10-01)
+
+- 12:12 的 previous-boot journal 显示系统仍启动旧 generation 喵~
+- 旧 generation 的 agenix identity 仍指向 `/home/Reiky-REI/.ssh/id_ed25519` 喵~ 家目录已移动后该路径不存在喵,日志随后出现 `no readable identities found` 与 `agenixInstall`/`agenixChown` 失败喵~
+- Home Manager 仍按 `Reiky-REI` profile 激活喵,`dsh-fence`、llama 与 netease 等服务因旧 `WorkSpace` 工作目录不存在而启动失败喵~
+- 这不是最终 generation 的 Home Manager 失败喵~ 12:29 启动新 generation 后,agenix 解密成功且 `home-manager-reiky` 完成激活喵~
+- 规避: 迁移脚本非零退出时不要盲目重启喵,留在 root TTY 核对失败日志与 active generation 后修复并幂等重跑喵~ 脚本现将完整输出保存到 root-only `/var/log/meow-user-migration/` 喵~
+- Noctalia 的 `~/.cache/noctalia/wallpapers.json` 是可变运行状态喵,Home Manager 的新 wallpaper directory 不会自动改写其中旧家目录绝对路径喵,迁移时需同步替换该缓存喵~
+- OpenCode V2 会话保存绝对 `directory` 喵,用户名迁移后用 session move API 重新归属会话喵,不要直接改 SQLite 喵~ `opencode-stable.db` 的 V1 会话可从备份副本用 V2 standalone 导出后导入当前库喵~
+
+## OpenCode `session list` 可能写入空 project metadata (2026-10-01)
+
+- 在没有会话的 `~/WorkSpace` 执行 `opencode session list` 返回 0 条喵,但数据库新建了该目录的 project metadata 行喵~
+- 该命令没有创建或删除 session/message 喵,但 project 列表会多一条空目录记录喵~
+- 诊断时不要把 `session list` 当纯只读查询喵,优先使用 `opencode debug paths` 与只读 session API喵,如需调用 `session list` 喵,先确认当前 directory 已在 project registry 中喵~
