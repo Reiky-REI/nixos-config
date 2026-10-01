@@ -137,8 +137,8 @@ in
           inputs.catppuccin.nixosModules.catppuccin
 
           (lib.mkIf (has "agenix-secrets") {
-            age.secrets.ai_api_key_REIKY_REI = {
-              file = ../secrets/ai_api_key_REIKY_REI.age;
+            age.secrets."ai-api-key-reiky" = {
+              file = ../secrets/ai-api-key-reiky.age;
               owner = primaryUser.username;
             };
             age.secrets.nas-smb-credentials = {

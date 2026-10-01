@@ -13,6 +13,7 @@
 - **knowledge/maps/** — 依赖链 / 模块关系图（按需创建）
 - **skills/** — 操作技能（按 skill 加载，不用全读）
 - **tools/** — 自研 agent 工具（当前: tools/kb-mcp 知识库语义检索 MCP server）
+- **artifacts/** — 归档区（scripts/logs/media/plans/config-snippets，收纳散落文件与一次性脚本）
 - **config/** — 工具脚本
 - **dialogue/** — 跨 AI 结构化消息板（由 config/dialogue.sh 管理; 旧 dialogue.md 已废弃为指针）
 - **flake.nix** — 入口

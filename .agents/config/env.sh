@@ -3,8 +3,8 @@
 set -a
 
 # 优先使用 agenix 解密的环境变量（日常 rebuild 走这里）
-if [ -f /run/agenix/ai_api_key_REIKY_REI ]; then
-  source /run/agenix/ai_api_key_REIKY_REI
+if [ -f /run/agenix/ai-api-key-reiky ]; then
+  source /run/agenix/ai-api-key-reiky
 fi
 
 # 回退到 token 文件（首次部署或 agenix 不可用时）
