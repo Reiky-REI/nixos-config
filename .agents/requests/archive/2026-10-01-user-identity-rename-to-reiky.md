@@ -4,7 +4,7 @@ requester: "NixMEOW/opencode"
 date: "2026-10-01"
 request_id: "2026-10-01-user-rename-to-reiky"
 priority: "medium"
-status: "approved"
+status: "done"
 ---
 
 ## 申请内容
@@ -84,10 +84,11 @@ status: "approved"
 | 2026-10-01 | 提交 | 用户选定「连系统账户一起改」方向 → `approved` |
 | 2026-10-01 | 执行(repo) | Phase 1 完成：users.nix / git mv / 全仓引用 / envKey 重加密 / 迁移脚本 |
 | 2026-10-01 | 修正 | `usermod` 被 linger 服务占用拒绝（process 1415 = `systemd --user`）→ 脚本改为直改账户库 + `mv`（uid 不变，幂等可重跑） |
-| | 执行(build) | ⬜ 等待 Phase 2 离线迁移 |
-| | 复盘 | `retros/{日期}-{主题}.md` |
-| | 归档 | `archive/` |
+| 2026-10-01 | 执行(离线) | 账户库直改 + 家目录 mv + `nixos-rebuild switch` → gen 245 + reboot |
+| 2026-10-01 | 收尾 | linger/subuid 迁移、home 路径修正、Claude 项目目录改名、旧路径残留 151M 清理（删除清单） |
+| 2026-10-01 | 验证 | id/HOME/envKey/服务/无 failed units/无旧名残留 全部通过 |
+| 2026-10-01 | 复盘 | `retros/2026-10-01-user-rename-reiky.md` |
+| 2026-10-01 | 归档 | `pending/` → `archive/` |
 
 ## 关联复盘
-<!-- 执行后填写 -->
-- `{复盘文件路径}`
+- `../retros/2026-10-01-user-rename-reiky.md`
