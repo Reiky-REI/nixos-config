@@ -296,6 +296,12 @@ def kb_search(args):
     try:
         rr = rerank(q, [STATE["chunks"][r]["text"][:1200] for r in pool])
         ranked = sorted(((sc, pool[i]) for i, sc in rr), reverse=True)[:k]
+        # 坏转换的 reranker GGUF(缺 cls.output.weight / pooling=RANK, 常见于社区转换版)
+        # 会对所有文档吐出 1e-2x 级退化解, 此时排序纯属噪声 → 回退混合召回收排序并标注
+        if ranked and max(sc for sc, _ in ranked) < 1e-6:
+            log("rerank returned degenerate scores, fallback to fused order")
+            note = "[!] reranker 分数退化(疑似模型缺分类头)，已回退混合召回收排序\n"
+            ranked = [(fsmap[r], r) for r in pool[:k]]
     except Exception as e:
         log("rerank failed, fallback to fused order:", e)
         note = "[!] rerank 端点异常(%s)，已按混合召回分排序\n" % e
@@ -304,7 +310,8 @@ def kb_search(args):
     for sc, r in ranked:
         c = STATE["chunks"][r]; m = c.get("meta") or {}
         snip = re.sub(r"\s+", " ", c["text"])[:MAX_SNIPPET]
-        lines.append("[%0.3f] %s#%s" % (sc, c["file"], c["heading"]))
+        sc_str = ("%0.3f" % sc) if sc >= 1e-3 else ("%0.2e" % sc)
+        lines.append("[%s] %s#%s" % (sc_str, c["file"], c["heading"]))
         mm = {x: m[x] for x in ("date", "module", "severity", "status") if x in m}
         if m.get("tags"): mm["tags"] = m["tags"]
         if mm: lines.append("  meta: %s" % json.dumps(mm, ensure_ascii=False))
