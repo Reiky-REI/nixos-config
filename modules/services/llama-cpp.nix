@@ -92,8 +92,14 @@ in {
 
     # ── 重排序服务:Qwen3-VL-Reranker-2B (:8082, --rerank) ──
     # 模型必须用带 reranker 专用张量的工作版 GGUF(官方 convert_hf_to_gguf 转)。
-    # 注意: mradermacher 等社区转换缺 cls.output.weight/pooling=RANK 元数据,
-    # 会打出 e^-13 级垃圾分(见 llama.cpp#16407)。
+    # 注意: mradermacher/tooktang 等社区转换缺 cls.output.weight/pooling=RANK 元数据,
+    # 会打出 e^-13~e^-36 级垃圾分(见 llama.cpp#16407); 判据 = 启动无 "pooling_type [-1]" 警告。
+    # 重转 recipe(2026-10-01):
+    #   python convert_hf_to_gguf.py --outtype q8_0 --outfile out.gguf <hf-dir>
+    #   ① 先移走 <hf-dir>/additional_chat_templates/ (否则 tokenizer.chat_templates 会被覆盖成
+    #      ['reranker'], llama-server 找不到名为 rerank 的模板 → 退化成 query+SEP+doc);
+    #   ② conversion/qwen.py 的 rerank 模板需改成 VL 版(无 <think>、指令为 candidates),
+    #      否则分数区分度差。详见 knowledge/retros/2026-10-01-kb-reranker-fix.md
     # rerank 与 embedding 是互斥模式, 故独立进程 8082; 2B 各 ~1.8G 走 GPU。
     systemd.services.llama-cpp-reranker = {
       description = "llama.cpp reranker server (Qwen3-VL-Reranker-2B, :8082)";

@@ -383,6 +383,13 @@ AstrBot 6185 之前手动启动, 重启后不自动运行。
 
 - **llama.cpp rerank "input too large / physical batch size 512"** (2026-08-24): rerank 编码受 `--ubatch-size` 限制而不是 `-b/--batch-size`; 只调 batch-size 无效, 必须把 ubatch 提到 ≥ 单文档 token 数(本机 2048), 否则 /v1/rerank 对长文档一律 HTTP 500
 - **systemd user .path 单元 start-limit 熔断** (2026-08-24): PathExistsGlob 场景任务快速进出队列会高频触发 unit, 默认阈值(5次/10s)直接 unit-start-limit-hit 停机且不再恢复; 需给 .path 和 .service 都放宽 StartLimitIntervalSec/Burst 并 reset-failed
+- **kb-mcp reranker 打分退化(e^-2x) — 社区 GGUF 缺分类头** (2026-10-01):
+  - 现象: `/v1/rerank` 对所有文档返回 `1e-28~1e-36` 级分数, 排序近似随机, `kb_search` 显示 `[0.000]`; 启动日志有 `model default pooling_type is [-1], but [4] was specified`
+  - 根因: Qwen3-VL-Reranker-2B 是生成式(`Qwen3VLForConditionalGeneration`), `/v1/rerank` 的 rank 分支需要 `cls.output.weight` + `pooling_type=RANK`; tooktang/mradermacher 等社区转换缺这两项(llama.cpp#16407)
+  - 修复: 用官方 `convert_hf_to_gguf.py`(llama-cpp-9190 自带)重转 → 它识别 README 里的 `# qwen3-vl-reranker`, 从 `embed_tokens` 取 `yes`(9693)/`no`(2152) 两行造 `cls.output.weight`, 写 `pooling=RANK` + rerank 模板
+  - 坑①: HF 的 `additional_chat_templates/reranker.jinja` 会把 `tokenizer.chat_templates` 数组覆盖成 `["reranker"]`, llama-server 只认名为 `rerank` 的模板 → 转换前移走该目录(否则退化 query+SEP+doc)
+  - 坑②: 转换器给 VL 也套文本版模板(带 `<think>`), VL 官方模板无 think 且指令为 "candidates" → 需把 `conversion/qwen.py` 的 rerank 模板改成 VL 版, 否则区分度差(0.56/0.30 vs 0.54/0.07)
+  - 判据: 正确模型 relevant≈0.5+/irrelevant≈0.0x 且启动无 `pooling_type [-1]` 警告; 坏模型/退化时 `server.py` 会自动回退混合召回排序并标注
 
 
 ---
