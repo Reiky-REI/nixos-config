@@ -5,19 +5,23 @@
 ## 原理
 
 ```
-secrets/ai_api_key_<USER>.age (age 加密，可安全进 git)
+secrets/ai-api-key-<user>.age (age 加密，可安全进 git)
   ↓ rebuild 时 agenix 用 SSH 私钥解密
-/run/agenix/ai_api_key_<USER> (明文)
-  ↓ zsh 按 ${USER} 自动 source
+/run/agenix/ai-api-key-<user> (明文)
+  ↓ zsh 启动时 source /run/agenix/ai-api-key-*
 shell 环境变量 (DEEPSEEK_API_KEY_<USER>, NIX_ACCESS_TOKEN 等)
 ```
 
-## 命名规则
+## 命名规则（2026-10-01 起统一为「小写 + 连字符」）
 
-每个用户的密钥文件命名格式：`ai_api_key_<用户名>.age`
+| 类型 | 文件 | 运行时路径 | 例子 |
+|------|------|-----------|------|
+| 每用户环境变量 | `ai-api-key-<user>.age` | `/run/agenix/ai-api-key-<user>` | `ai-api-key-reiky.age` |
+| 服务凭据 | `<service>-credentials.age` | `/run/agenix/<service>-credentials` | `nas-smb-credentials.age` |
+| 模板 | `ai-api-key.age.template` / `template.nix` | — | — |
 
-- **Reiky-REI** → `ai_api_key_REIKY_REI.age` → 环境变量 `DEEPSEEK_API_KEY_REIKY_REI`
-- 新用户 `foo` → `ai_api_key_foo.age` → 环境变量 `DEEPSEEK_API_KEY_foo`
+- agenix 的 `age.secrets.<键>` 的**键名**就是 `/run/agenix/` 下的文件名（`modules/age.nix` 的 `name` 选项，普通字符串），**允许连字符**，没有 `[a-zA-Z0-9_-]` 这种限制喵~（旧文档里"连字符要换下划线"的说法已作废）。
+- 密钥内容里的环境变量名不受文件名约束，以消费方配置引用的名字为准（如 `DEEPSEEK_API_KEY_REIKY_REI`）。
 
 ## 工作目录
 
@@ -31,56 +35,17 @@ cd /etc/nixos/secrets
 ### 编辑当前用户的密钥
 ```bash
 cd /etc/nixos/secrets
-agenix -e ai_api_key_REIKY_REI.age -i ~/.ssh/id_ed25519
+agenix -e ai-api-key-reiky.age -i ~/.ssh/id_ed25519
 ```
 
-文件中变量名要包含你的用户名：
+### 查看当前密钥（不解密文件）
 ```bash
-export DEEPSEEK_API_KEY_REIKY_REI="sk-..."
-export NIX_ACCESS_TOKEN="ghp_..."
-```
-
-### 新增一个用户（例如：添加用户 "foo"）
-
-步骤如下：
-
-```bash
-# 1. 让 foo 提供他的 SSH 公钥
-#    cat ~/.ssh/id_ed25519.pub
-
-# 2. 编辑 secrets/secrets.nix，把 foo 的公钥加进去
-#    let
-#      reiky_key = "ssh-ed25519 AAA...";
-#      foo_key   = "ssh-ed25519 BBB...";
-#    in {
-#      "ai_api_key_REIKY_REI.age".publicKeys = [reiky_key];
-#      "ai_api_key_foo.age".publicKeys       = [foo_key];
-#    }
-
-# 3. 把 foo 的密钥内容写到临时文件
-echo 'export DEEPSEEK_API_KEY_foo="sk-..."
-export NIX_ACCESS_TOKEN_foo="ghp_..."' > /tmp/foo_plain
-
-# 4. 创建加密文件（编辑器打开后粘贴 /tmp/foo_plain 内容）
-cat /tmp/foo_plain | agenix -e ai_api_key_foo.age -i ~/.ssh/id_ed25519
-
-# 5. 在 flake.nix 的 age.secrets 中添加 foo 的条目
-#    age.secrets.ai_api_key_foo = {
-#      file = ./secrets/ai_api_key_foo.age;
-#      owner = "foo";
-#    };
-
-# 6. rebuild，foo 的 zsh 会在启动时自动读取 /run/agenix/ai_api_key_foo
-```
-
-### 查看当前用户的密钥（不解密文件）
-```bash
-cat /run/agenix/ai_api_key_REIKY_REI
+cat /run/agenix/ai-api-key-reiky
 ```
 
 ### 查看加密文件内容
 ```bash
-agenix -d ai_api_key_REIKY_REI.age -i ~/.ssh/id_ed25519
+agenix -d ai-api-key-reiky.age -i ~/.ssh/id_ed25519
 ```
 
 ### 重加密所有密钥
@@ -89,40 +54,70 @@ agenix -d ai_api_key_REIKY_REI.age -i ~/.ssh/id_ed25519
 agenix -r -i ~/.ssh/id_ed25519
 ```
 
+### 轮换 GitHub token（NIX_ACCESS_TOKEN）
+```bash
+bash .agents/config/rotate-nix-token.sh
+```
+它只替换密钥里的 `NIX_ACCESS_TOKEN` 一行，其余 API key 原样保留，并同步回退文件 `.agents/config/token`。
+
+## 新增一个用户（例如 "foo"）
+
+```bash
+# 1. 让 foo 提供 SSH 公钥: cat ~/.ssh/id_ed25519.pub
+
+# 2. secrets/secrets.nix 加入公钥与文件条目:
+#      "ai-api-key-foo.age".publicKeys = [foo_key];
+
+# 3. 创建加密文件:
+cp ai-api-key.age.template ai-api-key-foo.age
+agenix -e ai-api-key-foo.age -i ~/.ssh/id_ed25519   # 粘贴 export ... 内容
+
+# 4. lib/mk-host.nix 增加条目:
+#      age.secrets."ai-api-key-foo" = {
+#        file = ../secrets/ai-api-key-foo.age;
+#        owner = "foo";
+#      };
+
+# 5. rebuild，foo 的 zsh 会通过 /run/agenix/ai-api-key-* 自动加载
+```
+
 ## 系统集成说明
 
-### flake.nix 中的配置
-用户身份集中登记在 `users.nix`，host 通过 `machines.nix.users` 绑定；当前兼容的 system-level secrets 仍使用 host 的 `primaryUser`：
-```nix
-# users.nix 中定义
-reiky = { username = "Reiky-REI"; ... };
+### 定义位置（lib/mk-host.nix）
 
-# lib/mk-host.nix 中由 users.nix 与 machines.nix 解析
-age.secrets.ai_api_key_REIKY_REI = {
-  file = ./secrets/ai_api_key_REIKY_REI.age;
+```nix
+# users.nix 中定义身份: reiky = { username = "Reiky-REI"; ... };
+# mk-host.nix 里由 users.nix 与 machines.nix 解析 primaryUser
+age.secrets."ai-api-key-reiky" = {
+  file = ../secrets/ai-api-key-reiky.age;
   owner = primaryUser.username;
 };
 age.identityPaths = [ "${primaryUser.homeDirectory}/.ssh/id_ed25519" ];
 ```
 
-### zsh 中的自动加载
+### zsh 中的自动加载（home/Reiky-REI/shell/zsh.nix）
+
 ```nix
-# home/Reiky-REI/shell/zsh.nix
-for file in /run/agenix/ai_api_key_${USER}; do
+for file in /run/agenix/ai-api-key-*; do
   [ -f "$file" ] && source "$file"
 done
 ```
 
-### age.secrets 名限制
-age.secrets 键名只能包含 `[a-zA-Z0-9_-]`，所以用户名中的连字符需要替换为下划线：
-- 用户 `Reiky-REI` → age.secrets 键为 `ai_api_key_REIKY_REI`
-- 但 `/run/agenix/` 中文件名可以带连字符（由 age file 名决定）
+### 构建环境（.agents/config/env.sh）
+
+```bash
+if [ -f /run/agenix/ai-api-key-reiky ]; then
+  source /run/agenix/ai-api-key-reiky
+fi
+# 回退: .agents/config/token（agenix 不可用时）
+```
 
 ## 当前密钥清单
 
-| 文件 | 用户 | 解密路径 | 环境变量 |
-|------|------|----------|----------|
-| `ai_api_key_REIKY_REI.age` | Reiky-REI | `/run/agenix/ai_api_key_REIKY_REI` | `DEEPSEEK_API_KEY_REIKY_REI`, `NIX_ACCESS_TOKEN`, `XIAOMI_API_KEY`, `XIAOMI_API_ENDPOINT` |
+| 文件 | 运行时路径 | 用途 / 环境变量 |
+|------|-----------|-----------------|
+| `ai-api-key-reiky.age` | `/run/agenix/ai-api-key-reiky` | `DEEPSEEK_API_KEY_REIKY_REI`, `NIX_ACCESS_TOKEN`, `XIAOMI_API_KEY`, `XIAOMI_API_ENDPOINT` |
+| `nas-smb-credentials.age` | `/run/agenix/nas-smb-credentials` | NAS SMB 挂载凭据 (root only) |
 
 ## 故障排查
 
@@ -132,3 +127,4 @@ age.secrets 键名只能包含 `[a-zA-Z0-9_-]`，所以用户名中的连字符�
 | `permission denied: /run/agenix/...` | 文件 root 所有 | 设 `age.secrets.<name>.owner = "你的用户名"` |
 | `/run/agenix/` 为空 | rebuild 未运行 | 重新 `nixos-rebuild switch` |
 | `agenix -e` 报 attribute missing | secrets.nix 无对应条目 | 在 secrets.nix 中添加文件条目 |
+| 改名后 `/run/agenix/` 还是旧名 | 未 switch | `sudo nixos-rebuild switch`（旧名文件随新代消失） |

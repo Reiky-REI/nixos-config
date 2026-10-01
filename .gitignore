@@ -6,8 +6,6 @@
 result
 .agents/tools/kb-mcp/index/
 .agents/tools/kb-mcp/__pycache__/
-cleanup.sh
-decode_objects.py
 .pnpm-store/
 
 # 编辑器临时文件

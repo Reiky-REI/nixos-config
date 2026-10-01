@@ -13,7 +13,7 @@ cd /etc/nixos/secrets
 ## 编辑当前用户的密钥
 ```bash
 cd /etc/nixos/secrets
-agenix -e ai_api_key_REIKY_REI.age -i ~/.ssh/id_ed25519
+agenix -e ai-api-key-reiky.age -i ~/.ssh/id_ed25519
 ```
 
 文件中变量名包含用户名：
@@ -24,12 +24,12 @@ export NIX_ACCESS_TOKEN="ghp_..."
 
 ## 查看当前密钥（不解密文件）
 ```bash
-cat /run/agenix/ai_api_key_REIKY_REI
+cat /run/agenix/ai-api-key-reiky
 ```
 
 ## 查看加密文件内容
 ```bash
-agenix -d ai_api_key_REIKY_REI.age -i ~/.ssh/id_ed25519
+agenix -d ai-api-key-reiky.age -i ~/.ssh/id_ed25519
 ```
 
 ## 重加密所有密钥
@@ -41,8 +41,8 @@ agenix -r -i ~/.ssh/id_ed25519
 ## 新增用户流程
 1. 让用户提供 SSH 公钥
 2. 编辑 `secrets/secrets.nix` 添加公钥和文件条目
-3. 创建加密文件: `cat /tmp/plain | agenix -e ai_api_key_foo.age -i ~/.ssh/id_ed25519`
-4. 在 `flake.nix` 的 `age.secrets` 中添加条目
+3. 创建加密文件: `cat /tmp/plain | agenix -e ai-api-key-foo.age -i ~/.ssh/id_ed25519`
+4. 在 `lib/mk-host.nix` 的 `age.secrets` 中添加条目 (含 `file` 与 `owner`)
 5. rebuild
 
 ## 故障排查

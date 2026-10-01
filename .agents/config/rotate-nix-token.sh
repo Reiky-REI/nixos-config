@@ -2,7 +2,7 @@
 # rotate-nix-token.sh — 轮换 NIX_ACCESS_TOKEN (GitHub token)
 #
 # 为什么需要它:
-#   - 构建时 env.sh 优先 source agenix 密钥 `secrets/ai_api_key_REIKY_REI.age`,
+#   - 构建时 env.sh 优先 source agenix 密钥 `secrets/ai-api-key-reiky.age`,
 #     其中的 `export NIX_ACCESS_TOKEN=...` 才是真正生效的那个;
 #     `.agents/config/token` 只是 agenix 不可用时的回退。
 #   - 所以轮换必须改 **agenix 密钥**, 光改回退文件没用 (会被 agenix 盖掉)。
@@ -17,7 +17,7 @@ set -euo pipefail
 ROOT="$(git -C "$(dirname "$0")/../.." rev-parse --show-toplevel)"
 cd "$ROOT"
 
-SECRET="secrets/ai_api_key_REIKY_REI.age"
+SECRET="secrets/ai-api-key-reiky.age"
 KEY="$HOME/.ssh/id_ed25519"
 
 if [ ! -f "$SECRET" ]; then echo "找不到 $SECRET"; exit 1; fi
