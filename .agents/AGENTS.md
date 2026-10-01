@@ -106,17 +106,33 @@ AI 根据任务规模自行判断走哪级：
 
 | 级别 | 适用场景 | 流程 |
 |------|---------|------|
-| **轻量 🏃** | 加包/改一行配置/修 typo | 直接改 → (Nix变更则build) → 提交 |
-| **标准 📋** | 新模块/跨文件改动/常规任务 | feature branch → build → 复盘+提交 → 合main → 删分支 |
-| **复杂 🧠** | 架构变更/排障/选型决策 | 先plan → feature branch → build → 决策记录+复盘+提交 → 合main → 删分支 |
+| **轻量 🏃** | 加包/改一行配置/修 typo | 修改 → Nix 变更 build 通过后 commit 喵~ 未验证且暂停时 stash 喵~ |
+| **标准 📋** | 新模块/跨文件改动/常规任务 | feature branch → 按依赖拆验证单元 → 通过的单元 commit 或整批 commit → 复盘 → 合 main → 删分支 喵~ |
+| **复杂 🧠** | 架构变更/排障/选型决策 | 先 plan → feature branch → 按依赖拆验证单元 → 通过后 commit → 决策记录+复盘 → 合 main → 删分支 喵~ |
 
 ### Git 工作流（标准级示例）
-1. **绝不直接在 main 上改** — 每个任务开一个 feature branch
-2. **开工前检查** — `git status` + `git branch`，确认没有未提交变更或进行中的分支
-3. **改完先 build** — `nixos-rebuild build --flake /etc/nixos#NixMEOW` 验证通过
-4. **写复盘** — 配置变更和复盘一起提交，保持 git 历史完整
-5. **提交后合回 main** — 提 PR 或直接合并，优先自己合（如需 review 则标注等待）
-6. **merge 后删分支** — 删除本地+远程分支，避免 stale branch 堆积
+1. **绝不直接在 main 上改** — 每个任务开一个 feature branch 喵~
+2. **开工前检查** — `git status` + `git branch -a` 确认改动归属喵,不覆盖或暂存其他人的未提交工作喵~
+3. **改完先 build** — Nix 变更先运行 `nixos-rebuild build --flake /etc/nixos#NixMEOW` 喵~
+4. **commit 粒度** — 后续修改依赖前一步结果时喵,或单项改动本身是可独立复用的原子单元时喵,分别 build/验证并分别 commit 喵~ 其他情况可整批验证通过后做一个完整 commit 喵~
+   例如五个模块里后续模块依赖前序接口时按接口边界分别验证和 commit 喵~ 若五个模块共同组成一个原子功能则完成集成验证后一次 commit 喵~
+5. **验证由 AI 优先完成** — 先运行所有可自动化 build/test 喵~ 只有硬件、现场 UI 等确实无法远程验证的步骤才交给用户喵~
+6. **验证失败先修复** — 修复后重跑 build/test 喵~ 无法通过、被阻塞或需要暂停时喵,stash 本任务未验证改动喵,不得 commit 喵~
+7. **stash 无需授权** — 可在每个重要改动前或按需创建 checkpoint 喵~ 使用 `git stash push -u -m "unverified: <task/module>" -- <task-paths...>` 只保存本任务文件喵~ 不要 stash 无关改动或 ignored files 喵~
+8. **恢复 stash** — 用 `git stash apply` 而非 `pop` 喵~ 恢复后重跑验证喵~ 验证通过并 commit 后再清理自己创建的 stash entry 喵~
+9. **交给用户验证时** — 先 stash 未验证改动喵~ 提供确切 stash 引用、恢复命令与验证步骤喵~
+10. **git 记录体现思路** — commit message 写明目标与关键原因喵,注释解释非显然的设计动机与约束喵~ 复盘和代码在同一 commit,方便未来接续喵~
+11. **复盘并提交** — 非平凡变更先写复盘喵~ 必需验证通过后按项目 bot identity 和 commit helper 提交喵,复盘与代码放在同一 commit 喵~
+12. **提交后合回 main** — 提 PR 或直接合并喵,优先自己合（如需 review 则标注等待）喵~
+13. **merge 后删分支** — 删除本地+远程分支喵,避免 stale branch 堆积喵~
+
+### Stash 命令示例
+
+```bash
+git stash push -u -m "unverified: <task/module>" -- <task-paths...>
+```
+
+恢复用 `git stash apply` 喵~ 验证通过并 commit 后才清理自己创建的 stash entry 喵~
 
 ### 开工前互查（重要！）
 每次动手前，**先查另一个 AI 有没有动过相关东西**：
