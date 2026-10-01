@@ -2,6 +2,7 @@
   pkgs,
   config,
   meow,
+  userId,
   ...
 }: let
   # 真机 clash-verge 端口 7897; WSL 走宿主 clash = 7890
@@ -54,11 +55,11 @@ in {
       # 编辑密钥:  agenix -e secrets/<name>.age -i ~/.ssh/id_ed25519
       # 重加密:    agenix -r secrets/ -i ~/.ssh/id_ed25519
       #
-      # 命名规则: secrets/ai-api-key-<user>.age → /run/agenix/ai-api-key-<user>
-      # 这里加载全部用户的 ai-api-key-* 密钥 (各自环境变量互不冲突)
-      for file in /run/agenix/ai-api-key-*; do
-        [ -f "$file" ] && source "$file"
-      done
+      # 命名规则: secrets/ai-api-key-<userId>.age → /run/agenix/ai-api-key-<userId>
+      # 注意: /run/agenix 目录不可列 (只有 x 权限), 不能用 glob, 必须拼精确路径
+      if [ -f /run/agenix/ai-api-key-${userId} ]; then
+        source /run/agenix/ai-api-key-${userId}
+      fi
 
       # === Claude Code + cc-switch 本地代理 ===
       # env 由 cc-switch 管理（~/.claude/settings.json），这里只设代理地址
