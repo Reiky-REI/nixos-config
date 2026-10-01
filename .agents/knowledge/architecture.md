@@ -28,6 +28,7 @@ machines.nix (host → features + user IDs)
 - `lib/mkHost.nix` 为每个绑定用户生成 NixOS 用户与 Home Manager 用户；`primaryUser` 目前仅供尚未迁移的单用户 system modules 兼容
 - Home Manager 服务模块与用户配置一起放在 `home/<profile>` 喵,`mkHost` 不扫描 `~/.config` 或其他工作区路径导入 Nix 文件喵~
 - 微码与固件属于设备事实，放 `hosts/<host>/`；不再由 `modules/hardware` 无条件开启
+- 双系统启动菜单（第一级 GRUB，`hosts/<host>/boot-menu.nix`，单元 `meow-boot-menu*`）也是设备事实，host-local；只有双系统 host import 它，systemd-boot 世代菜单保持 NixOS 托管
 - `config.nix` 保留为旧脚本兼容视图，新配置应直接使用 `users.nix`
 - 未知 user ID、重复绑定、重复登录名/home 路径及缺失 Home profile 会在求值时报错；feature 与 role ID 分别由 `lib/features.nix`、`lib/roles.nix` 类型校验
 
