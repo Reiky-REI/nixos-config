@@ -9,9 +9,12 @@
 #   systemd-boot 保持 NixOS 托管 (世代菜单照常更新)喵~
 #
 # 背景图与可复现性:
-#   仓库内嵌 Catppuccin 官方背景 (MIT) 作兜底喵; 本机实际背景由
-#   meow-stage1-background.service 在运行时从当前桌面壁纸生成后写入 ESP喵,
-#   第三方壁纸一个字节都不进 git 喵~ 背景文件缺失时自动用内嵌官方版本喵~
+#   仓库内嵌 Catppuccin 官方背景 (MIT, 已加 50% 黑遮罩) 作兜底喵; 本机实际背景由
+#   meow-stage1-background.service 在运行时生成两张写进 ESP:
+#     boot-background-nixos.png   (Noctalia 当前壁纸)
+#     boot-background-windows.png (Windows TranscodedWallpaper)
+#   GRUB 按 grubenv 的 saved_entry 决定用哪张 ("上次启动的系统"的桌面壁纸)喵~
+#   第三方壁纸一个字节都不进 git 喵~
 #
 # 设备事实 (host-local):
 #   nvme0n1p1 = NixOS ESP   (vfat 75D8-3A38, 挂载 /boot)
@@ -31,17 +34,68 @@
   windowsEspUuid = "2630-98EC";
   nixosDiskByEui = "/dev/disk/by-id/nvme-eui.1849474406090001001b444a446f13ec";
 
-  # Catppuccin Mocha 主题 + 两套 theme.txt:
-  #   theme-stock.txt -> 内嵌官方背景 (仓库兜底; 全新机器/无运行时背景时使用)
-  #   theme-esp.txt   -> ESP 运行时背景 /EFI/MEOW-OS/boot-background.png
-  theme = pkgs.runCommand "meow-grub-theme" {} ''
-    mkdir -p $out
-    cp -r ${pkgs.catppuccin-grub}/. $out/
-    chmod -R u+w $out
-    cp $out/theme.txt $out/theme-stock.txt
-    sed 's|desktop-image: "background.png"|desktop-image: "/EFI/MEOW-OS/boot-background.png"|' \
-      $out/theme.txt > $out/theme-esp.txt
+  # Catppuccin Mocha 主题 (去掉居中 logo) + 三套 theme.txt:
+  #   theme-stock.txt   -> 内嵌官方背景 (仓库兜底; 全新机器)
+  #   theme-nixos.txt   -> ESP /EFI/MEOW-OS/boot-background-nixos.png
+  #   theme-windows.txt -> ESP /EFI/MEOW-OS/boot-background-windows.png
+  # 所有背景统一加 50% 黑遮罩, 保证浅色菜单文字的可读性
+  themeText = desktopImage: ''
+    # MEOW GRUB theme (Catppuccin Mocha based; logo removed; 50%-dimmed background)
+    title-text: ""
+    desktop-image: "${desktopImage}"
+    desktop-image-scale-method: "stretch"
+    desktop-color: "#1E1E2E"
+    terminal-font: "Unifont Regular 16"
+    terminal-left: "0"
+    terminal-top: "0"
+    terminal-width: "100%"
+    terminal-height: "100%"
+    terminal-border: "0"
+
+    + boot_menu {
+      left = 50%-320
+      top = 50%
+      width = 640
+      height = 30%
+      item_font = "Unifont Regular 28"
+      item_color = "#CDD6F4"
+      selected_item_color = "#CDD6F4"
+      icon_width = 44
+      icon_height = 44
+      item_icon_space = 24
+      item_height = 56
+      item_padding = 5
+      item_spacing = 14
+      selected_item_pixmap_style = "select_*.png"
+    }
+
+    + label {
+      top = 82%
+      left = 30%
+      width = 40%
+      align = "center"
+      id = "__timeout__"
+      font = "Unifont Regular 28"
+      text = "Booting in %d seconds"
+      color = "#CDD6F4"
+    }
   '';
+
+  theme =
+    pkgs.runCommand "meow-grub-theme" {
+      nativeBuildInputs = [pkgs.imagemagick grub];
+    } ''
+      mkdir -p $out
+      cp -r ${pkgs.catppuccin-grub}/. $out/
+      chmod -R u+w $out
+      rm -f $out/theme.txt $out/logo.png
+      magick $out/background.png -fill black -colorize 50% -strip $out/background.png
+      # 菜单/倒计时用 28px 大字体 (原主题字体只有 16px, 2.5K 屏上看不清)
+      grub-mkfont -s 28 --no-bitmap -o $out/font-item.pf2 ${pkgs.unifont.otf}
+      cp ${pkgs.writeText "meow-theme-stock.txt" (themeText "background.png")} $out/theme-stock.txt
+      cp ${pkgs.writeText "meow-theme-nixos.txt" (themeText "/EFI/MEOW-OS/boot-background-nixos.png")} $out/theme-nixos.txt
+      cp ${pkgs.writeText "meow-theme-windows.txt" (themeText "/EFI/MEOW-OS/boot-background-windows.png")} $out/theme-windows.txt
+    '';
 
   # 第一级菜单 (内嵌进 EFI, 纯文本可审计)
   # 注意: GRUB 脚本不支持 `||`, 条件用 `if ! cmd ; then ... fi`
@@ -76,15 +130,21 @@
     fi
     set default="''${saved_entry}"
 
-    # 有运行时背景用 ESP 版, 否则用内嵌官方背景
-    if [ -f /EFI/MEOW-OS/boot-background.png ]; then
-      set theme=(memdisk)/boot/grub/themes/meow/theme-esp.txt
-    else
-      set theme=(memdisk)/boot/grub/themes/meow/theme-stock.txt
+    # 主题: 默认内嵌兜底; 有运行期背景时按"上次启动的系统"切换壁纸
+    set theme=(memdisk)/boot/grub/themes/meow/theme-stock.txt
+    if [ -f /EFI/MEOW-OS/boot-background-nixos.png ]; then
+      set theme=(memdisk)/boot/grub/themes/meow/theme-nixos.txt
+    fi
+    if [ "$saved_entry" = "meow-windows" ]; then
+      if [ -f /EFI/MEOW-OS/boot-background-windows.png ]; then
+        set theme=(memdisk)/boot/grub/themes/meow/theme-windows.txt
+      fi
     fi
 
     # 字体加载失败时保持 console 菜单, 仅损失颜值
+    # font.pf2 = 原主题 16px 字体 (terminal-font); font-item.pf2 = 28px 菜单字体
     if loadfont (memdisk)/boot/grub/themes/meow/font.pf2; then
+      loadfont (memdisk)/boot/grub/themes/meow/font-item.pf2
       set gfxmode=2560x1600,1920x1200,1280x800,auto
       terminal_output gfxterm
     fi
@@ -218,10 +278,12 @@ in {
     '';
   };
 
-  # 运行期壁纸注入: 生成 GRUB 背景写进 ESP (第三方图不进 git)
-  # 优先级: ~/.config/meow-boot/background (软链或一行路径) > Noctalia 当前壁纸
+  # 运行期背景注入: 两张背景写进 ESP (第三方图不进 git)
+  #   boot-background-nixos.png   = 覆盖文件 > Noctalia 当前壁纸
+  #   boot-background-windows.png = Windows TranscodedWallpaper > 缓存图 > 图片目录最新
+  # 统一 50% 黑遮罩保证文字可读; GRUB 按 grubenv saved_entry 选对应主题
   systemd.services.meow-stage1-background = {
-    description = "MEOW stage-1 GRUB: refresh wallpaper from current desktop wallpaper";
+    description = "MEOW stage-1 GRUB: refresh NixOS/Windows wallpaper backgrounds";
     wantedBy = ["multi-user.target"];
     after = ["local-fs.target"];
     unitConfig.RequiresMountsFor = espMount;
@@ -229,15 +291,36 @@ in {
       Type = "oneshot";
     };
     startLimitIntervalSec = 0;
-    path = [pkgs.coreutils pkgs.imagemagick pkgs.jq pkgs.file pkgs.gnugrep pkgs.gnused];
+    path = [pkgs.coreutils pkgs.imagemagick pkgs.jq pkgs.file pkgs.findutils pkgs.gnugrep pkgs.gnused];
     script = ''
       set -u
-      TARGET=${espStageDir}/boot-background.png
+      STAGE_DIR=${espStageDir}
       OVERRIDE=${userHome}/.config/meow-boot/background
       NOCTALIA=${userHome}/.cache/noctalia/wallpapers.json
+      WIN_HOME=/mnt/windows/Users/reiky
       STATE_DIR=/var/lib/meow-stage1-background
       mkdir -p "$STATE_DIR"
 
+      # 居中裁剪 2560x1600 + 50% 黑遮罩 + 去 alpha; 指纹未变则跳过
+      prepare() {
+        p_src="$1"
+        p_dst="$2"
+        p_fp="$3"
+        [ -f "$p_src" ] || return 0
+        p_stamp="$STATE_DIR/$(basename "$p_dst").fingerprint"
+        if [ -f "$p_dst" ] && [ -f "$p_stamp" ] && [ "$(cat "$p_stamp")" = "$p_fp" ]; then
+          return 0
+        fi
+        p_tmp="$(mktemp /var/tmp/meow-stage1-bg.XXXXXX.png)" || return 0
+        if magick "$p_src" -auto-orient -resize '2560x1600^' -gravity center -extent 2560x1600 -fill black -colorize 50% -strip "PNG24:$p_tmp" 2>/dev/null; then
+          install -D -m 0644 "$p_tmp" "$p_dst" && printf '%s' "$p_fp" > "$p_stamp"
+        else
+          echo "meow-stage1-background: conversion failed: $p_src" >&2
+        fi
+        rm -f "$p_tmp"
+      }
+
+      # ---- NixOS 侧: 覆盖文件 > Noctalia 当前壁纸 ----
       src=""
       if [ -e "$OVERRIDE" ]; then
         if [ -L "$OVERRIDE" ] || file -b --mime-type "$OVERRIDE" 2>/dev/null | grep -q '^image/'; then
@@ -249,24 +332,25 @@ in {
       if [ -z "$src" ] && [ -f "$NOCTALIA" ]; then
         src="$(jq -r '.wallpapers["eDP-1"].dark // .wallpapers["eDP-1"].light // (.wallpapers | to_entries | map(.value.dark // .value.light) | map(select(. != null)) | first) // .defaultWallpaper // empty' "$NOCTALIA" 2>/dev/null)"
       fi
-      if [ -z "$src" ] || [ ! -f "$src" ]; then
-        echo "meow-stage1-background: no usable wallpaper; keeping existing GRUB background" >&2
-        exit 0
-      fi
-
-      # 指纹未变且目标已存在时跳过, 避免每次开机重复写 ESP
-      fp="v1|$src|$(stat -c '%s|%Y' "$src" 2>/dev/null)"
-      if [ -f "$TARGET" ] && [ -f "$STATE_DIR/fingerprint" ] && [ "$(cat "$STATE_DIR/fingerprint")" = "$fp" ]; then
-        exit 0
-      fi
-
-      tmp="$(mktemp /var/tmp/meow-stage1-bg.XXXXXX.png)" || exit 0
-      trap 'rm -f "$tmp"' EXIT
-      if magick "$src" -auto-orient -resize '2560x1600^' -gravity center -extent 2560x1600 -fill black -colorize 15% -strip "PNG24:$tmp" 2>/dev/null; then
-        install -D -m 0644 "$tmp" "$TARGET" && printf '%s' "$fp" > "$STATE_DIR/fingerprint"
+      if [ -n "$src" ] && [ -f "$src" ]; then
+        prepare "$src" "$STAGE_DIR/boot-background-nixos.png" "nixos|v2|$src|$(stat -c '%s|%Y' "$src" 2>/dev/null)"
       else
-        echo "meow-stage1-background: image conversion failed: $src" >&2
+        echo "meow-stage1-background: no usable NixOS wallpaper" >&2
       fi
+
+      # ---- Windows 侧: 只读挂载, 访问时按需 automount ----
+      win_src="$WIN_HOME/AppData/Roaming/Microsoft/Windows/Themes/TranscodedWallpaper"
+      if [ ! -f "$win_src" ]; then
+        win_src="$(find "$WIN_HOME/AppData/Roaming/Microsoft/Windows/Themes/CachedFiles" "$WIN_HOME/Pictures/desktop_background" -maxdepth 1 -type f \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' \) -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -n 1 | cut -d' ' -f2-)"
+      fi
+      if [ -n "$win_src" ] && [ -f "$win_src" ]; then
+        prepare "$win_src" "$STAGE_DIR/boot-background-windows.png" "windows|v2|$win_src|$(stat -c '%s|%Y' "$win_src" 2>/dev/null)"
+      else
+        echo "meow-stage1-background: no usable Windows wallpaper" >&2
+      fi
+
+      # 清理旧版单背景文件
+      rm -f "$STAGE_DIR/boot-background.png"
     '';
   };
 

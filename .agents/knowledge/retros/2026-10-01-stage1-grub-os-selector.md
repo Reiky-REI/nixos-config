@@ -76,3 +76,25 @@ NixOS 的 `system.build.installBootLoader` 是 `types.unique` (只允许一个�
 - [ ] 从 Windows 回来选 NixOS, 下次预选=NixOS 喵
 - [ ] F12 固件菜单仍能看到「Linux Boot Manager」(systemd-boot 直启兜底)喵
 - [ ] 换桌面壁纸后, 下次 (或即时) GRUB 背景跟随更新喵
+
+## 迭代 (2026-10-01 用户实测反馈后)
+
+用户反馈: 文字偏小看不清、屏幕中间 logo 不需要、背景加 50% 黑遮罩、并希望 GRUB 背景跟随"上次启动的系统"的桌面壁纸喵~
+
+- **删 logo**: 主题改为自研模板 (不再复制上游 theme.txt), 移除 `logo.png` 与 image 组件喵~
+- **字体放大**: 16px → 28px 喵 (`grub-mkfont -s 28 --no-bitmap` 从 `pkgs.unifont.otf` 生成
+  `font-item.pf2`, 内部名 `Unifont Regular 28`)喵; 条目高/图标/间距 (44px 图标, item_height 56) 同步放大喵~
+- **50% 黑遮罩**: 所有运行期背景与内嵌兜底背景统一 `-fill black -colorize 50% -strip` 喵~
+  (兜底背景本身就是纯色图, 压暗后 PNG 只剩 ~146B 喵)
+- **双背景按上次系统切换**:
+  - `boot-background-nixos.png` ← 覆盖文件 > Noctalia 当前壁纸
+  - `boot-background-windows.png` ← Windows `TranscodedWallpaper` (> CachedFiles > Pictures/desktop_background 最新图)
+  - GRUB 读取 grubenv 的 `saved_entry` 选 `theme-nixos.txt` / `theme-windows.txt`, 都没有才用内嵌兜底
+    (两套背景都在 NixOS 运行时生成, 所以 Windows 里换壁纸后要等下一次进 NixOS 才会刷新)喵~
+- 旧的单背景文件 `boot-background.png` 由服务自动清理喵~
+
+## 验收 (第二轮)
+
+- [ ] GRUB 菜单文字明显变大、在遮罩背景上清晰可读, 中间无 logo喵
+- [ ] 上次启动 NixOS → 菜单背景 = NixOS 壁纸; 上次启动 Windows → 菜单背景 = Windows 壁纸喵
+- [ ] 切换系统各重启一次, 确认背景跟随 `saved_entry` 变换喵
