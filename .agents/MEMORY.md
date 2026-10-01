@@ -21,6 +21,7 @@
 - 2026-09-28 [opencode] 按用户许可修正 OpenCode shell 权限喵~ 将 `rm -rf *` 从 deny 改为 ask 喵,根路径精确 deny 保留喵~ 已构建并切换 NixMEOW喵,运行配置确认新规则生效喵~
 - 2026-09-29 [opencode] 修复 NixMEOW 到 Steam Deck 的动态主机名连接喵~ Avahi/NSS mDNS 已 build/switch，`ssh steamdeck` 解析并公钥登录成功喵~ Wi-Fi 音频 tmux 也已改用稳定 SSH alias 喵,见 `knowledge/retros/2026-09-29-steamdeck-mdns-hostname.md` #steamdeck-mdns
 - 2026-10-01 [opencode] 更新 Git 工作流为验证门禁喵~ 依赖或原子可复用改动分阶段验证与 commit喵,未验证暂停时 stash 本任务文件且无须授权喵~ #validation-gated-stash-workflow
+- 2026-10-01 [opencode] 修复 kb-mcp reranker 语义精排喵~ 根因 = Qwen3-VL-Reranker-2B 的社区 GGUF 缺分类头(cls.output.weight/pooling=RANK), `/v1/rerank` 吐 e^-2x 垃圾分、排序乱喵~ 用官方 `convert_hf_to_gguf.py` 重转(移走 `additional_chat_templates/` + 改 VL 版模板)后部署, 并给 `server.py` 加退化分回退喵~ 验证: 端点 0.54/0.07, kb_search 排序正确喵~ 前史见 home `retros/2026-08-19-reranker-gguf-bad-conversion.md`; 本次复盘 `retros/2026-10-01-kb-reranker-fix.md` #kb-reranker-fix
 
 ---
 

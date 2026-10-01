@@ -18,6 +18,9 @@ experience:
 
 # 复盘: 修复 kb-mcp reranker 语义精排 (Qwen3-VL-Reranker-2B 重转)
 
+## 前史 / 回归
+2026-08-19 已记录过同一个坑 (home `retros/2026-08-19-reranker-gguf-bad-conversion.md`), 当时换成官方 Qwen3-Reranker-0.6B 文本版解决并标记 resolved 喵~ 8-31 数据事故后模型升级为 Qwen3-VL-Reranker-2B, 但重部署时用了社区坏 GGUF → 复发喵~ 本次把 VL-2B 正确重转 (显存 8G 限制下保持 2B 级别), 从根上修好。
+
 ## 起因
 用户问「MCP 的 reranker 返回和 grep 有什么不同」, 实测时发现 `/v1/rerank` 对所有文档返回 `1e-28~1e-36` 级分数、排序近似随机, 也就是 kb-mcp 的「精排」其实一直是噪声喵~
 
