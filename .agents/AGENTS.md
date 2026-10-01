@@ -10,7 +10,7 @@
 - **knowledge/** — 静态参考文档（conventions, architecture, secrets, known-issues）
 - **knowledge/retros/** — 复盘记录（按日期排列）
 - **knowledge/decisions/** — 决策记录（复杂任务时写为什么这么选）
-- **knowledge/maps/** — 依赖链 / 模块关系图（按需创建, 当前为空）
+- **knowledge/maps/** — 依赖链 / 模块关系图（按需创建）
 - **skills/** — 操作技能（按 skill 加载，不用全读）
 - **tools/** — 自研 agent 工具（当前: tools/kb-mcp 知识库语义检索 MCP server）
 - **config/** — 工具脚本

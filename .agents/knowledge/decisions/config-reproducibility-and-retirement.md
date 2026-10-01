@@ -9,14 +9,14 @@ tags: [nixos, home-manager, reproducibility, multi-host, secrets, systemd, retir
 
 - `/etc/nixos` 是系统与 Home Manager 静态配置的唯一版本来源喵~
 - Host 和 User 保持正交喵,`machines.nix` 选择用户身份与 host capability 喵,`users.nix.homeProfile` 选择可复用的 user profile 喵~
-- `lib/mkHost.nix` 不从 `~/.config` 或 WorkSpace 动态导入 Nix 文件喵,Home Manager 服务定义放在 `home/<profile>/` 喵~
+- `lib/mk-host.nix` 不从 `~/.config` 或 WorkSpace 动态导入 Nix 文件喵,Home Manager 服务定义放在 `home/<profile>/` 喵~
 - host 特有的显示器映射、背光设备与 KB corpus roots 显式放在 `machines.nix` 喵~
 - 应用可写配置以 Nix 静态基线加运行时深度合并管理喵,密钥、cache、session 与程序生成状态不得进入 Nix store 喵~
 - AstrBot、NapCat、DSH-AstrBot bridge、mcp-agents-bridge 与专用 opencode-root 通道退役喵~
 
 ## 为什么这样选
 
-原先 `mkHost.nix` 会尝试读取家目录的 `~/.config/home-manager/services/*.nix` 喵,纯 flake 求值没有把这些文件纳入输入喵~ 因此它们既不可靠参与构建喵,也无法由 Git 审查和备份喵~
+原先 `mk-host.nix` 会尝试读取家目录的 `~/.config/home-manager/services/*.nix` 喵,纯 flake 求值没有把这些文件纳入输入喵~ 因此它们既不可靠参与构建喵,也无法由 Git 审查和备份喵~
 
 桌面设置同时有稳定偏好和应用状态喵~ Noctalia、SPlayer、YouTube Music 使用可写 JSON 深度合并喵,Zed 交给 Home Manager 的 mutable settings merger 喵,静态源不含 API token 喵~ Niri、Zellij、btop、Superfile、Cava、Fcitx5、Pigma、GitHub CLI 与 DSH profile 的可复现配置落入 Home profile 喵~
 

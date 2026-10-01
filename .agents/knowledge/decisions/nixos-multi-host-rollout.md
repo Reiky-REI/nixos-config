@@ -27,7 +27,7 @@ tags: [nixos, refactor, multi-host, machines, wsl, architecture]
 2. **模块自我屏蔽**: 宿主不再挑模块; `hosts/<hostname>/default.nix` 无脑 import `../../modules`,
    各模块自己 `lib.mkIf (config.meow.enabled ? "tag")` 决定生效与否。
    **加一台机器 = machines.nix 注册一行 + hosts/<hostname>/ 一个目录, flake 不用动。**
-3. **mkHost 生成器** (`lib/mkHost.nix`): flake 的内联模块全部搬入,
+3. **mkHost 生成器** (`lib/mk-host.nix`): flake 的内联模块全部搬入,
    `nixosConfigurations = builtins.mapAttrs mkHost (import ./machines.nix)` 由注册表直接生成。
 4. **flake 级特性**: `kernel-715` / `agenix-secrets` 两个标签在 mkHost 内用
    `builtins.elem` 判断 (mkIf 不能包 lambda 模块 —— 踩过的坑, 见 §5)。

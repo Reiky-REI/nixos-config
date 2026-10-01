@@ -4,7 +4,7 @@
 
 - 系统配置喵,user 注册喵,host 注册喵,服务配置与 secrets 声明都由 `/etc/nixos` 管理喵~
 - `users.nix` 定义身份喵,`machines.nix` 绑定 host 和 users 喵,可复用 Home Manager profile 放在 `home/<profile>` 喵~
-- `lib/mkHost.nix` 只导入仓库内模块喵,不从 `~/.config/home-manager/services` 动态读取文件喵~
+- `lib/mk-host.nix` 只导入仓库内模块喵,不从 `~/.config/home-manager/services` 动态读取文件喵~
 - Host 能力经 Home Manager 参数传到 user profile 喵,例如 Noctalia 显示器映射喵,背光设备名喵,KB 语料项目列表喵~
 - Host × User 组合由注册表显式选择 profile 喵,共享偏好由 Nix 模块组合喵~
 

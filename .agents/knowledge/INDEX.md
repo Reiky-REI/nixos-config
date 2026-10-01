@@ -42,6 +42,7 @@ Agent 每次启动时，按以下顺序加载知识：
 | [niri-focus-ring-transparent-overlay.md](decisions/niri-focus-ring-transparent-overlay.md) | niri, focus-ring, transparent, opacity, overlay, electron | 2026-05-27 |
 | [nixos-26.05-upgrade-plan.md](decisions/nixos-26.05-upgrade-plan.md) | upgrade, nixos-26.05, waydroid, gbinder, niri | 2026-05-27 |
 | [nixos-multi-dimension-registry.md](decisions/nixos-multi-dimension-registry.md) | nixos, multi-host, multi-user, multi-agent, architecture | 2026-09-27 |
+| [nixos-multi-host-rollout.md](decisions/nixos-multi-host-rollout.md) | nixos, refactor, multi-host, machines, wsl, architecture | 2026-09-22 |
 | [two-stage-boot-grub-systemd-boot.md](decisions/two-stage-boot-grub-systemd-boot.md) | boot, grub, systemd-boot, dual-boot, uefi, reproducibility, architecture | 2026-10-01 |
 
 ## 🚨 铁律速查（所有 AI 必读）

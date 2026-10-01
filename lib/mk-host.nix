@@ -1,6 +1,6 @@
 # ===== mkHost: 由 machines.nix 注册表生成 nixosConfigurations =====
 # 用法 (flake.nix):
-#   mkHost = import ./lib/mkHost.nix { inherit inputs system; };
+#   mkHost = import ./lib/mk-host.nix { inherit inputs system; };
 #   nixosConfigurations = builtins.mapAttrs mkHost (import ./machines.nix);
 #
 # 加一台新机器 = machines.nix 注册 + hosts/<name>/default.nix, flake 不用动。

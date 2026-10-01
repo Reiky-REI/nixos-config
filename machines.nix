@@ -8,7 +8,7 @@
 #              (决定 boot loader、systemd 睡眠等平台性配置)
 #   features — 特性标签列表。
 #              每个模块自己检查 (config.meow.enabled ? "<tag>") 决定是否生效,
-#              宿主不再挑选模块 (见 lib/mkHost.nix 与 modules/common/options.nix)。
+#              宿主不再挑选模块 (见 lib/mk-host.nix 与 modules/common/options.nix)。
 #              feature ID 由 modules/common/options.nix 对照 lib/features.nix 校验,
 #              标签拼错会直接 eval 失败。
 #   noctaliaMonitors — 此 host 上 Noctalia 小组件可用的显示器名称。
@@ -22,7 +22,7 @@
 # 1. 新机器上用 nixos-generate-config 生成硬件配置
 # 2. 在此注册 { hostname = { profile = "..."; kind = "..."; features = [...]; }; }
 # 3. 创建 hosts/{hostname}/default.nix
-# 4. 无需改 flake.nix —— nixosConfigurations 由本注册表自动生成 (lib/mkHost.nix)
+# 4. 无需改 flake.nix —— nixosConfigurations 由本注册表自动生成 (lib/mk-host.nix)
 # 5. 构建：nixos-rebuild build --flake /etc/nixos#{hostname}
 #
 # 注意：未在此注册的 hostname 会导致 build 直接报错（abort），

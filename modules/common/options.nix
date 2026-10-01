@@ -1,5 +1,5 @@
 # ===== meow.* 机器标签选项 =====
-# 由 lib/mkHost.nix 从 machines.nix 注入每台机器;
+# 由 lib/mk-host.nix 从 machines.nix 注入每台机器;
 # 各模块用 lib.mkIf (config.meow.enabled ? "<tag>") 自我屏蔽,
 # 宿主不再挑选模块 —— 加机器只需在 machines.nix 写一行标签。
 {

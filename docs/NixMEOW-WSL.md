@@ -2,7 +2,7 @@
 
 > 2026-09-22~23 建立。目标: 无 NVIDIA 黑屏风险的 NixOS switch 迭代场 + 嵌套 niri 桌面,
 > 所有会话相关的东西**都能自愈**(见"故障排查"一节)喵~
-> 决策记录: `.agents/dialogue/2026-09-22-refactor-multi-host.md`
+> 决策记录: `.agents/knowledge/decisions/nixos-multi-host-rollout.md`
 
 ## 1. 定位与形态
 

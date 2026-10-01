@@ -96,10 +96,10 @@
       inherit agentsConfig;
     };
 
-    # 机器由 machines.nix 注册表生成, 见 lib/mkHost.nix:
+    # 机器由 machines.nix 注册表生成, 见 lib/mk-host.nix:
     # 加一台新机器 = machines.nix 注册 + hosts/<name>/default.nix, 本文件不用动
     mkHost = hostName: machine:
-      import ./lib/mkHost.nix {
+      import ./lib/mk-host.nix {
         inherit inputs;
         system = machine.system or defaultSystem;
       }

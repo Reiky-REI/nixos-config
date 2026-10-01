@@ -9,3 +9,9 @@ result
 cleanup.sh
 decode_objects.py
 .pnpm-store/
+
+# 编辑器临时文件
+*.un~
+*.swp
+*.swo
+*~
