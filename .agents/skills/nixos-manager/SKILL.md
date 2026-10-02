@@ -31,15 +31,26 @@ agents: [opencode, claude]
 
 ## 5. 最终应用 ⚠️
 
-**🚨 此系统有 NVIDIA PRIME 混合显示！switch 会崩 compositor！**
-- `nixos-rebuild switch` 重启 `polkit.service` → compositor 失去 DRM master → 黑屏硬重启
-- **AI 不得主动执行 `switch`**
-- **AI 默认执行 `nixos-rebuild build`**，然后提示用户手动处理：
-  - 内核未变 → 用户自己 `sudo nixos-rebuild switch`
-  - 内核已变 → 用户应 `reboot`
-- 如果用户明确要求立即生效并接受风险，可例外
+**背景: 此系统 NVIDIA PRIME 混合显示, compositor (niri) 对 polkit / nix-daemon 等基础设施单元重启敏感——这些单元被 restart 会让 compositor 失去 DRM master, 黑屏硬重启 (见 `knowledge/retros/2026-05-26-rebuild-crash.md`)。**
+
+**风险边界**: 崩不崩取决于本次 switch 是否重启了基础设施单元, 而不是"switch 本身一定崩"。改动只涉及普通服务时, switch 是安全的。
+
+**判断方法** (switch 前必做):
+
+```bash
+nixos-rebuild dry-activate --flake .#<hostname>
+```
+
+只看 `would restart / stop` 列表:
+- ✅ 只有普通服务 (如 `llama-cpp-embedding` / `llama-cpp-reranker`) → compositor 安全, 可 switch
+- ⛔ 含 `polkit` / `nix-daemon` / `dbus` / `display-manager` / `systemd-*` 等基础设施, 或内核/initrd 变更 → 不得 switch, 交用户 `reboot`
+
+**处置流程**:
+- **AI 默认执行 `nixos-rebuild build`**
+- 用户明确授权 **且** dry-activate 确认只动普通服务 → AI 可执行 `sudo nixos-rebuild switch`
+- 内核变更或触及基础设施 → 交用户手动 `sudo nixos-rebuild switch` / `reboot`
 
 ## 安全限制
-- **绝对不允许** 未经用户确认执行 `nixos-rebuild switch`（即使确认，也需详细说明崩溃风险）
+- 未经用户确认, **不得执行** `nixos-rebuild switch`; 确认前先用 `dry-activate` 判断风险边界
 - **绝对不允许** 直接删除 `/etc/nixos/` 下的文件
 - **绝对不允许** 执行 `git push --force` 到 main 分支
