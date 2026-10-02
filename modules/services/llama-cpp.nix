@@ -16,52 +16,24 @@ in {
   disabledModules = ["services/misc/llama-cpp.nix"];
 
   options.services.llama-cpp = {
-    enable = lib.mkEnableOption "local llama.cpp servers (chat + embedding + reranker)";
-    # Qwen3-8B 聊天实例默认永久关闭(2026-08-24 用户裁定: 能力被云端模型替代且太蠢),
-    # 保留开关以便未来换更强模型一键恢复。
-    chat.enable = lib.mkOption {
-      type = lib.types.bool;
-      default = false;
-      description = "Qwen3-8B chat server on :8080";
-    };
+    enable = lib.mkEnableOption "local llama.cpp servers (embedding + reranker)";
   };
 
   config = lib.mkIf cfg.enable {
     # ── 本地 LLM 服务:llama.cpp server 多实例(CUDA 加速)──
     # 模型 GGUF 放 $HOME/WorkSpace/models/llama-cpp/:
-    #   - Qwen3-8B-Q4_K_M.gguf                 聊天主模型,  8080, OpenAI 兼容 (默认关: chat.enable)
     #   - Qwen.Qwen3-VL-Embedding-2B.Q8_0.gguf embedding,  8081,--embeddings
     #   - reranker/Qwen3-VL-Reranker-2B.Q8_0.gguf rerank,  8082,--rerank
     # Primary user directly reads models from its registered home directory.
-    # 显存注意: RTX 4070 Max-Q 只有 8G, 8B 全 GPU + 8192 ctx 会 OOM,
-    #   故 chat 用 4096 ctx; embedding/rerank 2B 各 ~1.8G, 总共 ~3.6G, 放得进 8G VRAM。
+    # 显存注意: RTX 4070 Max-Q 只有 8G, embedding/rerank 2B 各 ~1.8G, 总共 ~3.6G, 放得进 8G VRAM。
     #   2026-09-09: --gpu-layers 0 改 99, 从 CPU 推理切到 GPU, 释放 CPU 负载。
+    #   2026-10-02: Qwen3-8B chat 实例的模型文件与开关已彻底移除(能力由云端模型替代)。
 
-    systemd.services.llama-cpp-chat = lib.mkIf cfg.chat.enable {
-      description = "llama.cpp chat server (Qwen3-8B, OpenAI-compatible :8080)";
-      after = ["network.target"];
-      wantedBy = ["multi-user.target"];
-      path = ["/run/current-system/sw"];
-      serviceConfig = {
-        User = username;
-        Group = "users";
-        Type = "idle";
-        KillSignal = "SIGINT";
-        WorkingDirectory = modelsDir;
-        ExecStart = ''
-          ${llamaPkg}/bin/llama-server \
-            --host 127.0.0.1 --port 8080 \
-            -m ${modelsDir}/Qwen3-8B-Q4_K_M.gguf \
-            --ctx-size 4096 \
-            --gpu-layers 999 \
-            --jinja
-        '';
-        Restart = "on-failure";
-        RestartSec = "10s";
-        PrivateDevices = false;
-      };
-    };
-
+    # 2026-10-02: 关闭 prompt KV 缓存。kb 每次嵌入请求都会把 prompt 存进
+    # --cache-ram 缓存(默认上限 8192 MiB)且不主动释放, 单个 llama-server RSS
+    # 会顶满 8G 常驻(实测 cache state: 501 prompts / 8189 MiB)。embedding 是
+    # 无状态单次前向, 缓存无复用价值, 故 --no-cache-prompt + --cache-ram 0 双保险;
+    # 重排服务对称处理。
     systemd.services.llama-cpp-embedding = {
       description = "llama.cpp embedding server (Qwen3-VL-Embedding-2B, :8081)";
       after = ["network.target"];
@@ -82,7 +54,9 @@ in {
             --ctx-size 4096 \
             --batch-size 1024 \
             --ubatch-size 1024 \
-            --gpu-layers 99
+            --gpu-layers 99 \
+            --no-cache-prompt \
+            --cache-ram 0
         '';
         Restart = "on-failure";
         RestartSec = "10s";
@@ -123,7 +97,9 @@ in {
             --ctx-size 4096 \
             --batch-size 2048 \
             --ubatch-size 2048 \
-            --gpu-layers 99
+            --gpu-layers 99 \
+            --no-cache-prompt \
+            --cache-ram 0
         '';
         Restart = "on-failure";
         RestartSec = "10s";
