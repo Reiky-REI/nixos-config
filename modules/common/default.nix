@@ -17,14 +17,25 @@
   nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10"];
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
+  # 国内镜像优先 (清华 TUNA / 中科大 USTC / 上交 SJTU), 官方 cache 兜底。
+  # 注: 阿里云没有 Nix 二进制缓存 (nix-cache-info 404), 故不列入 substituters。
   nix.settings.substituters = [
     "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
     "https://mirrors.ustc.edu.cn/nix-channels/store"
+    "https://mirror.sjtu.edu.cn/nix-channels/store"
     "https://cache.nixos.org"
   ];
   nix.settings.trusted-public-keys = [
     "cache.nixos.org-1:6NCHdD59X431o0gWypbMrAURkbJ16ZPMQFGspcDShjY="
   ];
+
+  # 关键解耦 (2026-10-04): nix-daemon 对国内镜像绕过代理。
+  # networking.proxy 会把 http(s)_proxy 注入 nix-daemon; 代理一挂, 连
+  # TUNA/USTC 都连不上 → 系统构建全断。no_proxy 让镜像始终直连。
+  systemd.services.nix-daemon.environment = {
+    no_proxy = lib.mkForce "localhost,127.0.0.1,::1,mirrors.tuna.tsinghua.edu.cn,mirrors.ustc.edu.cn,mirror.sjtu.edu.cn";
+    NO_PROXY = lib.mkForce "localhost,127.0.0.1,::1,mirrors.tuna.tsinghua.edu.cn,mirrors.ustc.edu.cn,mirror.sjtu.edu.cn";
+  };
   nix.settings.max-jobs = lib.mkDefault (
     if config.hardware.isHighPerf
     then 16

@@ -37,7 +37,8 @@
     default = "http://127.0.0.1:7897";
     httpProxy = "http://127.0.0.1:7897";
     httpsProxy = "http://127.0.0.1:7897";
-    noProxy = "localhost,127.0.0.1,::1,*.local,100.64.0.0/10,*.ts.net";
+    # 国内镜像/常用域名绕过代理: 代理失效时 nix/pip 等仍可直连
+    noProxy = "localhost,127.0.0.1,::1,*.local,100.64.0.0/10,*.ts.net,mirrors.tuna.tsinghua.edu.cn,mirrors.ustc.edu.cn,mirror.sjtu.edu.cn,mirrors.aliyun.com";
   };
 
   services.openssh.enable = true;

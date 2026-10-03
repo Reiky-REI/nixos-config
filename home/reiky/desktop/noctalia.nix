@@ -48,4 +48,7 @@ in {
     target = "${config.xdg.configHome}/noctalia/plugins.json";
     source = pluginsFile;
   };
+
+  # 本地自定义插件: mihomo 代理状态 bar 组件 (源码真源在 ./plugins/mihomo-proxy)
+  xdg.configFile."noctalia/plugins/mihomo-proxy".source = ./plugins/mihomo-proxy;
 }

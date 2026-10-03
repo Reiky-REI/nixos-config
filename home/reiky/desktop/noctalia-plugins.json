@@ -6,5 +6,10 @@
       "url": "https://github.com/noctalia-dev/noctalia-plugins"
     }
   ],
+  "states": {
+    "mihomo-proxy": {
+      "enabled": true
+    }
+  },
   "version": 2
 }
