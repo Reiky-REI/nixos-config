@@ -8,7 +8,7 @@ _: {
     extraConfig = ''
       # kitty 光标：轨迹动画 + 闪烁 + 失焦空心（形状沿用 shell integration 的 beam/条状）
       cursor_trail 3
-      cursor_trail_color #ffbb77
+      cursor_trail_color #FFFF33
       cursor_trail_decay 0.1 0.5
       cursor_trail_start_threshold 0
       cursor_blink_interval 0.5
