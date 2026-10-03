@@ -205,6 +205,10 @@
           "pinned": []
         },
         {
+          "iconColor": "none",
+          "id": "plugin:mihomo-proxy"
+        },
+        {
           "deviceNativePath": "__default__",
           "displayMode": "graphic-clean",
           "hideIfIdle": false,

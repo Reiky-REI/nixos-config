@@ -1,0 +1,23 @@
+{
+  "id": "mihomo-proxy",
+  "name": "Mihomo Proxy",
+  "version": "1.0.0",
+  "minNoctaliaVersion": "4.0.0",
+  "author": "reiky",
+  "license": "MIT",
+  "description": "在状态栏显示 mihomo 代理状态，并可一键切换 rule/direct。",
+  "tags": ["Bar", "Network", "Proxy"],
+  "entryPoints": {
+    "main": "Main.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "dependencies": {
+    "plugins": []
+  },
+  "metadata": {
+    "defaultSettings": {
+      "refreshInterval": 3000,
+      "iconColor": "none"
+    }
+  }
+}

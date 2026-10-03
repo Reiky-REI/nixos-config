@@ -1,0 +1,12 @@
+{
+  "menu": {
+    "panel": "Open panel",
+    "on": "Turn proxy ON",
+    "off": "Turn proxy OFF"
+  },
+  "tooltip": {
+    "mode": "Mode",
+    "node": "Node",
+    "down": "Proxy is not running"
+  }
+}
