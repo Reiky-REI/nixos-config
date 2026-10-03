@@ -1,4 +1,26 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  # dsh-tui 启动器 — 原为手写脚本 ~/WorkSpace/bin/dsh-tui (改名后残留
+  # /home/Reiky-REI 死路径导致 corepack EACCES), 现收编为声明式:
+  # 跑 profile 里装的官方 TUI bin, node 由本 profile 提供。
+  dshTui = pkgs.writeShellScriptBin "dsh-tui" ''
+    set -euo pipefail
+
+    PROFILE_DIR="''${DSH_HOME:-$HOME/.dsh}/profiles/dsh-tui"
+    TUI_BIN="$PROFILE_DIR/node_modules/@deepseek-harness-tui/dsh-tui/bin/dsh-tui.js"
+
+    if [ ! -f "$TUI_BIN" ]; then
+      echo "[dsh-tui] profile 未初始化: $TUI_BIN" >&2
+      echo "[dsh-tui] 初始化: dsh plugin --profile dsh-tui add @deepseek-harness-tui/dsh-tui@<version>" >&2
+      exit 1
+    fi
+
+    if ! command -v dsh >/dev/null 2>&1; then
+      echo "[dsh-tui] 警告: PATH 上找不到 dsh CLI, TUI 可能无法启动会话" >&2
+    fi
+
+    exec ${pkgs.nodejs}/bin/node "$TUI_BIN" "$@"
+  '';
+in {
   # dsh (DeepSeek Harness) CLI — 由 Reiky-nixpkgs 私源提供, 替代此前
   # 家目录下的 `npm install @deepseek-ai/dsh` 非声明式安装。
   #
@@ -22,5 +44,7 @@
     # 此前靠 corepack shim + 手写 COREPACK_HOME, 用户改名 (Reiky-REI → reiky) 后
     # 旧路径残留在环境里导致 corepack EACCES → 改为声明式提供。
     pkgs.pnpm
+
+    dshTui
   ];
 }

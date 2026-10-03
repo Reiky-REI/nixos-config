@@ -41,7 +41,6 @@ in {
       ff = "fastfetch";
       nlg = "sudo nix-env -p /nix/var/nix/profiles/system --list-generations";
       ncg = "sudo nix-collect-garbage -d"; # 清理无用包
-      dsh-tui = "${config.home.homeDirectory}/WorkSpace/bin/dsh-tui";
     };
     #    使用P10K打开下面以下注释
     initContent = ''

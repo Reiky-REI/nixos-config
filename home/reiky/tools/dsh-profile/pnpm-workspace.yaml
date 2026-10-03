@@ -1,0 +1,23 @@
+packages:
+  - .
+
+nodeLinker: hoisted
+autoInstallPeers: false
+
+# dsh-fence 服务以 ProtectHome=read-only 运行，pnpm 的存储必须落在可写区，
+# 否则 StoreIndex(SQLite) 打不开：ERR_SQLITE_ERROR: unable to open database file
+# (@HOME@ 由 home/reiky/tools/dsh-profile.nix 在激活时替换成实际家目录)
+storeDir: @HOME@/.dsh/pnpm/store
+cacheDir: @HOME@/.dsh/pnpm/cache
+stateDir: @HOME@/.dsh/pnpm/state
+
+# 仅放行以下 git-hosted 插件的 prepare 脚本(编译 bundle),不全局放行。
+allowBuilds:
+  dsh-better-sidebar@git+https://github.com/dsh-external/DSH-better-sidebar.git#ecebc978009362ae90c64d9f07d3c518d4651dd9: true
+  dsh-undo@https://codeload.github.com/LingLambda/dsh-undo/tar.gz/6948396fc0e71171fa26d9979c81bc7591571288: true
+  node-pty: true
+
+minimumReleaseAgeExclude:
+  - '@yejiming/dsh-data-agent@0.1.1'
+  - '@yejiming/dsh-data-agent@0.2.2'
+  - 'dshmarket@1.66.8'

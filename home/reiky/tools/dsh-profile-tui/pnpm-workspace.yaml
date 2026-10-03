@@ -1,0 +1,24 @@
+packages:
+  - .
+
+nodeLinker: hoisted
+autoInstallPeers: false
+
+# 注意: 本 profile 不设 storeDir —— dsh-tui 由用户 shell 启动 (不在 dsh-fence 的
+# ProtectHome=read-only 围栏里), 沿用 pnpm 默认 store (~/.local/share/pnpm/store)
+# 即可; 显式改 storeDir 会让 pnpm 判定存储变更、强制整树重装(需联网)。
+# web profile 因为跑在围栏服务里, 才必须把 store 指到 ~/.dsh。
+
+# pnpm 12 默认启用 24h 供应链延迟 (minimumReleaseAge); 下列版本是主动升级/
+# 新发布的, 逐条豁免, 其余包仍走 24h 延迟策略。
+minimumReleaseAgeExclude:
+  - dsh-working-activity@0.2.6 || 0.4.0
+  - '@deepseek-harness-tui/dsh-tui@0.12.0'
+
+allowBuilds:
+  '@google/genai': true
+  protobufjs: true
+  koffi: true
+  node-pty: true
+  '@deepseek-ai/dsh-subprocess-local': true
+  esbuild: false
