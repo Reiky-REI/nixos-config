@@ -64,7 +64,40 @@ DeepSec TUI binary was not found. Install a DeepSec release, build `tui/`, or se
    把 dsh-plugins 拷到 /tmp(祖先无 node_modules)即走 passthrough,全套 9 项通过喵~
    两种路径下**授权门禁均成立**喵~
 
-## 遗留
+## 后续步骤(P3–P5)
 
-- Python 可选 extras(reportlab/mitmproxy/playwright)未装,见后续步骤喵~
-- `~/.deepsec/config.yaml` 待 `deepsec config init` 生成喵~
+### P3 Python 可选 extras(pixi)
+- `pixi.toml` 增 `reportlab`(pdf 报告)+ `playwright`(traffic/browser)喵~
+- **mitmproxy 未装**: mitmproxy 12.x 要求 `typing-extensions<=4.14`, 而
+  `pydantic>=2.13.4` 要求 `>=4.14.1`, 依赖求解不可满足喵~ 已降级并在
+  pixi.toml 注释说明喵~ traffic 组的浏览器侧(playwright)可用, 代理拦截侧暂缺喵~
+- `pixi install` 成功, `pixi.lock` 更新喵~ 验证 `import reportlab`(5.0.1)、
+  `import playwright` OK 喵~
+- `pkgs.pixi` 加入 home.packages(声明式维护 Python 环境)喵~
+
+### P4 config init
+- `deepsec config init` 生成默认 `~/.deepsec/config.yaml`(provider=openai, 无 key)喵~
+  需要 L3/spear 时用 `DEEPSEC_LLM_API_KEY` 或 `deepsec config set` 填喵~
+
+### P5 dsh 上游插件(Shield/Spear)
+- `dsh-profile/package.json` 增 `file:` 依赖:
+  `dsh-deepsec-shield` / `dsh-deepsec-spear`(指向 `~/WorkSpace/DeepSec/dsh-plugins/`)喵~
+- 这两个插件自带 `dsh.bundle.patch`, 但 **dsh 0.1.1-rc.2 不会自动并入**
+  (`--dump-config` 里看不到), 故按本仓既有模式在 profile 的 `cordis.patch.yml`
+  显式 insert, 并配 `command` 为绝对路径喵~
+- `dsh-fence` 服务 PATH 注入 `deepsec` / `deepsec-guard` 包装
+  (`writeShellScriptBin` 包家目录 pixi 脚本): 插件按 PATH 名或绝对路径调用
+  CLI, 而服务 PATH 原先只含系统包, 连既有 `dsh-deepsec-guard` 都可能 fail-open喵~
+- **踩坑**: profile 的 `pnpm-workspace.yaml` / `.modules.yaml` 仍是改名前的
+  `/home/Reiky-REI/...` 僵尸路径(2026-10-01 用户名 rename 遗留), 直接
+  `pnpm install` 会因 store 路径不存在而失败; 已就地修正为 `/home/reiky/...`喵~
+- `pnpm install --config.confirmModulesPurge=false` 重装成功(旧 storeDir 变更需
+  重建 node_modules, 非 TTY 下须显式关闭清理确认)喵~
+- 验证: `dsh --profile web --dump-config` 可见 `deepsec-shield` / `deepsec-spear`喵~
+
+## 遗留 / 边界
+
+- `mitmproxy` 因 typing-extensions 冲突未装(traffic 代理拦截侧不可用)喵~
+- playwright 浏览器二进制未下载, 需要时 `playwright install`喵~
+- `~/.deepsec` 不在 dsh-fence 的 ReadWritePaths 内(只读); Shield 扫描走 stdout
+  无碍, 但 Spear 运行审计日志写 `~/.deepsec/runs/` 会受限喵~

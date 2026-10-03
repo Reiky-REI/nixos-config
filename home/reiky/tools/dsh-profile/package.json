@@ -9,6 +9,8 @@
     "dsh-at-file": "github:omdsh-dev/dsh-at-file",
     "nxwatch": "file:../../../WorkSpace/nxwatch",
     "dsh-deepsec-guard": "file:../../../WorkSpace/dsh-deepsec-guard",
+    "dsh-deepsec-shield": "file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield",
+    "dsh-deepsec-spear": "file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear",
     "dshmarket": "link:../../../WorkSpace/dsh-market-pkg",
     "@dsh-external/dsh-client-ui-skin-maid-whale-webui": "link:../../../WorkSpace/dsh-maid-whale-webUI/maid-whale-webui"
   },

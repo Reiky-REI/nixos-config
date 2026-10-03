@@ -25,6 +25,19 @@
   cfg = config.services.dsh-fence;
   dshHome = "${primaryUser.homeDirectory}/.dsh";
   fallbackWorkspace = "${primaryUser.homeDirectory}/WorkSpace";
+
+  # DeepSec CLI/guard 入口: dsh 的 deepsec-shield/spear 插件按 PATH 名 `deepsec`
+  # 调用 CLI, dsh-deepsec-guard 守卫按 `deepsec-guard` 调用; 但本服务 PATH 只含
+  # 系统包。这里把家目录里的 pixi 包装脚本以 bash 显式引入服务 PATH。
+  # ~WorkSpace 在 ReadWritePaths 内, pixi 环境可读写。
+  deepsecCli = [
+    (pkgs.writeShellScriptBin "deepsec" ''
+      exec ${pkgs.bash}/bin/bash ${primaryUser.homeDirectory}/WorkSpace/bin/deepsec "$@"
+    '')
+    (pkgs.writeShellScriptBin "deepsec-guard" ''
+      exec ${pkgs.bash}/bin/bash ${primaryUser.homeDirectory}/WorkSpace/bin/deepsec-guard "$@"
+    '')
+  ];
 in {
   options.services.dsh-fence = {
     enable = lib.mkEnableOption "hardened systemd service for the DeepSeek Harness (dsh) web app";
@@ -57,7 +70,7 @@ in {
       # 不含 /run/current-system/sw/bin -> DSH 的 bash 工具 spawn bash 直接 ENOENT。
       # 把系统包路径挂进服务 PATH,让 DSH 按用户会话语义执行命令
       # (bash/nixos-rebuild/git/systemctl/just 等)。围栏其余加固不受影响。
-      path = ["/run/current-system/sw"];
+      path = ["/run/current-system/sw"] ++ deepsecCli;
 
       serviceConfig = {
         User = username;

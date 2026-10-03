@@ -30,3 +30,22 @@
         scanPostExecute: false
         allowOnError: true
         timeoutMs: 12000
+
+# DeepSec Shield/Spear 工具(dsh-plugins/, 上游 rev fff031f):
+# Shield = 防御侧代码审计(scan/agent-audit/supply-chain/report);
+# Spear = 授权渗透(recon/run, 签名作用域/时间窗/目标成员由 CLI 侧强制)。
+# 这两个插件自带 dsh.bundle.patch, 但 dsh 0.1.1-rc.2 不自动并入, 故显式 insert。
+# command 用绝对路径, 因 dsh-fence 服务 PATH 不含用户 profile。
+# 插件包: ~/WorkSpace/DeepSec/dsh-plugins/{deepsec-shield,deepsec-spear}(file: 安装)。
+- insert:
+    - id: deepsec-shield
+      name: 'dsh-deepsec-shield'
+      config:
+        command: /home/reiky/WorkSpace/bin/deepsec
+        timeoutMs: 600000
+- insert:
+    - id: deepsec-spear
+      name: 'dsh-deepsec-spear'
+      config:
+        command: /home/reiky/WorkSpace/bin/deepsec
+        timeoutMs: 3600000

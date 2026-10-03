@@ -29,6 +29,12 @@ importers:
       dsh-deepsec-guard:
         specifier: file:../../../WorkSpace/dsh-deepsec-guard
         version: file:../../../WorkSpace/dsh-deepsec-guard
+      dsh-deepsec-shield:
+        specifier: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield
+        version: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield
+      dsh-deepsec-spear:
+        specifier: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear
+        version: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear
       dshmarket:
         specifier: link:../../../WorkSpace/dsh-market-pkg
         version: link:../../../WorkSpace/dsh-market-pkg
@@ -176,6 +182,30 @@ packages:
   dsh-deepsec-guard@file:../../../WorkSpace/dsh-deepsec-guard:
     resolution: {directory: ../../../WorkSpace/dsh-deepsec-guard, type: directory}
 
+  dsh-deepsec-shield@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield:
+    resolution: {directory: ../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield, type: directory}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/dsh-tools': '*'
+      '@deepseek-ai/schemastery': '*'
+    peerDependenciesMeta:
+      '@deepseek-ai/dsh-tools':
+        optional: true
+      '@deepseek-ai/schemastery':
+        optional: true
+
+  dsh-deepsec-spear@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear:
+    resolution: {directory: ../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear, type: directory}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@deepseek-ai/dsh-tools': '*'
+      '@deepseek-ai/schemastery': '*'
+    peerDependenciesMeta:
+      '@deepseek-ai/dsh-tools':
+        optional: true
+      '@deepseek-ai/schemastery':
+        optional: true
+
   echarts@6.1.0:
     resolution: {integrity: sha512-q0yaFPggC9FUdsWH4blavRWFmxdrIodbkoKNAjJudAI6CA9gNPxHtV2RcZNEepZVlk4yvBYkOkbk6HIVpIyHZA==}
 
@@ -243,6 +273,10 @@ snapshots:
       zod: 4.4.3
 
   dsh-deepsec-guard@file:../../../WorkSpace/dsh-deepsec-guard: {}
+
+  dsh-deepsec-shield@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield: {}
+
+  dsh-deepsec-spear@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear: {}
 
   echarts@6.1.0:
     dependencies:
