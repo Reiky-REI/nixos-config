@@ -105,6 +105,29 @@ kitty +runpy "from kitty.config import load_config; bad=[]; \
 
 验证: `cursor_shape=1(BLOCK)`, `cursor_trail_color=Color(255,187,119)`, `BAD_LINES: []`喵~
 
+## 后续修订 3 (同日)
+
+- 用户澄清: **要保留条状(beam)光标**, trail 看不到只是因为 `cursor_trail_start_threshold`
+  默认 2 格、普通移动距离太近; 并非形状问题喵~
+- 故**回退 `cursor_shape block`**, 新增 `cursor_trail_start_threshold 0`（0 = 任何移动都触发）喵~
+- 轨迹色沿用 `#ffbb77`喵~
+
+**重要发现 (为什么"条状光标"改不掉 / `cursor_shape` 被无视)**:
+- HM 的 kitty 模块默认 `programs.kitty.shellIntegration.mode = "no-rc"`, 且
+  `enableZshIntegration` 默认开喵~ 它会把 kitty 的 zsh 集成写进 `~/.zshrc`:
+  先 `export KITTY_SHELL_INTEGRATION="no-rc"` 再加载 `kitty-integration`喵~
+- kitty 的 zsh 集成在 `kitty-integration` 第 284 行: 只要 `no-cursor` 不在选项里, 就会
+  **在每个提示符把光标切成 beam**喵~ 所以 `extraConfig` 里的 `cursor_shape` 会被它覆盖,
+  改光标形状/想保留 beam 都必须从 `shellIntegration.mode` 入手喵~
+- 想强制块状需 `programs.kitty.shellIntegration.mode = "no-cursor"`（HM 会自动补 `no-rc`,
+  最终 `shell_integration no-rc no-cursor`）喵~ 本任务按用户意愿保留 beam, 故**没有**加喵~
+- HM kitty 模块的 `xdg.configFile."kitty/kitty.conf".onChange` 会
+  `pkill -USR1 -u $USER kitty` 触发重载; 但旧运行实例若未重载会一直用旧配置喵~
+  排查"改了没生效"务必确认是不是**新起进程**, 否则会误判配置没落实喵~
+
+验证: 活配置含 `cursor_trail_color #ffbb77` + `cursor_trail_start_threshold 0`, 无 `cursor_shape`,
+`load_config` 返回 `Color(255,187,119)`、`threshold=0`、`BAD_LINES` 空喵~
+
 ## 踩坑
 
 1. **stash 会静默吞掉"已改但没生效"的改动** — 排障第一步应查 `git stash list`喵~
