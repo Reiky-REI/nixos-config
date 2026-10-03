@@ -23,7 +23,7 @@
     "showCategories": true,
     "showIconBackground": true,
     "sortByMostUsed": true,
-    "terminalCommand": "alacritty -e",
+    "terminalCommand": "kitty",
     "viewMode": "grid"
   },
   "audio": {
