@@ -70,7 +70,9 @@ in {
       # 不含 /run/current-system/sw/bin -> DSH 的 bash 工具 spawn bash 直接 ENOENT。
       # 把系统包路径挂进服务 PATH,让 DSH 按用户会话语义执行命令
       # (bash/nixos-rebuild/git/systemctl/just 等)。围栏其余加固不受影响。
-      path = ["/run/current-system/sw"] ++ deepsecCli;
+      # pnpm: dsh 启动时会按 profile 的 pnpm-lock.yaml 对账/安装插件;
+      # 服务 PATH 只含系统包, 缺 pnpm 会让对账静默失败 ("pnpm not found on PATH")。
+      path = ["/run/current-system/sw"] ++ deepsecCli ++ [pkgs.pnpm];
 
       serviceConfig = {
         User = username;
