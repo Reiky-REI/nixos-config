@@ -8,6 +8,11 @@
     typst
     nodejs
 
+    # Obsidian vault MCP 服务器(笔记整理), OpenCode/Claude Code/Codex 共用喵~
+    # 来自 Reiky-nixpkgs 私源, 声明式安装进用户 profile; 避免原先家目录 flake 的
+    # result 软链被 GC 回收导致 obsidian-vault MCP spawn 失败。
+    obsidian-mcp-server
+
     # Python with minl.ai 依赖 (使用 withPackages 确保依赖完整)
     (python3.withPackages (ps:
       with ps; [

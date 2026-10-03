@@ -945,3 +945,27 @@ flake 源快照会嵌进每个 host 的配置喵; 只要工作树内容变了 (�
 - 在没有会话的 `~/WorkSpace` 执行 `opencode session list` 返回 0 条喵,但数据库新建了该目录的 project metadata 行喵~
 - 该命令没有创建或删除 session/message 喵,但 project 列表会多一条空目录记录喵~
 - 诊断时不要把 `session list` 当纯只读查询喵,优先使用 `opencode debug paths` 与只读 session API喵,如需调用 `session list` 喵,先确认当前 directory 已在 project registry 中喵~
+
+## 家目录 flake 的 `result` 不是持久 GC root → 一次 GC 后二进制消失 (2026-10-03 实锤)
+
+### 问题
+`obsidian-vault` MCP 在家目录 `~/WorkSpace/tools/obsidian-mcp-server` 用 `nix build` 建的
+`result` 软链,GC 后 store 路径被回收成悬空链接喵~ OpenCode / Claude Code / Codex 三个
+客户端全部 spawn 失败 (`NotFound: ChildProcess.spawn .../result/bin/...`)喵~
+
+### 根因
+- 家目录里的 `result` 软链**不是**持久 GC root(只有 `nix profile` / home-manager generation
+  这类才是)喵~ `nix-collect-garbage` 会回收其指向的 store 路径喵~
+- 同时该 flake 的 `inputs.nixpkgs` 锁成了 `/nix/store/...-source` 绝对路径,那个 path input
+  也被 GC 了,导致连 `nix build` 都无法重放喵~
+
+### 规避
+- 任何要长期被 AI/服务按路径调用的二进制,MCP 服务器之类,一律收进 **Reiky-nixpkgs 私源**
+  + `home.packages` 声明式安装(落在 `/etc/profiles/per-user/reiky/bin/`,是 HM generation
+  的一部分,GC 安全)喵~ 不要依赖家目录 flake 的 `result`喵~
+- flake 的 `inputs.nixpkgs` 不要锁绝对 store 路径,用 `github:NixOS/nixpkgs/...` 或 follow 系统喵~
+
+### 相关
+- 同批修复:OpenCode `opencode-settings.json`、Claude `~/.claude.json`、Codex `~/.codex/config.toml`
+  里 homeserver 路径统一指向 `/etc/profiles/per-user/reiky/bin/obsidian-mcp-server`喵~
+- 复盘: `retros/2026-10-03-mcp-obsidian-gc-fix.md`

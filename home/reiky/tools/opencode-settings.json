@@ -141,7 +141,7 @@
       "obsidian-vault": {
         "type": "local",
         "command": [
-          "@HOME@/WorkSpace/tools/obsidian-mcp-server/result/bin/obsidian-mcp-server"
+          "/etc/profiles/per-user/reiky/bin/obsidian-mcp-server"
         ],
         "environment": {
           "VAULT_PATH": "@HOME@/WorkSpace/notes"
