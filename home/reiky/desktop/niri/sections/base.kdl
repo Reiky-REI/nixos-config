@@ -43,8 +43,8 @@ binds {
     // Mod-Shift-/, which is usually the same as Mod-?,
     // shows a list of important hotkeys.
     Mod+Shift+Slash { show-hotkey-overlay; }
-    Mod+Return hotkey-overlay-title="打开终端: alacritty" { spawn "alacritty"; }
-    Mod+Shift+Return hotkey-overlay-title="打开终端(浮动): alacritty" { spawn "alacritty" "--class" "floating_terminal"; }
+    Mod+Return hotkey-overlay-title="打开终端: kitty" { spawn "kitty"; }
+    Mod+Shift+Return hotkey-overlay-title="打开终端(浮动): kitty" { spawn "kitty" "--class" "floating_terminal"; }
     Mod+Shift+O hotkey-overlay-title="打开 opencode(浮动): alacritty" { spawn "alacritty" "--class" "floating_terminal" "-e" "opencode"; }
     Mod+Shift+C hotkey-overlay-title="打开 claude code(浮动): alacritty" { spawn "alacritty" "--class" "floating_terminal" "-e" "claude"; }
     Mod+D hotkey-overlay-title="打开应用启动器: fuzzel" { spawn "fuzzel"; }
