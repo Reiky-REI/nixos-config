@@ -1,6 +1,7 @@
 {pkgs, ...}: {
   imports = [
     ./claude-code.nix
+    ./cc-switch.nix
     ./codex.nix
   ];
 
