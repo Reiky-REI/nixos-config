@@ -13,8 +13,11 @@
   # users setting
   nix.settings.trusted-users = ["root"] ++ map (user: user.username) (builtins.attrValues selectedUsers);
   nixpkgs.config.allowUnfree = true;
-  # 临时允许 EOL electron-39 (vscode 等传递依赖), 26.05 升级后自动解决
-  nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10"];
+  # 临时允许 EOL electron (传递依赖), 等上游 / 26.05 修复后移除:
+  #  - electron-39.8.10: 旧 vscode 链遗留
+  #  - electron-41.10.7: 2026-10-04 bump 官方 nixpkgs(2026-10-02) 后 electron_41 被标 EOL,
+  #    由 home/reiky/apps/media.nix 的 splayer (electron = electron_41) 拉入喵~
+  nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10" "electron-41.10.7"];
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
   nix.settings.substituters = [
