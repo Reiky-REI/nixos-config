@@ -29,11 +29,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1791034846,
-        "narHash": "sha256-R+BugUZr0DotQTHOr0Wmp20O2odeIC+pVsks+da5Ktc=",
+        "lastModified": 1791036412,
+        "narHash": "sha256-ob8eWPjIycgnxpM+q7xaUC06Outwl0UWrMJVNzeVdRM=",
         "owner": "Reiky-REI",
         "repo": "Reiky-nixpkgs",
-        "rev": "f4406e6a81f3af1cc57a0621a6cc625ff82c9229",
+        "rev": "e50e7969a9ef96e5117b62b8be4aa08c22fa3fa0",
         "type": "github"
       },
       "original": {
