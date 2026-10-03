@@ -3,7 +3,7 @@
   "private": true,
   "dependencies": {
     "@dsh-external/dsh-mode-boost": "link:../../../WorkSpace/dsh-routing-suite/mode-boost",
-    "@dsh-external/dsh-super-injector": "link:../../../WorkSpace/dsh-routing-suite/injector-release",
+    "@dsh-external/dsh-super-injector": "link:../../../WorkSpace/dsh-routing-suite/injector",
     "@yejiming/dsh-data-agent": "^0.2.2",
     "deepseek-manners": "git+https://github.com/dsh-external/deepseek-manners.git",
     "dsh-at-file": "github:omdsh-dev/dsh-at-file",
@@ -12,7 +12,7 @@
     "dsh-deepsec-shield": "file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield",
     "dsh-deepsec-spear": "file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear",
     "dshmarket": "^1.66.8",
-    "@dsh-external/dsh-client-ui-skin-maid-whale-webui": "link:../../../WorkSpace/dsh-maid-whale-webUI/maid-whale-webui"
+    "@yunxii/dsh-client-ui-skin-maid-whale-webui": "^0.1.1"
   },
   "dsh": {
     "profile": {
@@ -25,7 +25,7 @@
         "@dsh-external/dsh-mode-boost",
         "@yejiming/dsh-data-agent",
         "dshmarket",
-        "@dsh-external/dsh-client-ui-skin-maid-whale-webui"
+        "@yunxii/dsh-client-ui-skin-maid-whale-webui"
       ]
     }
   }

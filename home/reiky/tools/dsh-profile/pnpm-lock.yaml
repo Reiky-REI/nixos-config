@@ -8,24 +8,24 @@ importers:
 
   .:
     dependencies:
-      '@dsh-external/dsh-client-ui-skin-maid-whale-webui':
-        specifier: link:../../../WorkSpace/dsh-maid-whale-webUI/maid-whale-webui
-        version: link:../../../WorkSpace/dsh-maid-whale-webUI/maid-whale-webui
       '@dsh-external/dsh-mode-boost':
         specifier: link:../../../WorkSpace/dsh-routing-suite/mode-boost
         version: link:../../../WorkSpace/dsh-routing-suite/mode-boost
       '@dsh-external/dsh-super-injector':
-        specifier: link:../../../WorkSpace/dsh-routing-suite/injector-release
-        version: link:../../../WorkSpace/dsh-routing-suite/injector-release
+        specifier: link:../../../WorkSpace/dsh-routing-suite/injector
+        version: link:../../../WorkSpace/dsh-routing-suite/injector
       '@yejiming/dsh-data-agent':
         specifier: ^0.2.2
         version: 0.2.2
+      '@yunxii/dsh-client-ui-skin-maid-whale-webui':
+        specifier: ^0.1.1
+        version: 0.1.1
       deepseek-manners:
         specifier: git+https://github.com/dsh-external/deepseek-manners.git
-        version: git+https://github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee
+        version: git+ssh://git@github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee
       dsh-at-file:
         specifier: github:omdsh-dev/dsh-at-file
-        version: https://codeload.github.com/omdsh-dev/dsh-at-file/tar.gz/9c71e52c483ae589c7979b6ffc8b3a2cd5d8efa4
+        version: git+ssh://git@github.com/omdsh-dev/dsh-at-file.git#da602d1a8f1b417b8a1d8d4059e0f4cb1c353524
       dsh-deepsec-guard:
         specifier: file:../../../WorkSpace/dsh-deepsec-guard
         version: file:../../../WorkSpace/dsh-deepsec-guard
@@ -130,23 +130,29 @@ packages:
       react:
         optional: true
 
+  '@yunxii/dsh-client-ui-skin-maid-whale-webui@0.1.1':
+    resolution: {integrity: sha512-dRzBXLICiWQZRff0Gz5X1CYyTTlnpxnT9/R61W6YvOlYssR2ke1Ydod+Ua+tylh+NlTgf5m94122m1xdhWUcGw==}
+    engines: {node: '>=22.19'}
+    peerDependencies:
+      '@deepseek-ai/cordis': ^4.0.1
+
   argparse@2.0.1:
     resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
   cosmokit@1.8.1:
     resolution: {integrity: sha512-PDBv4l90xZKrUsZ0vtoycgZpO/j4iFsqJXrAxsyBDsnQRI7ZMJXIjgDJsKNjd5L8jnVnnlrDCdhkFbTncgCVjQ==}
 
-  deepseek-manners@git+https://github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee:
-    resolution: {commit: 32f58a8a008797a624f0f46367cb91fed9de5dee, repo: https://github.com/dsh-external/deepseek-manners.git, type: git}
+  deepseek-manners@git+ssh://git@github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee:
+    resolution: {commit: 32f58a8a008797a624f0f46367cb91fed9de5dee, repo: git@github.com:dsh-external/deepseek-manners.git, type: git}
     version: 0.1.0
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.0
       '@deepseek-ai/schemastery': ^3.0.0
       react: ^18.0.0
 
-  dsh-at-file@https://codeload.github.com/omdsh-dev/dsh-at-file/tar.gz/9c71e52c483ae589c7979b6ffc8b3a2cd5d8efa4:
-    resolution: {gitHosted: true, integrity: sha512-NPHS/Uo80IaQY/dtsqvm/sg6qX/keBEmDX+BlnUUy6OKFvY0HGF/Oy4hQztBeinHzpuX7gSqqdN8fPzwRM1cCg==, tarball: https://codeload.github.com/omdsh-dev/dsh-at-file/tar.gz/9c71e52c483ae589c7979b6ffc8b3a2cd5d8efa4}
-    version: 0.6.0
+  dsh-at-file@git+ssh://git@github.com/omdsh-dev/dsh-at-file.git#da602d1a8f1b417b8a1d8d4059e0f4cb1c353524:
+    resolution: {commit: da602d1a8f1b417b8a1d8d4059e0f4cb1c353524, repo: git@github.com:omdsh-dev/dsh-at-file.git, type: git}
+    version: 0.7.0
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1-rc.1
       '@deepseek-ai/dsh-agent': '*'
@@ -154,6 +160,7 @@ packages:
       '@deepseek-ai/dsh-client-connection': '*'
       '@deepseek-ai/dsh-client-locale': '*'
       '@deepseek-ai/dsh-client-runtime': '*'
+      '@deepseek-ai/dsh-client-store': '*'
       '@deepseek-ai/dsh-client-ui-conversation': '*'
       '@deepseek-ai/dsh-client-ui-input-trigger': '*'
       '@deepseek-ai/dsh-client-ui-settings': '*'
@@ -175,6 +182,8 @@ packages:
       '@deepseek-ai/dsh-client-locale':
         optional: true
       '@deepseek-ai/dsh-client-runtime':
+        optional: true
+      '@deepseek-ai/dsh-client-store':
         optional: true
       '@deepseek-ai/dsh-client-ui-conversation':
         optional: true
@@ -261,8 +270,8 @@ packages:
     resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
     engines: {node: '>=20.18.1'}
 
-  zod@4.4.3:
-    resolution: {integrity: sha512-ytENFjIJFl2UwYglde2jchW2Hwm4GJFLDiSXWdTrJQBIN9Fcyp7n4DhxJEiWNAJMV1/BqWfW/kkg71UDcHJyTQ==}
+  zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
 
   zrender@6.1.0:
     resolution: {integrity: sha512-oEGMDB6pOP2S6OwRR4PdVv610zrjnA3Bh+JnSG12fYJlBKjtNAoEb5fSUoCOOINlH96I2fU38/A2UpRKs67xYQ==}
@@ -303,17 +312,19 @@ snapshots:
       fflate: 0.8.3
       js-yaml: 4.3.1
       schemastery: 3.18.0
-      zod: 4.4.3
+      zod: 4.6.5
+
+  '@yunxii/dsh-client-ui-skin-maid-whale-webui@0.1.1': {}
 
   argparse@2.0.1: {}
 
   cosmokit@1.8.1: {}
 
-  deepseek-manners@git+https://github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee: {}
+  deepseek-manners@git+ssh://git@github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee: {}
 
-  dsh-at-file@https://codeload.github.com/omdsh-dev/dsh-at-file/tar.gz/9c71e52c483ae589c7979b6ffc8b3a2cd5d8efa4:
+  dsh-at-file@git+ssh://git@github.com/omdsh-dev/dsh-at-file.git#da602d1a8f1b417b8a1d8d4059e0f4cb1c353524:
     dependencies:
-      zod: 4.4.3
+      zod: 4.6.5
 
   dsh-deepsec-guard@file:../../../WorkSpace/dsh-deepsec-guard: {}
 
@@ -352,7 +363,7 @@ snapshots:
 
   undici@7.30.0: {}
 
-  zod@4.4.3: {}
+  zod@4.6.5: {}
 
   zrender@6.1.0:
     dependencies:
