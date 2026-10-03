@@ -16,5 +16,11 @@
       fi
       exec ${pkgs.dsh}/bin/dsh "$@"
     '')
+
+    # dsh 的 profile 插件管理 (`dsh plugin ...`) 与 dsh-tui 的内置 /update 都用
+    # spawnSync("pnpm") 从 PATH 找 pnpm, 缺了会直接报 "pnpm not found on PATH"。
+    # 此前靠 corepack shim + 手写 COREPACK_HOME, 用户改名 (Reiky-REI → reiky) 后
+    # 旧路径残留在环境里导致 corepack EACCES → 改为声明式提供。
+    pkgs.pnpm
   ];
 }
