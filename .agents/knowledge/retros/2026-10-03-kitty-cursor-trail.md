@@ -1,7 +1,7 @@
 ---
 date: 2026-10-03
 module: home/reiky/terminal/kitty.nix
-tags: [kitty, cursor, home-manager, stash, wayland]
+tags: [kitty, cursor, home-manager, stash, wayland, niri, keybind]
 related: []
 ---
 
@@ -68,13 +68,29 @@ kitty +runpy "from kitty.config import load_config; bad=[]; \
 输出: `cursor_trail_color = Color(204, 119, 0)` (= #cc7700), `cursor_trail_decay = (0.1, 0.5)`,
 `cursor_blink_interval = 0.5`, `cursor_shape_unfocused = 4` (HOLLOW), 我们的行无 bad line喵~
 
+## 后续修订 (同日)
+
+用户看过效果后追加三项:
+
+1. **轨迹色 `#cc7700` → `#ffaa00`** — 用户说的"光标颜色"指的是**轨迹颜色**, 明确"光标颜色别改"喵~
+   所以只改 `cursor_trail_color`, 光标本体色继续由主题提供 (主题值 `Color(245,224,220)`)喵~
+2. **修掉两个既存无效选项**:
+   - `force_ltr_rendering yes` → `force_ltr yes` (正确选项名, 无 `_rendering` 后缀)
+   - `disable_ligature` → `disable_ligatures always` (正确名 + 必填值, 合法值 `never`/`cursor`/`always`)
+3. **Niri 终端快捷键换成 kitty** — `home/reiky/desktop/niri/sections/base.kdl`:
+   - `Mod+Return` → `spawn "kitty"`
+   - `Mod+Shift+Return` → `spawn "kitty" "--class" "floating_terminal"`
+     (kitty 的 `--class` 在 Wayland 设 app-id, 复用既有 `floating_terminal` window-rule 规则,
+     不依赖 alacritty 特有行为)喵~
+
+验证: kitty 解析 `BAD_LINES: []`; `niri validate` 输出 `config is valid`喵~
+
 ## 踩坑
 
 1. **stash 会静默吞掉"已改但没生效"的改动** — 排障第一步应查 `git stash list`喵~
    "我明明改了" 的经典假象喵~
 2. **`cursor_shape` vs `cursor_shape_unfocused`** — 前者不接受 `hollow`喵~ 别照搬网上/记忆里的值,
    本机源码 `kitty/options/utils.py` 才是准的喵~
-3. **顺带发现两个既存无效选项** (未在本任务修复, 避免 scope creep):
-   - `force_ltr_rendering` → `Ignoring unknown config key` (选项不存在)
-   - `disable_ligature` → 应为 `disable_ligatures` (拼写, 报 `Ignoring invalid config line`)
-   建议后续单独修喵~
+3. **`force_ltr` / `disable_ligatures` 的正确写法** — `force_ltr_rendering` 不存在 (应为 `force_ltr`);
+   `disable_ligature` 缺了 s 且 `disable_ligatures` 必须带值 (`never`/`cursor`/`always`)喵~
+   已在后续修订中修掉喵~
