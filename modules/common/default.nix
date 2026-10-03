@@ -13,8 +13,10 @@
   # users setting
   nix.settings.trusted-users = ["root"] ++ map (user: user.username) (builtins.attrValues selectedUsers);
   nixpkgs.config.allowUnfree = true;
-  # 临时允许 EOL electron-39 (vscode 等传递依赖), 26.05 升级后自动解决
-  nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10"];
+  # 临时允许 EOL electron (vscode 等传递依赖), 26.05 升级后自动解决。
+  # 2026-10-04 nixpkgs bump(→774debe7) 后 electron 由 39.8.10 升到 41.10.7(EOL),
+  # 白名单未跟上导致 eval 秒挂; 此处跟随上游版本号。
+  nixpkgs.config.permittedInsecurePackages = ["electron-41.10.7" "electron-39.8.10"];
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
   # 国内镜像优先 (清华 TUNA / 中科大 USTC / 上交 SJTU), 官方 cache 兜底。
