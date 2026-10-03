@@ -60,8 +60,13 @@ in {
 
   networking.hostName = "NixMEOW-WSL";
 
-  # WSL NAT 下国内镜像不稳定: 只走官方 cache + 禁 HTTP/2 (走代理已知问题)
-  nix.settings.substituters = lib.mkForce ["https://cache.nixos.org"];
+  # 国内镜像优先 (代理失效也能构建), cache.nixos.org 兜底; 禁 HTTP/2 (走代理已知问题)
+  nix.settings.substituters = [
+    "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
+    "https://mirrors.ustc.edu.cn/nix-channels/store"
+    "https://mirror.sjtu.edu.cn/nix-channels/store"
+    "https://cache.nixos.org"
+  ];
   nix.settings.http2 = lib.mkForce false;
 
   # Nix 没有 nix.conf 里的 proxy 选项 —— daemon 出网只能靠环境变量。
