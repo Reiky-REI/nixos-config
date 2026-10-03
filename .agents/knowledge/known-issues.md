@@ -969,3 +969,19 @@ flake 源快照会嵌进每个 host 的配置喵; 只要工作树内容变了 (�
 - 同批修复:OpenCode `opencode-settings.json`、Claude `~/.claude.json`、Codex `~/.codex/config.toml`
   里 homeserver 路径统一指向 `/etc/profiles/per-user/reiky/bin/obsidian-mcp-server`喵~
 - 复盘: `retros/2026-10-03-mcp-obsidian-gc-fix.md`
+
+## Codex CLI 自行改写 `~/.codex/config.toml`, 不能 HM 软链托管 (2026-10-03 实锤)
+
+### 问题
+Codex CLI(0.133)读取 `$CODEX_HOME/config.toml`(默认 `~/.codex/config.toml`), 并在运行时
+往里追加 `[projects]` / `[notice.model_migrations]` / `[mcp_servers]` 等运行态喵~ 若用
+`home.file` 把它软链到只读 store 目标, Codex 的**原子写会把软链替换成真实文件**, 下次
+HM 激活就漂移冲突喵~ (`~/.config/codex/config.toml` 是死路径, Codex 不读)
+
+### 规避
+- 模型/provider 等静态配置改用**包装脚本 + `-c`** 运行时注入(值来自 `agents.nix`
+  注册表), 见 `home/reiky/dev/codex.nix`喵~ 不要 `home.file` 托管该文件喵~
+- **Codex >= 0.133 移除了 `wire_api = "chat"`**, 只接受 `"responses"`;否则启动即
+  `failed to load configuration`喵~ DeepSeek 在 responses 模式下实测可用喵~
+- `-c` 是**全局选项**, 必须放在子命令之前;其值按 TOML 解析喵~
+- 复盘: `retros/2026-10-03-codex-config-wrapper.md`

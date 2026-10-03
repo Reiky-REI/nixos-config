@@ -5,26 +5,30 @@
   ...
 }: let
   codexCfg = agentConfig.codex;
-in {
-  home.packages = [pkgs.codex];
 
-  # Codex 配置由 agents.nix 注册表渲染 (模型/provider 不再写死在这里)
-  home.file.".config/codex/config.toml" = lib.mkIf (codexCfg != null) {
-    text = ''
-      model_provider = "deepseek"
-      model = "${codexCfg.model}"
-
-      [model_providers.deepseek]
-      name = "${codexCfg.providerName}"
-      base_url = "${codexCfg.baseUrl}"
-      env_key = "${codexCfg.envKey}"
-      wire_api = "chat"
-
-      # 额外识别 .agents/AGENTS.md 作为项目指令
-      project_doc_fallback_filenames = ["AGENTS.md", ".agents/AGENTS.md"]
-      project_doc_max_bytes = 65536
+  # Codex CLI 读取并「自行改写」$CODEX_HOME/config.toml(默认 ~/.codex/config.toml):
+  # 它会往里追加 [projects] / [notice] / [mcp_servers] 等运行态。因此不能用
+  # home.file 软链托管 —— 只读的 store 目标会被 Codex 的原子写替换掉, 造成漂移。
+  # 改用包装脚本, 以 `-c` 在运行时注入 provider(值来自 agents.nix 注册表),
+  # 既声明式, 又不与 Codex 自管的 config.toml 冲突。
+  # 注意: Codex >= 0.133 只接受 wire_api = "responses"(旧的 "chat" 会直接报错)。
+  codex =
+    if codexCfg == null
+    then pkgs.codex
+    else pkgs.writeShellScriptBin "codex" ''
+      exec ${pkgs.codex}/bin/codex \
+        -c 'model_provider="deepseek"' \
+        -c 'model="${codexCfg.model}"' \
+        -c 'model_providers.deepseek.name="${codexCfg.providerName}"' \
+        -c 'model_providers.deepseek.base_url="${codexCfg.baseUrl}"' \
+        -c 'model_providers.deepseek.env_key="${codexCfg.envKey}"' \
+        -c 'model_providers.deepseek.wire_api="responses"' \
+        -c 'project_doc_fallback_filenames=["AGENTS.md", ".agents/AGENTS.md"]' \
+        -c 'project_doc_max_bytes=65536' \
+        "$@"
     '';
-  };
+in {
+  home.packages = [codex];
 
   # 全局指令: 让 Codex 在任意仓库都遵循 NixMEOW 的工作纪律
   home.file.".codex/AGENTS.md".text = ''
