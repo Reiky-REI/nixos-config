@@ -1,4 +1,21 @@
-{pkgs, ...}: {
+{pkgs, ...}: let
+  # `proxy` 命令行 + man 手册页 (`man proxy`), 由 home-manager 装进 profile
+  proxyCli = pkgs.stdenvNoCC.mkDerivation {
+    pname = "mihomo-proxy-cli";
+    version = "1.0.0";
+    dontUnpack = true;
+    installPhase = ''
+      install -Dm755 ${./proxy.sh} $out/bin/proxy
+      install -Dm644 ${./proxy.1} $out/share/man/man1/proxy.1
+    '';
+    meta = {
+      description = "Control the headless mihomo proxy (on/off/node/status)";
+      mainProgram = "proxy";
+    };
+  };
+in {
+  home.packages = [ proxyCli ];
+
   # Mihomo 代理 (headless, 独立于 Clash Verge GUI)
   #
   # 背景: Clash Verge GUI 在 Wayland 下 GTK 初始化失败/随会话死亡,

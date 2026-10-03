@@ -1,0 +1,99 @@
+.TH PROXY 1 "2026-10-04" "mihomo" "User Commands"
+.SH NAME
+proxy \- control the mihomo proxy (on/off, node, status)
+.SH SYNOPSIS
+.B proxy
+[\fIon\fR | \fIoff\fR | \fItoggle\fR | \fIstatus\fR [\fI--json\fR] | \fInode\fR [\fIgroup\fR] | \fIpanel\fR | \fIrestart\fR | \fIhelp\fR]
+.SH DESCRIPTION
+.B proxy
+is a small helper around the headless
+.BR mihomo (1)
+instance managed by the user service
+.IR mihomo.service .
+It can turn the proxy on or off, find and switch to the fastest proxy node,
+show the current engine/mode/node, and open the web panel.
+.PP
+The proxy engine listens on
+.I 127.0.0.1:7897
+(mixed) and
+.I 127.0.0.1:7890
+(HTTP); the control API and the web panel are served on
+.IR 127.0.0.1:9097 .
+.SH COMMANDS
+.TP
+.B on
+Set mode to
+.I rule
+(rule\-based split routing) and make sure the service is running.
+.TP
+.B off
+Set mode to
+.I direct
+(all traffic goes direct). The engine keeps running and the system proxy
+environment variables stay valid. Prefer this over stopping the service:
+stopping the service makes programs that honour
+.B http_proxy
+fail to connect.
+.TP
+.B toggle
+Switch between
+.I on
+and
+.IR off .
+.TP
+.B status
+Print the engine state, current mode and current node. With
+.I --json
+print a single JSON object instead.
+.TP
+.BI node " [group]"
+Delay\-test all nodes of the given selector group (default
+.IR 节点选择)
+in parallel and switch to the one with the lowest latency.
+.TP
+.B panel
+Open the metacubexd web panel in a Chrome app window.
+.TP
+.B restart
+Restart
+.IR mihomo.service .
+.TP
+.B help
+Show usage.
+.SH SYSTEMD
+The engine is a user service:
+.PP
+.nf
+systemctl --user status  mihomo.service
+systemctl --user start   mihomo.service
+systemctl --user stop    mihomo.service
+systemctl --user restart mihomo.service
+systemctl --user enable  mihomo.service   # start on boot
+systemctl --user disable mihomo.service
+.fi
+.SH ENVIRONMENT
+.TP
+.B MIHOMO_API
+Base URL of the mihomo control API (default
+.IR http://127.0.0.1:9097 ).
+.TP
+.B MIHOMO_SECRET
+API secret (default
+.IR set-your-secret ).
+.SH FILES
+.TP
+.I ~/.config/mihomo/config.yaml
+The mihomo configuration (subscription). Private to
+.IR mihomo.service ;
+the Clash Verge GUI no longer manages it.
+.TP
+.I ~/.config/mihomo/ui/
+Local web panel assets (metacubexd) served at
+.IR /ui/ .
+.SH SEE ALSO
+.BR mihomo (1),
+.BR systemctl (1)
+.SH NOTES
+The noctalia status bar shows a shield icon
+.RI ( plugin:mihomo-proxy ):
+left click toggles rule/direct, right click opens the panel.
