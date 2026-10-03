@@ -85,6 +85,26 @@ kitty +runpy "from kitty.config import load_config; bad=[]; \
 
 验证: kitty 解析 `BAD_LINES: []`; `niri validate` 输出 `config is valid`喵~
 
+## 后续修订 2 (同日)
+
+用户反馈"条状(beam)光标没有拖影", 遂决定改用块状光标并把轨迹色调成 `#ffbb77`喵~
+
+`home/reiky/terminal/kitty.nix`:
+- 新增 `cursor_shape block`
+- `cursor_trail_color #ffaa00` → `#ffbb77`
+
+**根因 (读 kitty 0.47.0 源码 `kitty/cursor_trail.c`)**:
+- trail 只在光标"大跳"时触发喵~ `should_skip_cursor_trail_update()` 中, 当移动距离
+  `abs(dx) + abs(dy) <= cursor_trail_start_threshold`（默认 `2`）时直接 return true 跳过喵~
+  所以逐字符 / 单格移动永远不出拖影, 只有 **≥3 格** 的跳转才有喵~
+- beam 的 trail 几何只有 `cursor_beam_thickness`（默认 `1.5pt`）那么宽
+  (`update_cursor_trail_target()` 里 `right = left + dx/cell_w * cursor_beam_thickness`)喵~
+  是一条极细的线, 视觉上几乎看不见; block 是整格矩形, 拖影非常明显喵~
+- 结论: beam 不是"不支持"trail, 而是又细又只在跳格时触发, 观感上≈没有喵~
+- 如果想让小范围移动也出拖影, 可调低 `cursor_trail_start_threshold`（如 `1`）喵~
+
+验证: `cursor_shape=1(BLOCK)`, `cursor_trail_color=Color(255,187,119)`, `BAD_LINES: []`喵~
+
 ## 踩坑
 
 1. **stash 会静默吞掉"已改但没生效"的改动** — 排障第一步应查 `git stash list`喵~
