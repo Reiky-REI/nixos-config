@@ -6,8 +6,12 @@ _: {
       size = 14;
     };
     extraConfig = ''
-      # kitty的光标动画（默认不开启）
-      # cursor_trail 3
+      # kitty 光标：轨迹动画 + 闪烁 + 失焦空心
+      cursor_trail 3
+      cursor_trail_color #cc7700
+      cursor_trail_decay 0.1 0.5
+      cursor_blink_interval 0.5
+      cursor_shape_unfocused hollow
       bold_font        auto
       italic_font      auto
       bold_italic_font auto
