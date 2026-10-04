@@ -1,0 +1,20 @@
+# dsh-deepsec-guard bundle patch —— 统一 DeepSec 安全守卫
+# 引擎统一为 DeepSec(deepsec-guard),挂 DSH 动作前接缝:
+#   agent/pre-step(入站消息) + tools/pre-execute(工具参数) ,可选 tools/post-execute。
+- insert:
+    - id: dsh-deepsec-guard
+      name: 'dsh-deepsec-guard'
+      config:
+        enabled: true
+        # 要扫的工具注册名
+        toolNames:
+          - bash
+          - persistent-bash
+          - terminal-bash
+          - str-replace-editor
+          - edit
+        scanPreStep: true
+        scanPostExecute: false
+        # guard 不可用/超时是否放行(fail-open)。想更严格设 false=fail-closed。
+        allowOnError: true
+        timeoutMs: 12000

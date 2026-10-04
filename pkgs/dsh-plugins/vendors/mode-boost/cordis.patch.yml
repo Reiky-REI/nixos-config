@@ -1,0 +1,6 @@
+# dsh-mode-boost bundle 层：装配实测提升版思维模式路由插件。
+# 宿主平面插件，无需 preset fork；装配在官方 Standard preset 之上，
+# 宿主平面 → 所有 preset 的会话受益。
+- insert:
+    - id: mode-boost
+      name: '@dsh-external/dsh-mode-boost'

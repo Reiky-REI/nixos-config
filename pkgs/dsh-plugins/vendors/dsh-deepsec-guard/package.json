@@ -1,0 +1,16 @@
+{
+  "name": "dsh-deepsec-guard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "统一 DeepSec 安全守卫 — 在 DSH 的动作前接缝 (agent/pre-step + tools/pre-execute) 调用 deepsec-guard, 命中恶意提示词/高危则拦截。引擎统一为 DeepSec, 不引入其他检测器。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {},
+  "dependencies": {}
+}

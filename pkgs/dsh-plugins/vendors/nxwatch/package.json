@@ -1,0 +1,26 @@
+{
+  "name": "nxwatch",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NixOS 守夜人: nixos-guard 预设的前端驾驶舱(状态条 + 展开面板 + 视觉主题),宿主半提供元数据与壁纸资源路由。",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ],
+      "platform": "web"
+    }
+  },
+  "dependencies": {}
+}
