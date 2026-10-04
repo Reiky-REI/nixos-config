@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@dsh-external/dsh-mode-boost':
-        specifier: link:../../../WorkSpace/dsh-routing-suite/mode-boost
-        version: link:../../../WorkSpace/dsh-routing-suite/mode-boost
+        specifier: link:@DSH_MODE_BOOST@
+        version: link:@DSH_MODE_BOOST_REL@
       '@dsh-external/dsh-super-injector':
-        specifier: link:../../../WorkSpace/dsh-routing-suite/injector
-        version: link:../../../WorkSpace/dsh-routing-suite/injector
+        specifier: link:@DSH_SUPER_INJECTOR@
+        version: link:@DSH_SUPER_INJECTOR_REL@
       '@yejiming/dsh-data-agent':
         specifier: ^0.2.2
         version: 0.2.2
@@ -27,20 +27,20 @@ importers:
         specifier: github:omdsh-dev/dsh-at-file
         version: git+ssh://git@github.com/omdsh-dev/dsh-at-file.git#da602d1a8f1b417b8a1d8d4059e0f4cb1c353524
       dsh-deepsec-guard:
-        specifier: file:../../../WorkSpace/dsh-deepsec-guard
-        version: file:../../../WorkSpace/dsh-deepsec-guard
+        specifier: link:@DSH_DEEPSEC_GUARD@
+        version: link:@DSH_DEEPSEC_GUARD_REL@
       dsh-deepsec-shield:
-        specifier: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield
-        version: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield
+        specifier: link:@DSH_DEEPSEC_SHIELD@
+        version: link:@DSH_DEEPSEC_SHIELD_REL@
       dsh-deepsec-spear:
-        specifier: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear
-        version: file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear
+        specifier: link:@DSH_DEEPSEC_SPEAR@
+        version: link:@DSH_DEEPSEC_SPEAR_REL@
       dshmarket:
         specifier: ^1.66.8
         version: 1.66.8
       nxwatch:
-        specifier: file:../../../WorkSpace/nxwatch
-        version: file:../../../WorkSpace/nxwatch
+        specifier: link:@DSH_NXWATCH@
+        version: link:@DSH_NXWATCH_REL@
 
 packages:
 
@@ -204,33 +204,6 @@ packages:
       react:
         optional: true
 
-  dsh-deepsec-guard@file:../../../WorkSpace/dsh-deepsec-guard:
-    resolution: {directory: ../../../WorkSpace/dsh-deepsec-guard, type: directory}
-
-  dsh-deepsec-shield@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield:
-    resolution: {directory: ../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield, type: directory}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@deepseek-ai/dsh-tools': '*'
-      '@deepseek-ai/schemastery': '*'
-    peerDependenciesMeta:
-      '@deepseek-ai/dsh-tools':
-        optional: true
-      '@deepseek-ai/schemastery':
-        optional: true
-
-  dsh-deepsec-spear@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear:
-    resolution: {directory: ../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear, type: directory}
-    engines: {node: '>=20'}
-    peerDependencies:
-      '@deepseek-ai/dsh-tools': '*'
-      '@deepseek-ai/schemastery': '*'
-    peerDependenciesMeta:
-      '@deepseek-ai/dsh-tools':
-        optional: true
-      '@deepseek-ai/schemastery':
-        optional: true
-
   dshmarket@1.66.8:
     resolution: {integrity: sha512-zOYCijI/du6qlcmUbx47aaUv6OM7Z/akIQ8n3f9Q2ihtV3U3sbRI5nG0guS+8npsb/vhA2turyEf9Yblg6LweQ==}
     peerDependencies:
@@ -256,9 +229,6 @@ packages:
   js-yaml@4.3.2:
     resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
     hasBin: true
-
-  nxwatch@file:../../../WorkSpace/nxwatch:
-    resolution: {directory: ../../../WorkSpace/nxwatch, type: directory}
 
   schemastery@3.18.0:
     resolution: {integrity: sha512-Jw2uxjoyyqc/yeurmChUEc/jbi8GsrdXV/KmqRUDZXJAXAmrJiPsz8vKa17l/VckyzljHZ9oGaul443CQiXxtA==}
@@ -326,12 +296,6 @@ snapshots:
     dependencies:
       zod: 4.6.5
 
-  dsh-deepsec-guard@file:../../../WorkSpace/dsh-deepsec-guard: {}
-
-  dsh-deepsec-shield@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-shield: {}
-
-  dsh-deepsec-spear@file:../../../WorkSpace/DeepSec/dsh-plugins/deepsec-spear: {}
-
   dshmarket@1.66.8:
     dependencies:
       js-yaml: 4.3.2
@@ -351,8 +315,6 @@ snapshots:
   js-yaml@4.3.2:
     dependencies:
       argparse: 2.0.1
-
-  nxwatch@file:../../../WorkSpace/nxwatch: {}
 
   schemastery@3.18.0:
     dependencies:
