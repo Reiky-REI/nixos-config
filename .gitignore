@@ -3,6 +3,7 @@
 .agents/plans/20*/
 .agents/sessions/20*/
 .claude/worktrees/
+.agents/dialogue/.note.lock
 result
 .agents/tools/kb-mcp/index/
 .agents/tools/kb-mcp/__pycache__/
