@@ -1,5 +1,21 @@
 # Known Issues
 
+## ⚠️ 世代清理纪律: 禁止一刀切, 只走 nix-prune-generations (2026-10-05)
+
+### 问题
+2026-10-04 17:31 在磁盘吃紧的处理中执行了 `nix-env -p /nix/var/nix/profiles/system --delete-generations old` + `nix-collect-garbage -d`喵, 一刀切清掉了除当前外的**全部** system profile 世代喵; 加上每日 `nix-gc` 原 `--delete-older-than 3d` 策略, boot 菜单只剩一个世代、无任何回滚点喵。
+
+### 纪律 (必须遵守)
+- **禁止** agent/人工执行 `nix-collect-garbage -d`、`nix-env --delete-generations old`、`nix-env --delete-generations <n>d` 喵
+- 世代清理**唯一合法路径**: `sudo nix-prune-generations` (预览) / `sudo nix-prune-generations -y` (执行)喵 — 空间闸门式保留: 剩余 ≥ 15G 不删任何世代喵; < 15G 时 7 天内全留 + 7 天外留最新 5 条喵
+- 预览默认 dry-run, 从不隐式删除喵; 规则与动机见 `modules/common/nix-prune.nix` 头注释与 README「世代保留策略」喵
+
+### 现状
+- `nix.gc.options = ""` — 每日 00:00 GC 只做 store 回收, 不删世代喵
+- `rebuild.sh switch/test/boot` 成功后自动跑 prune 预览喵
+
+---
+
 ## 26.05 内核 6.18.42 + 固件 20260605: mt7921e 与小米 AP 关联回归 (2026-08-16)
 
 ### 问题

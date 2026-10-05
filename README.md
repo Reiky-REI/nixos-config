@@ -92,7 +92,7 @@ machines.nix (host → roles/features/users)
 
 | 层 | 目录 | 放什么 | 不放什么 |
 |----|------|--------|----------|
-| 全局基础 | `modules/common/` | `nix.settings`, `nixpkgs.config`, `time`, `i18n`, `nix.gc`, `nix-ld`, `hardware.profile` | 交互 shell、桌面策略、硬件驱动、daemon |
+| 全局基础 | `modules/common/` | `nix.settings`, `nixpkgs.config`, `time`, `i18n`, `nix.gc`, `nix.pruneGenerations`, `nix-ld`, `hardware.profile` | 交互 shell、桌面策略、硬件驱动、daemon |
 | 角色 | `modules/roles/` | 按 role 启用的交互能力（字体、`programs.zsh`、sudo 免密、polkit wheel 规则） | 具体设备或桌面实现 |
 | 硬件 | `modules/hardware/` | GPU 图形栈、蓝牙、通用硬件包（微码/固件放 host） | 软件包、桌面、服务策略 |
 | 桌面 | `modules/desktop/` | Niri 系统级启用、Ly display manager、XWayland、Steam、fcitx5、Wayland env vars | 用户态 WM 配置、主题文件 |
@@ -127,6 +127,21 @@ UEFI 启动链是两级的：固件 → **MEOW Boot Menu**（自建 GRUB，选�
   - 二者缺失时回退内嵌的 Catppuccin 官方背景（`meow-boot-menu-wallpaper.{service,path}` 负责刷新）
 - 调整：字体大小 / 遮罩强度 / 主题模板都在 `boot-menu.nix`；背景切换优先级见上
 - 详见复盘 `retros/2026-10-01-stage1-grub-os-selector.md`（文件名保留历史命名）与决策 `decisions/two-stage-boot-grub-systemd-boot.md`
+
+### 世代保留策略 (nix-prune-generations)
+
+systemd-boot 菜单只列出**当前存活的 system profile 世代**——世代被删，菜单条目随之消失，不在失败清单上。
+策略核心是**空间闸门**（规则与动机见 `modules/common/nix-prune.nix` 头注释）：
+
+| 条件 | 行为 |
+|------|------|
+| 剩余空间 ≥ `nix.pruneGenerations.minFree`（默认 15G） | **什么都不删**——世代是回滚保单，宁可多留 |
+| 剩余空间 < 阈值 | 7 天内全留 + 7 天外保留最新 5 条，其余删除，然后 `nix-store --gc` 回收 |
+
+- 每日 00:00 的 `nix-gc` **只做 store 回收，不删世代**（`options = ""`，删除职责全部收口在 prune）
+- `rebuild.sh switch/test/boot` 成功后自动跑一次 prune 预览（dry-run，只在空间不够时列出可删清单）
+- 手动：`sudo nix-prune-generations` 预览 / `sudo nix-prune-generations -y` 执行
+- ⚠️ **禁止 `nix-collect-garbage -d` / `nix-env --delete-generations old`**：一刀切清光回滚点（2026-10-04 曾导致 boot 菜单只剩一个世代、无法回滚，复盘 `retros/2026-10-05-boot-generation-gc.md`）
 
 ## 5. 职责边界
 
@@ -280,6 +295,7 @@ just check-fmt            # 预览格式化改动
 just lint                 # 静态分析 (statix)
 just check                # 完整验证：fmt check + lint + nix flake check
 just rebuild              # 构建配置 (build 模式，不 switch)
+just switch               # 切换系统 (经 rebuild.sh，结束后自动做世代保留预览)
 just install-apk name url # 下载 APK 并安装到 Waydroid
 ```
 

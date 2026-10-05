@@ -47,4 +47,19 @@ sudo env \
 if [ -x "$SCRIPT_DIR/wake-agent.sh" ]; then
   "$SCRIPT_DIR/wake-agent.sh" "$MODE" "$rc" || true
 fi
+
+# switch/test/boot 会新建 system profile 世代 — 成功后顺手预览世代保留状态。
+# prune 是空间闸门式保留 (规则与动机见 modules/common/nix-prune.nix 头注释):
+# 默认 dry-run, 只在剩余空间不够时给出可删清单, 不自动删除。
+if [ "$rc" -eq 0 ]; then
+  case "$MODE" in
+    switch | test | boot)
+      if [ -x /run/current-system/sw/bin/nix-prune-generations ]; then
+        echo "==> 世代保留预览 (空间够不删; 详见 README「世代保留策略」)"
+        sudo /run/current-system/sw/bin/nix-prune-generations || true
+      fi
+      ;;
+  esac
+fi
+
 exit "$rc"

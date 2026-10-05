@@ -8,6 +8,7 @@
   imports = [
     ./hardware-profile.nix
     ./options.nix
+    ./nix-prune.nix
   ];
 
   # users setting
@@ -70,11 +71,15 @@
   nix.optimise.automatic = true;
   nix.optimise.dates = ["04:00"];
 
-  # nix gc
+  # nix gc — 只做 store 垃圾回收, 世代清理统一走 nix-prune-generations
+  # (空间闸门式保留, 规则见 modules/common/nix-prune.nix 与 README「世代保留策略」)。
+  # 背景: 原 --delete-older-than 3d 每天 GC 都无条件删回滚点; 2026-10-04 与一次
+  # 人工 `--delete-generations old` 叠加后 boot 菜单只剩一个世代且无法回滚。
+  # mkForce 是为了让该语义不被其它模块的第三方 default 悄悄改回删世代路径。
   nix.gc = {
     automatic = lib.mkDefault true;
     dates = lib.mkDefault "daily";
-    options = lib.mkDefault "--delete-older-than 3d";
+    options = lib.mkForce "";
   };
 
   # allow none nix packages
