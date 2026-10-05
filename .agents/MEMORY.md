@@ -29,3 +29,4 @@
 ---
 
 ## 历史记录
+- 2026-10-05 [opencode] 世代策略改空间闸门式保留喵~ 新增 `nix-prune-generations`(modules/common/nix-prune.nix): 剩余 ≥15G 不删任何世代; <15G 时 7d 内全留+7d 外留最新 5 条, current 永不删, 默认 dry-run/-y 执行喵~ nix.gc.options 置空(每日 GC 不再删世代), rebuild.sh switch/test/boot 成功后自动 prune 预览喵~ 禁止 `-d`/`--delete-generations old` 已入 known-issues/AGENTS/CLAUDE/README喵~ main @ 0a6efa2 已推; **switch 待用户**(dry-activate 显示会重启 polkit, PRIME 黑屏风险)喵~ 复盘 retros/2026-10-05-boot-generation-gc.md #nix-prune-generations
