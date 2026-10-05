@@ -30,3 +30,4 @@
 
 ## 历史记录
 - 2026-10-05 [opencode] 世代策略改空间闸门式保留喵~ 新增 `nix-prune-generations`(modules/common/nix-prune.nix): 剩余 ≥15G 不删任何世代; <15G 时 7d 内全留+7d 外留最新 5 条, current 永不删, 默认 dry-run/-y 执行喵~ nix.gc.options 置空(每日 GC 不再删世代), rebuild.sh switch/test/boot 成功后自动 prune 预览喵~ 禁止 `-d`/`--delete-generations old` 已入 known-issues/AGENTS/CLAUDE/README喵~ main @ 0a6efa2 已推; **switch 待用户**(dry-activate 显示会重启 polkit, PRIME 黑屏风险)喵~ 复盘 retros/2026-10-05-boot-generation-gc.md #nix-prune-generations
+- 2026-10-05 [opencode] 补记: rebuild.sh switch 完成(gen 260, 0 failed units, polkit 重启致会话重启正常拉起), prune 预览在 rebuild 流程内实际生效喵~ 工作区整理完毕: repo 干净(dialogue 33 条归档 @9077b61)+home 散落文件归档(~/.agents/artifacts/{logs/home-loose-files-20261005,scripts})+zen.tar 移 Downloads+dead link/stale zcompdump 清理喵~ 下一步任务: home-manager standalone 化(方案C, 独立会话)喵~
