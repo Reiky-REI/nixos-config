@@ -30,3 +30,7 @@ check: check-fmt lint check-docs
 rebuild:
     nixos-rebuild build --flake /etc/nixos#NixMEOW
     @echo '==> 验证通过。如需写复盘: .agents/knowledge/retros/$(date +%F)-<topic>.md'
+
+# 切换系统 (经 rebuild.sh: 代 proxy/token/黑屏警告; 结束后自动做世代保留预览)
+switch:
+    sudo .agents/config/rebuild.sh switch

@@ -44,6 +44,7 @@ just generate-all       # 全部生成
 2. **查已知问题** — 遇到报错先查 `.agents/knowledge/known-issues.md`
 3. **改完验证** — `nixos-rebuild build --flake /etc/nixos#NixMEOW`
 4. **写复盘** — 配置变更完成后写复盘到 `.agents/knowledge/retros/`
+5. **世代清理** — 禁止 `nix-collect-garbage -d` / `--delete-generations old`; 只走 `nix-prune-generations`（decisions/known-issues 2026-10-05）
 
 ## 与 OpenCode 的对齐规则
 
