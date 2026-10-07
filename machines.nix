@@ -76,6 +76,7 @@
       # --- virtualization ---
       "podman"
       "libvirt"
+      "waydroid"
       # --- storage ---
       "nas-smb"
       # --- flake 级 ---

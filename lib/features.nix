@@ -25,4 +25,5 @@
   "tablet"
   "tailscale"
   "udisks2"
+  "waydroid"
 ]
