@@ -1,11 +1,82 @@
 # NixOS 配置仓库 — NixMEOW
 
-## 1. 仓库目标
+> 一份由人类用户与多个 AI 客户端共同维护的声明式 NixOS 配置。
+
+## 1. AI 协作体系
+
+本仓库的特殊之处在于：**AI 不只是工具，而是配置仓库的一等维护者**。
+OpenCode / Claude Code / Codex 共享同一套注册表、纪律、经验与运行时，下面按
+**注册 → 协作 → 唤起 → 护栏 → 经验 → 运行时** 六层展开。
+每层只给总览与入口，细节以 `.agents/`、`.claude/`、`.opencode/` 下的对应文件为准。
+
+### 1.1 参与方与注册 (`agents.nix`)
+
+- 三个客户端（OpenCode / Claude Code / Codex）共用一份注册表 `agents.nix`。
+- 生效范围 = `(agent, user, host)` 三向求交：`hosts` 默认全部 host，`users` 必须显式列出，`privileged = true` 还必须写非空 `hosts.allow`。
+- 未知 client/user/host、空 `users`、privileged 缺 allowlist 都会在 eval 阶段直接失败。
+- `flake.nix` 经 `lib/agents.nix` 派生 `agentsConfig` / `opencodeConfig` / `claudeConfig` 与 Codex 的 `config.toml`；客户端专属样板仍在各自适配层。
+- **规则单一真相**：根 `AGENTS.md`（入口索引）→ `.agents/AGENTS.md`（总纪律与工作流）。
+  OpenCode 经 `opencode.json` 的 `instructions` 注入，Claude Code 走 `CLAUDE.md`。
+- 自研 AI 工具（cc-switch / obsidian-mcp-server / deepsec 等）由私源 `Reiky-nixpkgs` 提供。
+  声明式安装、随 nix 升级，不再有「手装在家目录又被 GC 收走」的漂移。
+
+### 1.2 协作机制
+
+- **三级工作流**：🏃 轻量（改一行）→ 📋 标准（feature branch → build → 复盘同 commit → 合 main → 删分支）→ 🧠 复杂（先 plan + 决策记录）。
+- **绝不直接改 main**：每个任务开 feature branch，改完先 `nixos-rebuild build` 验证。
+- **跨 AI 通信**：`.agents/config/dialogue.sh` 结构化消息板（`post` / `list` / `ack`）与 `requests/pending/`（处理后归档到 `archive/`）。
+- **开工前互查**：`git status` + `git branch -a`、`dialogue.sh list --status pending`、扫 `requests/pending/`、看最新 `retros/`、查 `known-issues.md`。
+
+### 1.3 自动唤起与互相唤起
+
+- **编译完自动拉起 AI**：`.agents/config/rebuild.sh` 结束后调用 `wake-agent.sh`，在调用者 Wayland 会话里开 `alacritty -e opencode --continue` 并弹桌面通知。
+- **开关策略**：`switch` 默认拉起、`build` 默认不拉（避免频繁打扰）。
+  `REBUILD_WAKE_AGENT=1/0` 或标记文件 `~/.config/rebuild/wake-agent` 可覆盖（`sudo` 会重置环境，用标记文件更省事）。
+- **去重**：已有交互式会话在跑时只通知、不重复拉起，并往消息板留一条 `watchdog→opencode` 记录。
+- **强制唤起**：`.agents/config/queue-task.sh` 加 `--wake` 参数时用 `WAKE_FORCE=1`，即使已有会话也新开一个 TUI，真正做到「干完活把 AI 叫回来」。
+- **断电续命**：`home/reiky/tools/agent-resume.nix` 部署 systemd 用户单元 `agent-resume.path`（队列一有任务秒触发）+ `agent-resume.timer`（每 2 分钟兜底）。
+  配合 `loginctl enable-linger`，AI 进程被杀 / 会话中断后队列照样自动消费，结果再反过来唤醒 AI。
+- **跨 AI 互相唤起** = 消息板留言 + 队列 payload 里执行对方客户端的启动命令。
+
+### 1.4 护栏机制（高危操作）
+
+三层护栏，越靠上越贴近 AI，越靠下越贴近内核：
+
+1. **客户端权限层（声明式、入库）**
+   - `opencode.json` 的 `permissions`：shell 通配 `allow`，高危操作显式 `deny` —— `git push --force` / `rm -rf /` / `rm -rf *` / `sudo rm -rf *` / `dd if=/dev/zero of=/dev/sda` / `curl * | sh`。
+   - Claude Code 走白名单：`.claude/settings.json` 只放行 `mcp__kb__*`、`git *`、`nixos-rebuild build *`、`nix eval`、`ls/find/grep/cat/mkdir/touch/cp/mv`。
+     该文件由 `lib/claude-config.nix` + `.agents/config/generate-claude.sh` 生成。
+2. **高危操作 shell 脚本封装（默认安全 / 默认 dry-run）**
+   - `.agents/config/rebuild.sh`：`switch` 前 5 秒 PRIME 黑屏警告，统一代理 / token / 镜像源，结束后自动跑世代保留预览 —— 不鼓励裸敲 `nixos-rebuild switch`。
+   - `nix-prune-generations`（`modules/common/nix-prune.nix`）：默认只预览，`-y` 才执行，且仅在剩余空间低于阈值时才删世代，`current` 世代永不删。
+   - `.agents/config/commit.sh`：固定 `opencode[bot]` 身份，只推当前 feature branch。
+   - `.agents/config/queue-task.sh`：长任务入队时强制严格模式 + 重试计数 + 完成标记。
+3. **系统级沙箱 / 围栏**
+   - `modules/services/dsh-fence.nix`：用一个加固的 systemd 服务包住 DeepSeek Harness 进程树（`ProtectSystem=strict`、home 只读 + 仅 workspace 与 `~/.dsh` 可写、`PrivateTmp`、`NoNewPrivileges`、空 `CapabilityBoundingSet`、收窄地址族）。
+   - 流程铁律：删文件前留证、迁移后校验哈希、禁止 `nix-collect-garbage -d` 一刀切清世代。
+
+### 1.5 经验体系
+
+- **入口**：`.agents/knowledge/INDEX.md`，按需读 `.agents/knowledge/conventions.md`、`.agents/knowledge/architecture.md`、`.agents/knowledge/known-issues.md`、`.agents/knowledge/secrets.md`。
+- **沉淀**：`.agents/knowledge/retros/`（复盘）、`.agents/knowledge/decisions/`（决策）、`.agents/MEMORY.md`（跨会话状态）、`.agents/SKILLS.md` 与 `.agents/skills/`（按需加载技能）。
+- **语义检索 kb-mcp**：`.agents/tools/kb-mcp/` 调用本机 llama.cpp 的 Qwen3-VL-Embedding-2B（:8081）与 Qwen3-VL-Reranker-2B（:8082），混合召回 + 精排。
+  支持多根模式（每个目录有自己的经验体系），语料变更由事件钩子触发重建。
+- **铁律速查**见 `.agents/AGENTS.md` 与 `known-issues.md`：删前留证 / 迁移校验哈希 / 禁 `-d` 清世代 / 精确 pid 操作。
+
+### 1.6 运行时与工具链
+
+- **客户端适配**：`lib/opencode-config.nix`、`lib/claude-config.nix`、Codex 包装脚本（用 `-c` 注入 provider）。
+- **MCP 挂载**：项目 `.mcp.json` 与 `opencode.json` 挂 `kb-mcp`；`obsidian-mcp-server` 声明式安装。
+- **本地推理**：`modules/services/llama-cpp.nix`（CUDA 多实例，支撑上面的 kb 检索）。
+- **无人值守三件套**：`rebuild.sh` + `wake-agent.sh` + `agent-resume`（见 1.3）。
+- 更多运维细节见第 12 章「Rebuild」与 `.agents/AGENTS.md`。
+
+## 2. 仓库目标
 
 管理 NixOS declarative 配置，host、user 与 agent 是相互独立的注册维度，按明确绑定组合共享能力。
 不同用途与硬件的 host 可以共享模块，同时只启用各自需要的功能。
 
-## 2. 分层原则
+## 3. 分层原则
 
 ```
 machines.nix (host → roles/features/users)
@@ -20,7 +91,7 @@ machines.nix (host → roles/features/users)
 - **角色模块**：`modules/roles/` 按 host 用途组合启用能力（交互 shell、管理权限、字体等）
 - **用户模块**：`home/{profile}/` 存放 home-manager 用户级选项（应用、shell、editor、WM 配置）
 
-## 3. 目录树
+## 4. 目录树
 
 ```
 /etc/nixos/
@@ -88,7 +159,7 @@ machines.nix (host → roles/features/users)
 └── .opencode/                     # OpenCode 项目配置
 ```
 
-## 4. 各层职责
+## 5. 各层职责
 
 | 层 | 目录 | 放什么 | 不放什么 |
 |----|------|--------|----------|
@@ -143,7 +214,7 @@ systemd-boot 菜单只列出**当前存活的 system profile 世代**——世�
 - 手动：`sudo nix-prune-generations` 预览 / `sudo nix-prune-generations -y` 执行
 - ⚠️ **禁止 `nix-collect-garbage -d` / `nix-env --delete-generations old`**：一刀切清光回滚点（2026-10-04 曾导致 boot 菜单只剩一个世代、无法回滚，复盘 `retros/2026-10-05-boot-generation-gc.md`）
 
-## 5. 职责边界
+## 6. 职责边界
 
 | 角色 | 职责 |
 |------|------|
@@ -156,7 +227,7 @@ systemd-boot 菜单只列出**当前存活的 system profile 世代**——世�
 - **系统层 (NixOS modules)**：`services.mpd`, `services.pipewire`, `virtualisation.docker`, `services.openssh`, `services.flatpak`, `hardware.nvidia`, `programs.niri`, `services.displayManager`
 - **Home 层 (home-manager)**：`programs.kitty`, `programs.rofi`, `programs.waybar`, `programs.wlogout`, `programs.zsh`, `programs.bat`, `programs.fzf`, home 文件部署
 
-## 6. 机器注册与特性标签 (meow.*)
+## 7. 机器注册与特性标签 (meow.*)
 
 本仓库支持多机器共享配置，通过 **machines.nix** 注册每台机器的标签：
 
@@ -207,17 +278,12 @@ systemd-boot 菜单只列出**当前存活的 system profile 世代**——世�
 
 ### 用户身份与 host 绑定
 
-`users.nix` 使用稳定 ID 注册登录名、home 路径和可复用 Home Manager profile；每个 host 通过 `machines.nix.users` 显式绑定一个或多个身份喵~ 当前 NixMEOW 与 WSL 都绑定 `reiky`，原 `home/reiky/` 目录继续使用；`config.nix` 暂时保留为兼容视图喵~ `primaryUser` 仅供仍采用单一默认用户的系统模块兼容使用，新代码应使用 host 的 user 列表或具体 user 身份喵~
+`users.nix` 使用稳定 ID 注册登录名、home 路径和可复用 Home Manager profile；每个 host 通过 `machines.nix.users` 显式绑定一个或多个身份。当前 NixMEOW 与 WSL 都绑定 `reiky`，原 `home/reiky/` 目录继续使用；`config.nix` 暂时保留为兼容视图。`primaryUser` 仅供仍采用单一默认用户的系统模块兼容使用，新代码应使用 host 的 user 列表或具体 user 身份。
 
 ### AI agent 注册 (`agents.nix`)
 
-三个客户端（OpenCode / Claude Code / Codex）共用一份 agent 定义喵~
-
-- 作用域：`hosts` 默认全部 host；`users` 必须显式列出；`privileged = true` 还必须写非空 `hosts.allow`
-- 实际生效 = `(agent, user, host)` 交集，即 agent 的 `users` ∩ host 绑定的 `users`
-- 未知 client/user/host、空 `users`、privileged 缺 allowlist 都会在 eval 阶段失败
-- flake 输出 `agentsConfig` 提供解析结果；`#opencodeConfig` / `#claudeConfig` 与 Codex 的
-  `config.toml` 均由它派生，客户端专属样板仍在各自适配层
+三个客户端共用一份注册表 `agents.nix`，按 `(agent, user, host)` 三向求交决定生效范围。
+完整机制（注册规则、协作流程、唤起、护栏、经验体系、运行时）见 [第 1 章「AI 协作体系」](#1-ai-协作体系)。
 
 ### 添加新机器（**不需要动 flake.nix**）
 
@@ -240,7 +306,7 @@ nixos-rebuild build --flake /etc/nixos#<hostname>
 
 **注意**：未在 `machines.nix` 注册的 hostname 会直接 `abort` 报错退出，防止意外部署。
 
-## 7. 如何新增一个系统模块
+## 8. 如何新增一个系统模块
 
 
 
@@ -254,7 +320,7 @@ touch modules/<category>/<module-name>/default.nix
 # （或如果你的模块是独立新分类，在 modules/default.nix 中添加）
 ```
 
-## 8. 如何新增一个 home module
+## 9. 如何新增一个 home module
 
 > `{profile}` 是 `users.nix` 的 `homeProfile` 字段，当前为 `reiky`（与登录名一致），字段保留以支持多身份/多用户复用。
 
@@ -267,7 +333,7 @@ touch home/{profile}/<module-name>/default.nix
 # 3. 在 home/{profile}/default.nix 的 imports 中添加 ./<module-name>
 ```
 
-## 9. 软件归类判断规则
+## 10. 软件归类判断规则
 
 | 类别 | 判断标准 | 示例 |
 |------|----------|------|
@@ -284,7 +350,7 @@ touch home/{profile}/<module-name>/default.nix
 - `TERMINAL` → `home/{username}/`
 - `XDG_DATA_DIRS` (flatpak) → `modules/services/`
 
-## 10. Just 命令
+## 11. Just 命令
 
 ```bash
 just generate-opencode    # 生成 OpenCode 配置
@@ -299,7 +365,7 @@ just switch               # 切换系统 (经 rebuild.sh，结束后自动做世
 just install-apk name url # 下载 APK 并安装到 Waydroid
 ```
 
-## 11. Rebuild
+## 12. Rebuild
 
 ```bash
 # 使用 .agents/config/rebuild.sh (自动设置 proxy + GitHub token)
@@ -336,11 +402,11 @@ mkdir -p ~/.config/rebuild && touch ~/.config/rebuild/wake-agent
 
 ### 不可中断长任务 (agent-resume)
 
-长任务通过用户级 systemd 队列执行喵, 与 OpenCode 会话生命周期解耦喵~
+长任务通过用户级 systemd 队列执行，与 OpenCode 会话生命周期解耦。
 
-- Home Manager 声明 `agent-resume.service/path/timer` 喵, 配置见 `home/reiky/tools/agent-resume.nix` 喵~
-- runner 唯一源码为 `.agents/config/agent-resume-runner.sh` 喵, 启动时会恢复遗留 `running/` 任务喵~
-- 推荐用 `.agents/config/queue-task.sh` 入队喵, 自动启用严格错误处理、重试计数与 payload 完成标记喵~
+- Home Manager 声明 `agent-resume.service/path/timer`，配置见 `home/reiky/tools/agent-resume.nix`。
+- runner 唯一源码为 `.agents/config/agent-resume-runner.sh`，启动时会恢复遗留 `running/` 任务。
+- 推荐用 `.agents/config/queue-task.sh` 入队，自动启用严格错误处理、重试计数与 payload 完成标记。
 
 ```bash
 .agents/config/queue-task.sh \
@@ -349,18 +415,18 @@ mkdir -p ~/.config/rebuild && touch ~/.config/rebuild/wake-agent
   --runtime-max 3600 --max-retries 3 --wake
 ```
 
-`--wake` 会在任务结束后强制拉起 `opencode --continue` 喵, 即使已有交互会话也会新开窗口喵~
-任务状态、日志与使用纪律见 `.agents/AGENTS.md` 喵~ runner 回归测试为
-`bash .agents/config/test-agent-resume-runner.sh` 喵~
+`--wake` 会在任务结束后强制拉起 `opencode --continue`，即使已有交互会话也会新开窗口。
+任务状态、日志与使用纪律见 `.agents/AGENTS.md`。runner 回归测试为
+`bash .agents/config/test-agent-resume-runner.sh`。
 
-## 12. 排查配置归属错误
+## 13. 排查配置归属错误
 
 - 选项不存在 → 检查模块是否在正确的层（系统 vs home），以及是否被导入
 - 选项冲突 → 在对应模块的 `default.nix` 中搜索该选项定义
 - 行为不符合预期 → 检查 `hosts/{HOST}/default.nix` 是否包含不应在 composition root 中的配置
 - 找不到模块 → 检查 `modules/default.nix` 或 `home/{username}/default.nix` 的 imports
 
-## 13. WSL2 试验台 (NixMEOW-WSL)
+## 14. WSL2 试验台 (NixMEOW-WSL)
 
 第二台"机器"：Windows WSL2 里跑的 NixOS，定位是**无 NVIDIA 黑屏风险的 switch 迭代场** +
 嵌套 niri 桌面。完整文档见 **[docs/NixMEOW-WSL.md](docs/NixMEOW-WSL.md)**，覆盖：
