@@ -43,3 +43,9 @@ related:
 
 - 免验证代价: tailnet 内本人名下设备可免任何验证 ssh 进本机 (非 root 用户) 喵~ 本 tailnet 全为本人设备, 可接受喵~
 - Tailscale SSH 接管 tailscale 接口的 22 端口喵, 局域网访问仍走普通 sshd (密码认证) 喵~
+
+## 补记 (同日晚): 已被后续决策取代
+
+用户随后要求 SSH 必须经过用户密码认证, Tailscale SSH 免密直通与其冲突喵~
+已关闭两台机器的 Tailscale SSH (RunSSH=false) 并回退本复盘对应的 nixos `--ssh` 声明喵~
+最终认证模型与验证见 `2026-10-16-ssh-password-policy.md`喵~

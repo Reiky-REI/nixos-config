@@ -12,9 +12,8 @@
 
     # 持久化 Tailscale 状态: 首次手动 sudo tailscale up 后重启自动重连
     # --timeout=5s 防止未认证时无限阻塞 systemd (注意: 必须带单位, 否则 parse error)
-    # --ssh: 启用 Tailscale SSH (RunSSH), 供其他 tailnet 设备免密钥 ssh 进本机
-    #        (ACL 默认 check 模式, 首次连接需浏览器确认); 该 flag 实际存于
-    #        tailscaled state, 这里显式声明以防 state 重置后丢失
+    # 注: 不启用 Tailscale SSH (--ssh) — 按用户要求 SSH 走普通 sshd 密码认证,
+    #     见 .agents/knowledge/retros/2026-10-16-ssh-password-policy.md
     systemd.services.tailscale-autoconnect = {
       description = "Automatic connection to Tailscale";
       after = ["network-pre.target" "tailscale.service"];
@@ -27,7 +26,7 @@
       in ''
         sleep 2
         ${tailscale} status > /dev/null 2>&1 && exit 0
-        ${tailscale} up --accept-routes --accept-dns --ssh --timeout=5s
+        ${tailscale} up --accept-routes --accept-dns --timeout=5s
       '';
     };
   };
