@@ -36,6 +36,7 @@ EMBED_URL = os.environ.get("KB_EMBED_URL",  "http://127.0.0.1:8081/v1/embeddings
 RERANK_URL= os.environ.get("KB_RERANK_URL", "http://127.0.0.1:8082/v1/rerank")
 def _collect_sources():
     # 通用语料发现: 顶层章程文件 + knowledge/** 与 memory/** 全部 .md(跳过隐藏)
+    # + skills/*/SKILL.md (只收每个 skill 的顶层说明, 不递归 references/scripts)
     out = []
     for pat in ["AGENTS.md", "SKILLS.md", "MEMORY.md", "CLAUDE.md",
                 "knowledge", "memory"]:
@@ -48,6 +49,14 @@ def _collect_sources():
                         out.append(os.path.relpath(os.path.join(dirpath, fn), AG))
         elif os.path.isfile(p):
             out.append(pat)
+    skills_dir = os.path.join(AG, "skills")
+    if os.path.isdir(skills_dir):
+        for d in sorted(os.listdir(skills_dir)):
+            if d.startswith("."):
+                continue
+            fp = os.path.join(skills_dir, d, "SKILL.md")
+            if os.path.isfile(fp):
+                out.append(os.path.relpath(fp, AG))
     return sorted(set(out))
 
 SOURCES = _collect_sources()
