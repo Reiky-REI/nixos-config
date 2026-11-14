@@ -50,7 +50,11 @@
   '';
 in {
   home.file.".config/opencode/opencode.jsonc".source = opencodeSettingsFile;
-  home.file.".config/opencode/cli.json".source = ./opencode-cli.json;
+  # .config/opencode/cli.json 不再由 HM 管理: 它是 OpenCode 自己会写的运行时设置
+  # (TUI theme/session/diffs 等 UI 偏好)。HM 用软链接管理时, 应用一改写就把它变成
+  # 普通文件, 下次激活 HM 想备份成 cli.json.hm-backup, 若备份已存在整条激活链直接
+  # 失败 (home-manager-reiky.service failed, 连带 dsh profile 同步被跳过)。
+  # 历史默认值见 git: 078142a:home/reiky/tools/opencode-cli.json
 
   # 全局 edit 前自动快照插件; 放在 .opencode/plugins 外, 避免项目级与全局重复加载。
   home.file.".config/opencode/plugins/edit-backup.js".source = ./opencode-edit-backup.js;

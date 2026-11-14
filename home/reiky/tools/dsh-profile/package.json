@@ -5,13 +5,10 @@
     "@dsh-external/dsh-mode-boost": "link:@DSH_MODE_BOOST@",
     "@dsh-external/dsh-super-injector": "link:@DSH_SUPER_INJECTOR@",
     "@yejiming/dsh-data-agent": "^0.2.2",
-    "deepseek-manners": "git+https://github.com/dsh-external/deepseek-manners.git",
-    "dsh-at-file": "github:omdsh-dev/dsh-at-file",
-    "nxwatch": "link:@DSH_NXWATCH@",
     "dsh-deepsec-guard": "link:@DSH_DEEPSEC_GUARD@",
     "dsh-deepsec-shield": "link:@DSH_DEEPSEC_SHIELD@",
     "dsh-deepsec-spear": "link:@DSH_DEEPSEC_SPEAR@",
-    "dshmarket": "^1.66.8",
+    "dshmarket": "^1.73.19",
     "@yunxii/dsh-client-ui-skin-maid-whale-webui": "^0.1.1"
   },
   "dsh": {
@@ -19,8 +16,6 @@
       "bundles": [
         "@deepseek-ai/dsh-base",
         "@deepseek-ai/dsh-web-app",
-        "dsh-at-file",
-        "deepseek-manners",
         "@dsh-external/dsh-super-injector",
         "@dsh-external/dsh-mode-boost",
         "@yejiming/dsh-data-agent",

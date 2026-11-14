@@ -7,11 +7,10 @@
 #
 # 来源三分:
 #   - 上游有仓:  fetchFromGitHub 钉 rev        (dsh-deepsec-shield/spear, dsh-super-injector)
-#   - 上游无仓:  vendor 进 ./vendors/ (git 管)  (dsh-nxwatch, dsh-deepsec-guard)
+#   - 上游无仓:  vendor 进 ./vendors/ (git 管)  (dsh-deepsec-guard)
 #   - rev 取不到: vendor 进 ./vendors/ (git 管) (dsh-mode-boost @ b166041)
 { callPackage }:
 {
-  nxwatch = callPackage ./nxwatch.nix {};
   deepsec-guard = callPackage ./deepsec-guard.nix {};
   mode-boost = callPackage ./mode-boost.nix {};
   deepsec-shield = callPackage ./deepsec-shield.nix {};

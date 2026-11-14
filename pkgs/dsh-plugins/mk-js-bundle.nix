@@ -15,6 +15,11 @@
   src,
   # 上游 monorepo 中的子目录 (例如 dsh-plugins/deepsec-shield); 空 = src 根
   subdir ? "",
+  # 插件 store path 之外还需要能被 Node 解析到的运行时依赖。
+  # 键是 node_modules 下的包名, 值是 store path。用于「源码 import 了某个宿主自带的
+  # @deepseek-ai/* 包, 但插件自身的 package.json 没声明」的场景 —— Node 从 realpath
+  # (store path) 向上解析, profile 里 hoist 的副本救不了它, 只能放进 $out/node_modules。
+  extraNodeModules ? {},
   meta ? {},
 }:
 stdenv.mkDerivation {
@@ -30,6 +35,13 @@ stdenv.mkDerivation {
     runHook preInstall
     mkdir -p "$out"
     cp -a "$src"/. "$out"/
+    # cp -a 会连源目录的只读权限一起复制; 下面的 node_modules 软链需要写权限
+    chmod -R u+w "$out"
+    ${lib.concatStringsSep "\n" (lib.mapAttrsToList (name: target: ''
+        mkdir -p "$out/node_modules/$(dirname ${lib.escapeShellArg name})"
+        ln -s ${lib.escapeShellArg "${target}"} "$out/node_modules/${name}"
+      '')
+      extraNodeModules)}
     runHook postInstall
   '';
 

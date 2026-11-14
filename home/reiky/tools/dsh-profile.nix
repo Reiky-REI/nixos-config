@@ -31,8 +31,6 @@
     "@DSH_MODE_BOOST_REL@" = rel "${dshPlugins.mode-boost}";
     "@DSH_SUPER_INJECTOR@" = "${dshPlugins.super-injector}";
     "@DSH_SUPER_INJECTOR_REL@" = rel "${dshPlugins.super-injector}";
-    "@DSH_NXWATCH@" = "${dshPlugins.nxwatch}";
-    "@DSH_NXWATCH_REL@" = rel "${dshPlugins.nxwatch}";
     "@DSH_DEEPSEC_GUARD@" = "${dshPlugins.deepsec-guard}";
     "@DSH_DEEPSEC_GUARD_REL@" = rel "${dshPlugins.deepsec-guard}";
     "@DSH_DEEPSEC_SHIELD@" = "${dshPlugins.deepsec-shield}";
@@ -76,7 +74,10 @@
     target=${lib.escapeShellArg "${profilesRoot}/${p.name}"}
     ${pkgs.coreutils}/bin/install -D -m 0644 ${lib.escapeShellArg (subst p "dsh-profile-${p.name}-package.json" (p.src + "/package.json"))} "$target/package.json"
     ${pkgs.coreutils}/bin/install -D -m 0644 ${lib.escapeShellArg (subst p "dsh-profile-${p.name}-pnpm-lock.yaml" (p.src + "/pnpm-lock.yaml"))} "$target/pnpm-lock.yaml"
-    ${pkgs.coreutils}/bin/install -D -m 0644 ${lib.escapeShellArg (p.src + "/cordis.patch.yml")} "$target/cordis.patch.yml"
+    # cordis.patch.yml 也走 writeText: 直接引用 p.src (flake 源码树) 时该 store path
+    # 不在系统闭包里, 一次 nix-collect-garbage 后开机激活就报 cannot stat。
+    # 经 writeText 生成的副本被 activation 脚本引用 -> 进闭包, GC 不会再挖走。
+    ${pkgs.coreutils}/bin/install -D -m 0644 ${lib.escapeShellArg (subst p "dsh-profile-${p.name}-cordis.patch.yml" (p.src + "/cordis.patch.yml"))} "$target/cordis.patch.yml"
     ${pkgs.coreutils}/bin/install -D -m 0644 ${lib.escapeShellArg (subst p "dsh-profile-${p.name}-pnpm-workspace.yaml" (p.src + "/pnpm-workspace.yaml"))} "$target/pnpm-workspace.yaml"
   '';
 in {

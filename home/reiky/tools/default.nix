@@ -21,5 +21,5 @@ in {
     ]
     ++ lib.optionals (system == "x86_64-linux") [./deepsec.nix]
     ++ lib.optionals hasAgentTools [./dsh-profile.nix]
-    ++ lib.optionals (hasAgentTools && system == "x86_64-linux") [./opencode.nix];
+    ++ lib.optionals (hasAgentTools && system == "x86_64-linux") [./opencode.nix ./dsh-superagent.nix];
 }

@@ -20,12 +20,6 @@ importers:
       '@yunxii/dsh-client-ui-skin-maid-whale-webui':
         specifier: ^0.1.1
         version: 0.1.1
-      deepseek-manners:
-        specifier: git+https://github.com/dsh-external/deepseek-manners.git
-        version: git+ssh://git@github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee
-      dsh-at-file:
-        specifier: github:omdsh-dev/dsh-at-file
-        version: git+ssh://git@github.com/omdsh-dev/dsh-at-file.git#da602d1a8f1b417b8a1d8d4059e0f4cb1c353524
       dsh-deepsec-guard:
         specifier: link:@DSH_DEEPSEC_GUARD@
         version: link:@DSH_DEEPSEC_GUARD_REL@
@@ -36,11 +30,8 @@ importers:
         specifier: link:@DSH_DEEPSEC_SPEAR@
         version: link:@DSH_DEEPSEC_SPEAR_REL@
       dshmarket:
-        specifier: ^1.66.8
-        version: 1.66.8
-      nxwatch:
-        specifier: link:@DSH_NXWATCH@
-        version: link:@DSH_NXWATCH_REL@
+        specifier: ^1.73.19
+        version: 1.73.19
 
 packages:
 
@@ -142,73 +133,11 @@ packages:
   cosmokit@1.8.1:
     resolution: {integrity: sha512-PDBv4l90xZKrUsZ0vtoycgZpO/j4iFsqJXrAxsyBDsnQRI7ZMJXIjgDJsKNjd5L8jnVnnlrDCdhkFbTncgCVjQ==}
 
-  deepseek-manners@git+ssh://git@github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee:
-    resolution: {commit: 32f58a8a008797a624f0f46367cb91fed9de5dee, repo: git@github.com:dsh-external/deepseek-manners.git, type: git}
-    version: 0.1.0
-    peerDependencies:
-      '@deepseek-ai/cordis': ^4.0.0
-      '@deepseek-ai/schemastery': ^3.0.0
-      react: ^18.0.0
-
-  dsh-at-file@git+ssh://git@github.com/omdsh-dev/dsh-at-file.git#da602d1a8f1b417b8a1d8d4059e0f4cb1c353524:
-    resolution: {commit: da602d1a8f1b417b8a1d8d4059e0f4cb1c353524, repo: git@github.com:omdsh-dev/dsh-at-file.git, type: git}
-    version: 0.7.0
-    peerDependencies:
-      '@deepseek-ai/cordis': ^4.0.1-rc.1
-      '@deepseek-ai/dsh-agent': '*'
-      '@deepseek-ai/dsh-api-remotes': '*'
-      '@deepseek-ai/dsh-client-connection': '*'
-      '@deepseek-ai/dsh-client-locale': '*'
-      '@deepseek-ai/dsh-client-runtime': '*'
-      '@deepseek-ai/dsh-client-store': '*'
-      '@deepseek-ai/dsh-client-ui-conversation': '*'
-      '@deepseek-ai/dsh-client-ui-input-trigger': '*'
-      '@deepseek-ai/dsh-client-ui-settings': '*'
-      '@deepseek-ai/dsh-client-ui-slots': '*'
-      '@deepseek-ai/dsh-llm': '*'
-      '@deepseek-ai/dsh-settings': '*'
-      '@deepseek-ai/dsh-typert-protocol': '*'
-      '@deepseek-ai/dsh-typert-registry': '*'
-      react: ^18.2.0
-    peerDependenciesMeta:
-      '@deepseek-ai/cordis':
-        optional: true
-      '@deepseek-ai/dsh-agent':
-        optional: true
-      '@deepseek-ai/dsh-api-remotes':
-        optional: true
-      '@deepseek-ai/dsh-client-connection':
-        optional: true
-      '@deepseek-ai/dsh-client-locale':
-        optional: true
-      '@deepseek-ai/dsh-client-runtime':
-        optional: true
-      '@deepseek-ai/dsh-client-store':
-        optional: true
-      '@deepseek-ai/dsh-client-ui-conversation':
-        optional: true
-      '@deepseek-ai/dsh-client-ui-input-trigger':
-        optional: true
-      '@deepseek-ai/dsh-client-ui-settings':
-        optional: true
-      '@deepseek-ai/dsh-client-ui-slots':
-        optional: true
-      '@deepseek-ai/dsh-llm':
-        optional: true
-      '@deepseek-ai/dsh-settings':
-        optional: true
-      '@deepseek-ai/dsh-typert-protocol':
-        optional: true
-      '@deepseek-ai/dsh-typert-registry':
-        optional: true
-      react:
-        optional: true
-
-  dshmarket@1.66.8:
-    resolution: {integrity: sha512-zOYCijI/du6qlcmUbx47aaUv6OM7Z/akIQ8n3f9Q2ihtV3U3sbRI5nG0guS+8npsb/vhA2turyEf9Yblg6LweQ==}
+  dshmarket@1.73.19:
+    resolution: {integrity: sha512-SGguYIslqf+9DeyWfm8UeM8yRpzcKhytHALp22LBBP4T4qC5BRtMOmvyt+OQvxO/VhEW4jywFZt2TBbwe7LUZg==}
     peerDependencies:
       '@deepseek-ai/cordis': ^4.0.1
-      '@deepseek-ai/dsh-settings': ^0.1.0-rc.7 || ^0.1.1-rc.2 || ^0.1.2-alpha.2 || ^0.2.0-rc.1
+      '@deepseek-ai/dsh-settings': ^0.1.0-rc.7 || ^0.1.1-rc.2 || ^0.1.2-alpha.2 || ^0.2.0-rc.1 || ^0.2.1-alpha.3 || ^0.2.1-rc.1
       '@deepseek-ai/schemastery': ^3.18.1
     peerDependenciesMeta:
       '@deepseek-ai/dsh-settings':
@@ -290,13 +219,7 @@ snapshots:
 
   cosmokit@1.8.1: {}
 
-  deepseek-manners@git+ssh://git@github.com/dsh-external/deepseek-manners.git#32f58a8a008797a624f0f46367cb91fed9de5dee: {}
-
-  dsh-at-file@git+ssh://git@github.com/omdsh-dev/dsh-at-file.git#da602d1a8f1b417b8a1d8d4059e0f4cb1c353524:
-    dependencies:
-      zod: 4.6.5
-
-  dshmarket@1.66.8:
+  dshmarket@1.73.19:
     dependencies:
       js-yaml: 4.3.2
       undici: 7.30.0

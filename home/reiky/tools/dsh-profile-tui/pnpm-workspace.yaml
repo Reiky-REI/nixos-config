@@ -13,7 +13,7 @@ autoInstallPeers: false
 # 新发布的, 逐条豁免, 其余包仍走 24h 延迟策略。
 minimumReleaseAgeExclude:
   - dsh-working-activity@0.2.6 || 0.4.0
-  - '@deepseek-harness-tui/dsh-tui@0.12.0'
+  - '@deepseek-harness-tui/dsh-tui@0.20.1'
 
 allowBuilds:
   '@google/genai': true
