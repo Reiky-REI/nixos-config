@@ -1001,3 +1001,12 @@ HM 激活就漂移冲突喵~ (`~/.config/codex/config.toml` 是死路径, Codex 
   `failed to load configuration`喵~ DeepSeek 在 responses 模式下实测可用喵~
 - `-c` 是**全局选项**, 必须放在子命令之前;其值按 TOML 解析喵~
 - 复盘: `retros/2026-10-03-codex-config-wrapper.md`
+
+## 僵尸引用链：`/result` 这类构建软链被自动登记成 gcroot (2026-11-15)
+
+- **现象**：`/` 下有一根 `nobody` 属主的 `result -> …20260806…` 软链，钉住 21G 旧闭包三周喵~
+- **机制**：nix 把每个 `result` 软链自动登记成间接 gcroot（`nix-store --gc --print-roots` 可见 `gcroots/auto/<hash> -> /result`）喵~
+- **触发条件**：`rebuild.sh` 不切 cwd，若从 `/` 起的降权/沙箱进程构建，result 就落在 `/` 喵~
+- **同族历史（第三次复发）**：08-18 `gcroots/profiles` 指向 calamares 残留 → GC 端掉 gen174 回滚后路；08-30 HM 旧 gcroot 钉住 WPS/OBS 4.4G（删链回收 14.8G）喵~
+- **修复**：`.agents/config/nix-gcroot-audit.sh --fix`（断头 gcroot + 超龄 result → GC）喵~
+- **预防**：`rebuild.sh` 已加 `cd /etc/nixos` + 构建后自动体检；临时构建用 `nix build --no-link`喵~

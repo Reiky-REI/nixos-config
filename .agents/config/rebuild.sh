@@ -4,6 +4,12 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/env.sh"
 
+# 2026-11-15: 固定在仓库根构建喵~
+# 原因: nix 把构建结果写成调用者 cwd 下的 ./result, 而每个 result 会被自动登记成
+# gcroot(/nix/var/nix/gcroots/auto/...); 曾有一次降权进程从 `/` 起构建, 留下 `/result`
+# 钉住整个旧闭包 21G 三周 (审计工具: .agents/config/nix-gcroot-audit.sh)喵~
+cd /etc/nixos
+
 if [ -z "${NIX_ACCESS_TOKEN:-}" ]; then
   echo "⚠️  NIX_ACCESS_TOKEN not set. Git fetch may fail."
   exit 1
@@ -42,6 +48,12 @@ sudo env \
   https_proxy="$https_proxy" \
   NIX_ACCESS_TOKEN="$NIX_ACCESS_TOKEN" \
   nixos-rebuild "${ARGS[@]}" || rc=$?
+
+
+# 构建完成顺手体检「僵尸引用链」(只读, 发现问题才输出)喵~
+if [ -x /etc/nixos/.agents/config/nix-gcroot-audit.sh ]; then
+  /etc/nixos/.agents/config/nix-gcroot-audit.sh --quiet || true
+fi
 
 # 编译结束后拉起 AI (opt-in):
 #   REBUILD_WAKE_AGENT=1  或  调用者家目录 ~/.config/rebuild/wake-agent 标记存在
