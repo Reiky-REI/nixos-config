@@ -46,7 +46,12 @@ in {
     package = waydroidNetNft;
   };
 
-  systemd.services.waydroid-container.serviceConfig.Environment = with pkgs; [
-    "PATH=${lib.makeBinPath [ iptables nftables kmod dnsmasq iproute2 ]}:/run/wrappers/bin:/run/current-system/sw/bin"
-  ];
+  # 必须跟着 feature 开关走: 无条件的 systemd.services.waydroid-container
+  # 会在 waydroid 下线后仍生成 unit (ExecStart 已不存在), 导致 switch 报
+  # "bad unit file setting" 并以非零状态退出喵~
+  systemd.services.waydroid-container = lib.mkIf (config.meow.enabled ? "waydroid") {
+    serviceConfig.Environment = with pkgs; [
+      "PATH=${lib.makeBinPath [ iptables nftables kmod dnsmasq iproute2 ]}:/run/wrappers/bin:/run/current-system/sw/bin"
+    ];
+  };
 }

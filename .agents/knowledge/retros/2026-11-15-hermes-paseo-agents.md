@@ -98,6 +98,31 @@ Paseo 提供的是**隔离**(每个 workspace 独立 worktree/分支)和**编排
 知识层的边界也要注意喵: worktree 里的 `.agents/` 是分支副本喵,
 kb 索引只覆盖主 checkout 喵~ 所以复盘/知识更新只在主 checkout 写喵~
 
+## 坑 4: paseo 的 expo 打包默认 heap 不够, 静默 exit 1
+
+上游 `package.nix` 的 buildPhase 会跑 `npm run build:daemon-web-ui` 喵,
+其中 `expo export --platform web` 要打 5685 个模块喵~ 上游只在
+`desktop-package.nix` 里设了 `NODE_OPTIONS=--max-old-space-size=4096` 喵,
+daemon 包没有喵~ 默认 heap 下 Metro 在 99.9% 处 OOM 被 kill 喵,
+日志里只有一句 `Web Bundling failed 158421ms ... (5685 modules)`,
+没有任何 stacktrace 喵——很容易误判成缺依赖喵~
+
+处理: 模块里 override `env.NODE_OPTIONS = "--max-old-space-size=6144"` 喵~
+本机 14G 内存, 6G heap 打包时 RSS 峰值约 6.8G 喵, 能过喵~
+(注意是 `env` 而不是 `NODE_OPTIONS` 顶层属性, stdenv 才认喵)
+
+## 坑 5: 下线 feature 后残留的 systemd unit 让 switch 非零退出
+
+`modules/virtualization/default.nix` 原来有一行**无条件**的
+`systemd.services.waydroid-container.serviceConfig.Environment = ...` 喵~
+`virtualisation.waydroid.enable = false` 只删了 ExecStart 来源喵,
+unit 本体还在喵 → systemd 报 `bad unit file setting` 喵,
+`nixos-rebuild switch` 返回 4 (虽然配置其实已激活) 喵~
+
+教训: 给某个服务的附加配置也必须跟着 feature 开关走喵,
+用 `lib.mkIf (config.meow.enabled ? "x")` 包住整个
+`systemd.services.<name>` 属性集, 而不是只包 `enable` 喵~
+
 ## 验证
 
 - `nix build .#nixosConfigurations.NixMEOW.config.system.build.toplevel` 通过喵~
