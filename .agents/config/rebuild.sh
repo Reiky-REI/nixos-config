@@ -12,8 +12,10 @@ fi
 MODE="${1:-dry-activate}"
 VERBOSE="${2:-}"
 
-# 镜像源（TUNA + USTC 优先，cache.nixos.org 兜底）
-SUBSTITUTERS="https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store https://mirrors.ustc.edu.cn/nix-channels/store https://cache.nixos.org"
+# 镜像源（USTC + SJTU 优先，cache.nixos.org 兜底）
+# 2026-11-15: 去掉 TUNA —— nix-channels/store 的 nix-cache-info 返回 403,
+# 排在首位只会让每次 narinfo 查询先白跑一趟 (见 modules/common/default.nix 注释)
+SUBSTITUTERS="https://mirrors.ustc.edu.cn/nix-channels/store https://mirror.sjtu.edu.cn/nix-channels/store https://cache.nixos.org"
 
 ARGS=(
   "$MODE"

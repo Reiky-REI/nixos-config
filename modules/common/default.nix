@@ -21,10 +21,12 @@
   nixpkgs.config.permittedInsecurePackages = ["electron-39.8.10" "electron-41.10.7"];
   nix.settings.experimental-features = ["nix-command" "flakes"];
 
-  # 国内镜像优先 (清华 TUNA / 中科大 USTC / 上交 SJTU), 官方 cache 兜底。
+  # 国内镜像优先 (中科大 USTC / 上交 SJTU), 官方 cache 兜底。
   # 注: 阿里云没有 Nix 二进制缓存 (nix-cache-info 404), 故不列入 substituters。
+  # 2026-11-15: 移除清华 TUNA —— 其 nix-channels/store 的 nix-cache-info 现在返回
+  #   403 (实测), 排在首位等于每次 narinfo 查询先白跑一趟 (约 0.3s×每次)。
+  # 注意顺序就是尝试顺序, 可用的快的放前面。
   nix.settings.substituters = [
-    "https://mirrors.tuna.tsinghua.edu.cn/nix-channels/store"
     "https://mirrors.ustc.edu.cn/nix-channels/store"
     "https://mirror.sjtu.edu.cn/nix-channels/store"
     "https://cache.nixos.org"
@@ -40,16 +42,30 @@
     no_proxy = lib.mkForce "localhost,127.0.0.1,::1,mirrors.tuna.tsinghua.edu.cn,mirrors.ustc.edu.cn,mirror.sjtu.edu.cn";
     NO_PROXY = lib.mkForce "localhost,127.0.0.1,::1,mirrors.tuna.tsinghua.edu.cn,mirrors.ustc.edu.cn,mirror.sjtu.edu.cn";
   };
+  # 构建并发 (2026-11-15 重定标): 本机 24 线程 / 14GB 内存。
+  # 旧值 max-jobs=16 + cores=16 → 最坏 16×16=256 个编译线程抢 24 线程, 且单个
+  # `npm ci` 峰值就 ~3GB RSS, 16 个并发直接吃光内存 (实测 swap 已用 3.5G)。
+  # 新值按内存定标而不是按核数: 6 并发 × 每包 4 线程 = 24 线程封顶,
+  # 内存峰值也能压住。低档机器再收窄, 保证老机器不会把自己换页换死。
   nix.settings.max-jobs = lib.mkDefault (
     if config.hardware.isHighPerf
-    then 16
+    then 6
     else if config.hardware.isMediumPerf
-    then 8
-    else 4
+    then 4
+    else 2
   );
-  nix.settings.cores = 16;
+  nix.settings.cores = 4;
   nix.settings.min-free = 5368709120;
   nix.settings.max-free = 10737418240;
+
+  # zram (2026-11-15): 只有 14GB 物理内存, 构建高峰已实际用到 3.5G 磁盘 swap。
+  # zram 把换出页压缩后留在内存里, 比 NVMe 上的 swap 快一个数量级;
+  # 只在真正换页时才分配, 不会白占内存 (memoryPercent=25 ≈ 3.5GB 上限)。
+  zramSwap = {
+    enable = true;
+    algorithm = "zstd";
+    memoryPercent = 25;
+  };
 
   # timezone and local
   time.timeZone = "Asia/Shanghai";
