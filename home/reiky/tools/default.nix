@@ -17,6 +17,7 @@ in {
       ./monitors.nix
       ./agent-resume.nix
       ./dsh.nix
+      ./hermes.nix
       ./user-services.nix
     ]
     ++ lib.optionals (system == "x86_64-linux") [./deepsec.nix]

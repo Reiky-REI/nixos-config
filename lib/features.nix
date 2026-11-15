@@ -18,6 +18,7 @@
   "nas-smb"
   "netease-cdn-bypass"
   "networkmanager"
+  "paseo"
   "podman"
   "power"
   "printing"

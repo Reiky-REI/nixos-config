@@ -26,6 +26,7 @@ Agent 每次启动时，按以下顺序加载知识：
 | conventions.md | 风格, 命名, 环境变量, git | 写代码前确认格式和命名规范 |
 | secrets.md | agenix, 加密, 密钥 | 管理加密密钥、新增用户时 |
 | known-issues.md | 已知问题, 排障, 兼容性 | 遇到报错、排查问题时 |
+| multi-agent-coordination.md | paseo, 多 agent, worktree, 协作 | 多 session 并行、谁负责合并、用 Paseo 编排时 |
 
 ## 知识扩展目录
 | 目录 | 用途 | 何时写入 |
@@ -77,6 +78,7 @@ Agent 每次启动时，按以下顺序加载知识：
 | **GC 前检查 gcroot 健康** | 2026-08-18 | 误删整个世代闭包 |
 | **switch 前确认 3080 无手动进程** | 2026-08-16 | dsh-fence 端口冲突导致半切换 |
 | **pkill -f 不要用** | AGENTS.md 纪律7 | 误杀自身进程 |
+| **同一分支同一时刻只允许一个 agent 写** | multi-agent-coordination.md | 并行 agent 互相覆盖未提交改动 |
 
 ## 复盘索引
 完整复盘列表见 [retros/.retros-index.md](retros/.retros-index.md)（共 101 篇）

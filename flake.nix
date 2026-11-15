@@ -68,6 +68,30 @@
       url = "github:Reiky-REI/Reiky-nixpkgs";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+
+    # Nous Research Hermes Agent (CLI / Desktop / Gateway), 见 home/reiky/tools/hermes.nix
+    # 上游把 Nix 标为 Tier 2 平台 (best-effort), 因此锁定后不要随手 update
+    # ⚠ 必须用下面这个 nixpkgs 快照: 上游 nix/pm-packages.nix 给 patchelf 打了只适配
+    # 0.19.x 的补丁, 而 26.05 / nixpkgs-715 / 2026-11 的 unstable 都回退成 patchelf 0.15.2
+    # (补丁 hunk FAILED, 2026-11-15 实测三次), 02c087f 是上游 flake.lock 自带的快照,
+    # 其 patchelf 为 0.19.2 喵~
+    nixpkgs-hermes = {
+      url = "github:NixOS/nixpkgs/02c087f3fe673c9e317f206a627cb6b910336dbe";
+    };
+
+    hermes-agent = {
+      url = "github:NousResearch/hermes-agent";
+      inputs.nixpkgs.follows = "nixpkgs-hermes";
+      inputs.home-manager.follows = "home-manager";
+    };
+
+    # Paseo: 多 agent 编排 (daemon + Desktop), 官方 flake 自带 services.paseo 模块
+    # 不 follows 主 nixpkgs: buildNpmPackage 的 npmDepsHash 由上游按自己的 nixpkgs 固定,
+    # follow 会导致固定输出哈希失配 (上游文档也说明可 override npmDepsHash 解决)
+    # 锁定 release tag (main 上是 0.16.0-beta), 升级时改 tag 再 nix flake update paseo
+    paseo = {
+      url = "github:getpaseo/paseo/v0.15.4";
+    };
   };
 
   outputs = {

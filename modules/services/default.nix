@@ -8,6 +8,7 @@
     ./dsh-fence.nix
     ./llama-cpp.nix
     ./netease-cdn-bypass.nix
+    ./paseo.nix
   ];
 
   # DSH 外层围栏:加固的 systemd 服务接管 dsh web。

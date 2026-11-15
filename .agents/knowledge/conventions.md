@@ -96,6 +96,9 @@ experience:
 - 修改复杂配置前先读 `known-issues.md` 避免踩坑
 - 新知识及时补充到对应知识文件或 `known-issues.md`
 - 仅非平凡变更才写复盘到 `knowledge/retros/`
+- **并行/多 session 场景**先读 `multi-agent-coordination.md` 喵:
+  一个任务一个 worktree 一个分支一个 owner 喵,合并只由交互 session 或用户执行 喵~
+  Paseo (127.0.0.1:6767) 负责隔离与编排,不替代合并纪律 喵~
 
 ## 打包归属 (2026-09-20 用户指令)
 - **nixpkgs 已有的包** → 直接用 nixpkgs / pkgs-unstable，不在本地重打包

@@ -65,6 +65,7 @@
       "dsh-fence"
       "llama-cpp"
       "netease-cdn-bypass"
+      "paseo"
       "media-mpd"
       "audio"
       "flatpak"
@@ -76,7 +77,7 @@
       # --- virtualization ---
       "podman"
       "libvirt"
-      "waydroid"
+      # waydroid 已按用户要求下线 (2026-11-15), 运行时数据另行归档后清理
       # --- storage ---
       "nas-smb"
       # --- flake 级 ---

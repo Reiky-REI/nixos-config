@@ -135,6 +135,7 @@ in
 
           inputs.agenix.nixosModules.default
           inputs.catppuccin.nixosModules.catppuccin
+          inputs.paseo.nixosModules.default
 
           (lib.mkIf (has "agenix-secrets") {
             age.secrets."ai-api-key-reiky" = {
