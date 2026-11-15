@@ -1004,9 +1004,9 @@ HM 激活就漂移冲突喵~ (`~/.config/codex/config.toml` 是死路径, Codex 
 
 ## 僵尸引用链：`/result` 这类构建软链被自动登记成 gcroot (2026-11-15)
 
-- **现象**：`/` 下有一根 `nobody` 属主的 `result -> …20260806…` 软链，钉住 21G 旧闭包三周喵~
+- **现象**：`/` 下有一根 `result -> …20260806…` 软链(2026-08-17 19:49 创建)，钉住 21G 旧闭包三周喵~
 - **机制**：nix 把每个 `result` 软链自动登记成间接 gcroot（`nix-store --gc --print-roots` 可见 `gcroots/auto/<hash> -> /result`）喵~
-- **触发条件**：`rebuild.sh` 不切 cwd，若从 `/` 起的降权/沙箱进程构建，result 就落在 `/` 喵~
+- **触发条件**：`rebuild.sh` 不切 cwd，只要有进程从 `/` 起跑 `nixos-rebuild build`，result 就落在 `/` 喵~（注意：在 Hermes 沙箱里看到的属主全是 `nobody`，那是 user namespace 映射导致的假象，不能用来判断真实属主喵~）
 - **同族历史（第三次复发）**：08-18 `gcroots/profiles` 指向 calamares 残留 → GC 端掉 gen174 回滚后路；08-30 HM 旧 gcroot 钉住 WPS/OBS 4.4G（删链回收 14.8G）喵~
 - **修复**：`.agents/config/nix-gcroot-audit.sh --fix`（断头 gcroot + 超龄 result → GC）喵~
 - **预防**：`rebuild.sh` 已加 `cd /etc/nixos` + 构建后自动体检；临时构建用 `nix build --no-link`喵~
