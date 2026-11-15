@@ -286,3 +286,30 @@ df -h /
 4. **coredump 可以安全全删** — 它们只是崩溃转储
 5. **Rust target 可以安全删** — 下次编译会重建
 6. **waydroid 按需保留** — 用户决定
+
+## 僵尸引用链：`result` 软链 = 自动 gcroot (2026-11-15)
+
+**机制**：nix 会把每个 `result` 软链自动登记成 gcroot（`/nix/var/nix/gcroots/auto/<hash> -> <result 路径>`），
+本意是「刚构建出来的产物别被 GC」。**没人清理的 result 会永久钉住整个闭包**喵~
+本机实例：2026-08-17 一个 `nobody` 属主的降权进程在 `/` 下构建，留下 `/result`，
+钉住 34G 旧闭包（净占 21G）三周，直到 11-15 才发现喵~
+
+**体检（只读，普通用户即可）**
+```bash
+~/.agents/config/nix-gcroot-audit.sh            # 全量报告
+~/.agents/config/nix-gcroot-audit.sh --quiet    # 只输出问题（cron/watchdog 用）
+~/.agents/config/nix-gcroot-audit.sh --sizes    # 附带现役/非现役路径数
+```
+
+**清理（需要 root）**
+```bash
+sudo ~/.agents/config/nix-gcroot-audit.sh --fix            # 断头 gcroot + 超 30 天 result → GC
+sudo ~/.agents/config/nix-gcroot-audit.sh --fix --max-age 7
+```
+
+**预防（已落地）**
+- `rebuild.sh` 开头固定 `cd /etc/nixos`，result 只会落在被 `.gitignore` 忽略的 `/etc/nixos/result`喵~
+- `rebuild.sh` 构建后自动跑一次 `nix-gcroot-audit --quiet` 体检喵~
+- 临时构建别在 `/` 或 `$HOME` 裸跑：用 `nix build --no-link` 或 `--out-link /tmp/build-XXX`喵~
+
+**红线**：世代是回滚保单，永不自动删；只清 `result` 型 gcroot 与断头登记喵~
