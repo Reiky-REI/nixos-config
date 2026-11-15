@@ -35,7 +35,10 @@ in {
   systemd.user.services.hermes-dashboard = lib.mkIf (isWorkstation && system == "x86_64-linux") {
     Unit = {
       Description = "Hermes Agent Web Dashboard";
-      After = ["default.target"];
+      # 面板与 gateway 共用 ~/.hermes 的 SQLite, 让它排在 gateway 之后起,
+      # 避免启动瞬间两边同时抢写锁 (曾见 database is locked)喵~
+      After = ["default.target" "hermes-agent.service"];
+      Wants = ["hermes-agent.service"];
     };
     Install.WantedBy = ["default.target"];
     Service = {

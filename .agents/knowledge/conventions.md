@@ -100,6 +100,18 @@ experience:
   一个任务一个 worktree 一个分支一个 owner 喵,合并只由交互 session 或用户执行 喵~
   Paseo (127.0.0.1:6767) 负责隔离与编排,不替代合并纪律 喵~
 
+## 本机端口约定 (loopback only, 2026-11-15)
+| 端口 | 服务 | 归属 |
+|------|------|------|
+| 6767 | Paseo daemon (`services.paseo`) — web UI + WS | /etc/nixos |
+| 9119 | Hermes 网页面板 (`hermes-dashboard.service`, user unit) | /etc/nixos/home/reiky/tools/hermes.nix |
+| 9900 | Hermes 原生 A2A server (agent card `hermes-NixMEOW`) | `~/.hermes` 运行时配置 |
+| 9901 | a2a-bridge — opencode 各线收口 (`/a/net` `/a/dsh` `/a/cc-switch` `/a/hermes`) | dsh 线 (user service) |
+| 8081 / 8082 | kb-mcp embedding / reranker | /etc/nixos (kb-mcp) |
+
+约定: 一律绑 `127.0.0.1`, 外网访问走 tailscale 直连, 不开放监听喵~
+新增长期监听端口请先在这里登记一行, 再改对应 module 喵~
+
 ## 打包归属 (2026-09-20 用户指令)
 - **nixpkgs 已有的包** → 直接用 nixpkgs / pkgs-unstable，不在本地重打包
 - **nixpkgs 没有的包** → 一律上传到个人私源 [`Reiky-nixpkgs`](https://github.com/Reiky-REI/Reiky-nixpkgs)（新增 `pkgs/<name>/default.nix` + 挂 overlay），主仓以 `nixpkgs.overlays = [ Reiky-nixpkgs.overlays.default ]` 消费

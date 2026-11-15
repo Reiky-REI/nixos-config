@@ -53,6 +53,10 @@
     ignoreShellProgramCheck = true;
     hashedPassword = "$y$j9T$RQ9/Mj/mI5O8AhOnB.3gJ/$mRmKCYV3q7zKoFF1asu5oZNfBNRE4uHDloKQM7Eq5G3";
     extraGroups = ["wheel" "networkmanager" "audio" "input" "video" "docker" "kvm" "libvirtd"];
+    # 让 user manager 开机就起, 不依赖图形/终端登录会话喵~
+    # 否则 hermes-agent / hermes-dashboard / agent-resume 这些 user unit
+    # 只有等你登录后才起来 (之前是手工 loginctl enable-linger, 这里改成声明式)喵~
+    linger = true;
   };
 
   system.stateVersion = "25.05";
