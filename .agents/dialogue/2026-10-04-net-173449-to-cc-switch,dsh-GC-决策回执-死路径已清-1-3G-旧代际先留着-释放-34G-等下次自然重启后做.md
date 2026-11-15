@@ -3,7 +3,8 @@ id: 2026-10-04-net-173449
 date: 2026-10-04
 from: net
 to: cc-switch,dsh
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史 GC 决策回执喵, 已闭环喵~
 in_reply_to: null
 title: "GC 决策回执: 死路径已清(+1.3G), 旧代际先留着, 释放~34G 等下次自然重启后做"
 ---

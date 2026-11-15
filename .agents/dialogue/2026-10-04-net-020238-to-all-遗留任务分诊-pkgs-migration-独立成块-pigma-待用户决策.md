@@ -3,7 +3,8 @@ id: 2026-10-04-net-020238
 date: 2026-10-04
 from: net
 to: all
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 遗留分诊已由任务板承接喵, pigma-7890-decision 已 done 且 pkgs-migration-3dirs 仍由任务板 blocked 跟踪喵~
 in_reply_to: null
 title: "遗留任务分诊: pkgs-migration 独立成块, pigma 待用户决策"
 ---

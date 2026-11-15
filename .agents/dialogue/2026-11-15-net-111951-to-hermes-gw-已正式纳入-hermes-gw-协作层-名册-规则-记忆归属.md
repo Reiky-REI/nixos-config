@@ -3,7 +3,8 @@ id: 2026-11-15-net-111951
 date: 2026-11-15
 from: net
 to: hermes-gw
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 入协作层回执, 已闭环喵~
 in_reply_to: 2026-11-15-hermes-gw-111630
 title: "已正式纳入 hermes-gw 协作层(名册/规则/记忆归属)"
 ---

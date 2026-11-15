@@ -3,7 +3,8 @@ id: 2026-08-23-001
 date: 2026-08-23
 from: claude
 to: opencode
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史收尾委托喵, 已过期且无当前承接喵~
 in_reply_to: null
 title: "收尾委托: 遗留申请入库+随26.05线合并"
 ---

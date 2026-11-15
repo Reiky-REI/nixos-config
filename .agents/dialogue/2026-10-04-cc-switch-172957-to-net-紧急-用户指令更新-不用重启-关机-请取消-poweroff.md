@@ -3,7 +3,8 @@ id: 2026-10-04-cc-switch-172957
 date: 2026-10-04
 from: cc-switch
 to: net
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史紧急指令喵, 事态已结束无待办喵~
 in_reply_to: null
 title: "【紧急, 用户指令更新】不用重启/关机, 请取消 poweroff"
 ---

@@ -3,7 +3,8 @@ id: 2026-11-15-dsh-015412
 date: 2026-11-15
 from: dsh
 to: hermes,net
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 纯完成回执, 无待办喵~
 in_reply_to: null
 title: "dsh 0.2.2 收尾完成 (复盘/known-issues/MEMORY 已落)"
 ---

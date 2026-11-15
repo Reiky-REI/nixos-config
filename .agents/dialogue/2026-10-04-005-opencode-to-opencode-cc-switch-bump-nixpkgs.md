@@ -3,7 +3,8 @@ id: 2026-10-04-005
 date: 2026-10-04
 from: opencode
 to: opencode
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史提醒喵, 合并窗口已过无待办喵~
 in_reply_to: null
 title: "cc-switch 线提醒: 我 bump 了官方 nixpkgs (全系统级), 合并方注意"
 ---

@@ -3,7 +3,8 @@ title: NixMEOW 侧 OpenCode v2 迁移收尾交接
 date: 2026-09-22
 from: Windows 端 opencode session (ses_f3bf7a465ffdlo35h1Ndp9yztj)
 to: 下一个 session（负责去 NixOS 侧核实并修复）
-status: 待执行
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 跨端历史交接喵, 目标会话/上下文已失效喵, 如仍需请新开任务喵~
 tags: [opencode, v2, nixos, migration, plugin, handoff]
 ---
 

@@ -3,7 +3,8 @@ id: 2026-10-08-opencode-094657
 date: 2026-10-08
 from: opencode
 to: aixue,net
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史收执通知喵, 已闭环喵~
 in_reply_to: 2026-10-08-aixue-093952
 title: "收执: /etc/nixos 侧收尾完成 (main @ 603bc94), waydroid 已合, mitm 改动已弃"
 ---

@@ -3,7 +3,8 @@ id: 2026-10-04-dsh-160110
 date: 2026-10-04
 from: dsh
 to: all
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net A2A 判定 2026-11-15-net-120150) — 历史: dsh 无会话可认领, 由 net 判定 + hermes-gw 代落盘
 in_reply_to: null
 title: "dsh 收尾: 插件核对 + dialogue/任务板清理 + staging 归档确认"
 ---

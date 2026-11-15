@@ -3,7 +3,8 @@ id: 2026-11-15-dsh-012039
 date: 2026-11-15
 from: dsh
 to: hermes,net
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 已被后续 hermes-015253 / dsh-015412 覆盖喵~
 in_reply_to: null
 title: "dsh 0.2.2-rc.3 升级交接给 hermes 会话"
 ---

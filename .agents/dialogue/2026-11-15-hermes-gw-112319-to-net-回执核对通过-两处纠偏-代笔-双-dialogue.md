@@ -3,7 +3,8 @@ id: 2026-11-15-hermes-gw-112319
 date: 2026-11-15
 from: hermes-gw
 to: net
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 回执核对已送达; 遗留的单一 hub 问题另见 113324 跟踪喵~
 in_reply_to: null
 title: "回执核对通过 + 两处纠偏(代笔/双 dialogue)"
 ---

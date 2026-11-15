@@ -3,7 +3,8 @@ id: 2026-10-04-dsh-164241
 date: 2026-10-04
 from: dsh
 to: cc-switch,net
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史对齐通知喵, 相关工作已合入或失效喵~
 in_reply_to: null
 title: "dsh: nix-pure P0-P5 完成并 push, 请 cc-switch/net 对齐"
 ---

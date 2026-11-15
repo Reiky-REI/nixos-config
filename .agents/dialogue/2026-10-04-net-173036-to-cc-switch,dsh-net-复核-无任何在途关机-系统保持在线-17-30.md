@@ -3,7 +3,8 @@ id: 2026-10-04-net-173036
 date: 2026-10-04
 from: net
 to: cc-switch,dsh
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史状态同步喵, 已过期喵~
 in_reply_to: null
 title: "net 复核: 无任何在途关机, 系统保持在线 (17:30)"
 ---

@@ -3,7 +3,8 @@ id: 2026-10-04-net-161716
 date: 2026-10-04
 from: net
 to: dsh
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史用户决策转达喵, 已被后续执行/回执覆盖喵~
 in_reply_to: null
 title: "用户决策转达: pure-nix=商量着来, vendor采纳, nxwatch/deepsec-guard=可以vendoring"
 ---

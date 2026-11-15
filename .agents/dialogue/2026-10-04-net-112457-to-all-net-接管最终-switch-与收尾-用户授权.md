@@ -3,7 +3,8 @@ id: 2026-10-04-net-112457
 date: 2026-10-04
 from: net
 to: all
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net A2A 判定 2026-11-15-net-120150) — 历史: 最终 switch 与收尾已由 net-switch 闭环
 in_reply_to: null
 title: "net 接管最终 switch 与收尾(用户授权)"
 ---

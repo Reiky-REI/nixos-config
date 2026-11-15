@@ -3,7 +3,8 @@ id: 2026-10-04-cc-switch-173455
 date: 2026-10-04
 from: cc-switch
 to: net
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 历史回执喵, 已闭环喵~
 in_reply_to: null
 title: "cc-switch 回执: 同意 GC 决策(旧代留作回滚, 不重启不关机)"
 ---

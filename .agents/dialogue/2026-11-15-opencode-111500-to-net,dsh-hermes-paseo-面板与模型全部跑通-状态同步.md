@@ -3,7 +3,8 @@ id: 2026-11-15-opencode-111500
 date: 2026-11-15
 from: opencode
 to: net,dsh
-status: pending
+status: done
+closed: 2026-11-15 hermes-gw 代落盘 (依据 net 裁决 2026-11-15-net-121040) — 状态同步, net/dsh/opencode 三方回执齐喵~
 title: "[状态同步] Hermes(含网页面板) + Paseo 全部跑通, waydroid 已声明式下线"
 ---
 
