@@ -60,6 +60,61 @@ in {
   config = lib.mkIf (config.meow.enabled ? "nas-smb") {
     environment.systemPackages = [pkgs.cifs-utils];
 
+    # NAS 挂载健康巡检 (2026-11-15 新增, 见复盘 2026-11-15-nas-mount-health.md):
+    #   旧行为只在开机挂一次, NAS 掉线/换 IP 后陈旧挂载会一直留着 —
+    #   任何 stat/ls ~/nas 都卡在 D 状态 (实测开机 21 天后 starship 扫描超时,
+    #   systemd-tmpfiles 报 "Host is down")。
+    #   本巡检完全不触碰挂载点 (findmnt 读 /proc/self/mountinfo), 避免自身也被卡死。
+    systemd.services.nas-health = {
+      description = "Detach stale NAS mount and retry mount when NAS comes back";
+      serviceConfig = {
+        Type = "oneshot";
+        TimeoutStartSec = "120s";
+      };
+      script = ''
+        set -u
+        MOUNT=${mountPoint}
+        FINDMNT=${lib.getBin pkgs.util-linux}/bin/findmnt
+        UMOUNT=${lib.getBin pkgs.util-linux}/bin/umount
+        SYSTEMCTL=${config.systemd.package}/bin/systemctl
+
+        # --mountpoint: 只有 MOUNT 本身是挂载点才输出 (--target 会返回父挂载 /, 误判已挂载)
+        SRC="$("$FINDMNT" -n -o SOURCE --mountpoint "$MOUNT" 2>/dev/null || true)"
+        CUR_IP=""
+        if [ -n "$SRC" ]; then
+          CUR_IP="$(printf '%s' "$SRC" | sed -e 's|^//||' -e 's|/.*$||')"
+        fi
+
+        IP="$(${discover})" || IP=""
+
+        # 已挂载且服务端 IP 未变 = 认为健康, 不动它
+        if [ -n "$CUR_IP" ] && [ -n "$IP" ] && [ "$CUR_IP" = "$IP" ]; then
+          exit 0
+        fi
+
+        if [ -n "$SRC" ]; then
+          echo "NAS 挂载已陈旧 (已挂 //$CUR_IP, 当前发现: ''${IP:-不可达}), 惰性分离"
+          "$UMOUNT" -f -l "$MOUNT" || true
+        fi
+        # NAS 在线 (首次挂载 / IP 变化后的重挂) 才触发挂载
+        if [ -n "$IP" ]; then
+          "$SYSTEMCTL" restart nas-mount.service || true
+        else
+          echo "NAS 不可达, 保持未挂载 (nofail)"
+        fi
+      '';
+    };
+
+    systemd.timers.nas-health = {
+      description = "Periodic NAS mount health check";
+      wantedBy = ["timers.target"];
+      timerConfig = {
+        OnBootSec = "2min";
+        OnUnitActiveSec = "5min";
+        Unit = "nas-health.service";
+      };
+    };
+
     # 挂载点目录 (用户可写, 便于手动操作)
     systemd.tmpfiles.rules = [
       "d ${mountPoint} 0755 ${username} ${user.group} -"
@@ -86,7 +141,9 @@ in {
         echo "NAS 发现于 $IP"
 
         ${lib.getBin pkgs.coreutils}/bin/mkdir -p ${mountPoint}
-        if ${lib.getBin pkgs.util-linux}/bin/mountpoint -q ${mountPoint}; then
+        # 用 findmnt 而不是 mountpoint: 陈旧 CIFS 挂载上 stat 会卡在 D 状态,
+        # mountpoint 正是靠 stat 判断, 会把自己卡死; findmnt 只读 /proc/self/mountinfo。
+        if ${lib.getBin pkgs.util-linux}/bin/findmnt -n -o SOURCE --mountpoint ${mountPoint} >/dev/null 2>&1; then
           ${lib.getBin pkgs.util-linux}/bin/umount -l ${mountPoint} || true
         fi
 
