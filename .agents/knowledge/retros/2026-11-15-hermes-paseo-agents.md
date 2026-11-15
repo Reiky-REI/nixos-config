@@ -128,3 +128,27 @@ unit 本体还在喵 → systemd 报 `bad unit file setting` 喵,
 - `nix build .#nixosConfigurations.NixMEOW.config.system.build.toplevel` 通过喵~
 - `hermes --version` / `paseo --version` 可用, `systemctl status hermes-agent paseo` active 喵~
 - 浏览器打开 `http://127.0.0.1:6767` 出 Paseo web UI 喵~
+
+## 坑 6: nix 构建跳过 postinstall → Paseo web UI 首屏崩 React #130
+
+上游 `nix/package.nix` 用 npm 的 `--ignore-scripts` 装依赖喵, 所以
+`npm run postinstall` (patch-package) 不会跑喵~ 少打 `@gorhom/bottom-sheet`
+的补丁后 `BottomSheetModalInternalProvider` 是 undefined 喵,
+web 客户端一挂载就抛 `Minified React error #130` 并落到 RootErrorBoundary 喵~
+(desktop 与 daemon web-ui 共用同一份 app bundle, 所以两边一起中招喵,
+上游 issue #7673 有完整分析喵)
+
+处理: `overrideAttrs (old: { preBuild = "npm run postinstall"; ... })` 喵~
+验证方法(不用开浏览器): 构建产物里的主 bundle 应能 grep 到
+`BottomSheetModalInternalProvider` 喵~
+
+## Hermes 面板与模型配置(非 nix 托管部分)
+
+- 面板: `hermes dashboard --no-open --skip-build` 常驻 127.0.0.1:9119 喵~
+  nix 包里自带预构建 dist (`share/hermes-agent/web_dist`), 所以要 `--skip-build` 喵,
+  否则它会尝试用 pnpm 现场打包喵~
+- 模型: `~/.hermes/.env` 写 `DEEPSEEK_API_KEY` / `XIAOMI_API_KEY` (值取自
+  agenix `ai-api-key-reiky`), `~/.hermes/config.yaml` 的 `model:` 段写
+  `default/provider/base_url` 喵~ 默认 deepseek-chat, 需要 MiMo 时
+  `hermes --provider xiaomi -m mimo-v2.6-flash` 喵~
+- 这两个文件是运行时状态, 故意不进 nix: 保持 `hermes setup` / `hermes model` 可写喵~

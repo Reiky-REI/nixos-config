@@ -19,10 +19,19 @@
 }: let
   user = primaryUser.username;
 
-  # 上游 package.nix 没给 expo/Metro 打包设 NODE_OPTIONS 喵~
-  # 5685 个模块在默认 4G heap 下会在 99.9% 处 OOM, build:web 直接 exit 1 喵~
-  # 这里把 heap 提到 6G (本机 14G 内存, 留够给系统) 喵~
+  # 两处上游 nix 打包的坑, 都必须 override 掉才能用的:
+  #
+  # 1) preBuild = "npm run postinstall":
+  #    nix 构建带 --ignore-scripts, 上游 postinstall (patch-package) 不会跑喵~
+  #    少打 @gorhom/bottom-sheet 的补丁 → BottomSheetModalInternalProvider
+  #    是 undefined → web UI 首屏就崩 "Minified React error #130" 喵~
+  #    上游 issue #7673 证实 (desktop 与 daemon web-ui 共用同一份 app bundle)喵~
+  #
+  # 2) NODE_OPTIONS heap 6G:
+  #    上游只在 desktop-package.nix 设了 4G, daemon 包没设喵~
+  #    expo export 打 5685 个模块时会在 99.9% 处 OOM, 静默 exit 1 喵~
   paseoPackage = inputs.paseo.packages.${pkgs.stdenv.hostPlatform.system}.default.overrideAttrs (old: {
+    preBuild = "npm run postinstall";
     env = (old.env or {}) // {NODE_OPTIONS = "--max-old-space-size=6144";};
   });
 in {

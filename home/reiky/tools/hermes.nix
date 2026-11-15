@@ -30,6 +30,30 @@ in {
 
   programs.hermes-agent.enable = true;
 
+  # Web 面板 (config / API keys / sessions 管理) 喵~
+  # nix 包里已带预构建 dist (share/hermes-agent/web_dist), 所以 --skip-build 喵~
+  systemd.user.services.hermes-dashboard = lib.mkIf (isWorkstation && system == "x86_64-linux") {
+    Unit = {
+      Description = "Hermes Agent Web Dashboard";
+      After = ["default.target"];
+    };
+    Install.WantedBy = ["default.target"];
+    Service = {
+      Type = "simple";
+      ExecStart = "${hermes}/bin/hermes dashboard --no-open --skip-build --host 127.0.0.1 --port 9119";
+      WorkingDirectory = config.home.homeDirectory;
+      Environment = [
+        "HERMES_HOME=${hermesHome}"
+        "PATH=${lib.makeBinPath [hermes pkgs.bash pkgs.coreutils pkgs.git]}"
+      ];
+      Restart = "always";
+      RestartSec = 5;
+      UMask = "0077";
+      NoNewPrivileges = true;
+      PrivateTmp = true;
+    };
+  };
+
   systemd.user.services.hermes-agent = lib.mkIf (isWorkstation && system == "x86_64-linux") {
     Unit = {
       Description = "Hermes Agent Gateway";
